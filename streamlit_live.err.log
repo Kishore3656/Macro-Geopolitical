@@ -1,0 +1,8 @@
+D:\trading bot\geo-market-ml\dashboard\app.py:107: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  st.caption(f"UTC {datetime.utcnow().strftime('%Y-%m-%d %H:%M')}  ·  refreshes every 60s")
+D:\trading bot\geo-market-ml\dashboard\app.py:70: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  cutoff = (datetime.utcnow() - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
+D:\trading bot\geo-market-ml\dashboard\app.py:86: DeprecationWarning:
+
+datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+

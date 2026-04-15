@@ -1,0 +1,94 @@
+D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py:111: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  gti_start    = datetime.utcnow() + timedelta(minutes=2)
+D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py:112: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  predict_start = datetime.utcnow() + timedelta(minutes=3)
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 35: character maps to <undefined>
+Call stack:
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 155, in <module>
+    main()
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 144, in main
+    log.info(f"  \u2192 {name}")
+Message: '  \u2192 RSS'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 35: character maps to <undefined>
+Call stack:
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 155, in <module>
+    main()
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 144, in main
+    log.info(f"  \u2192 {name}")
+Message: '  \u2192 GDELT'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 35: character maps to <undefined>
+Call stack:
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 155, in <module>
+    main()
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 144, in main
+    log.info(f"  \u2192 {name}")
+Message: '  \u2192 NewsAPI'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 35: character maps to <undefined>
+Call stack:
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 155, in <module>
+    main()
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 144, in main
+    log.info(f"  \u2192 {name}")
+Message: '  \u2192 Market'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 35: character maps to <undefined>
+Call stack:
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 155, in <module>
+    main()
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 144, in main
+    log.info(f"  \u2192 {name}")
+Message: '  \u2192 GTI'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\logging\__init__.py", line 1163, in emit
+    stream.write(msg + self.terminator)
+  File "C:\Users\kishore\AppData\Roaming\uv\python\cpython-3.12.12-windows-x86_64-none\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 35: character maps to <undefined>
+Call stack:
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 155, in <module>
+    main()
+  File "D:\trading bot\Macro-Geopolitical Market\geo-market-ml\scheduler.py", line 144, in main
+    log.info(f"  \u2192 {name}")
+Message: '  \u2192 Predict'
+Arguments: ()

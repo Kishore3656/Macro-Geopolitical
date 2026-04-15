@@ -46,4 +46,4 @@ RSS_FEEDS = [
 NEWSAPI_DAILY_LIMIT = 95
 
 # SQLite row fetch limit (RAM guard)
-MAX_ROWS = 500
+MAX_ROWS = 2000

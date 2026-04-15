@@ -25,7 +25,7 @@ import sys
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from config import GDELT_POLL_MINS, RSS_POLL_MINS, NEWSAPI_POLL_MINS, MARKET_POLL_MINS
+from config import GDELT_POLL_MINS, RSS_POLL_MINS, NEWSAPI_POLL_MINS, MARKET_POLL_MINS, NEWSAPI_KEY
 
 logging.basicConfig(
     level=logging.INFO,
@@ -85,6 +85,16 @@ def job_predict():
         log.error(f"Prediction job failed: {e}")
 
 
+def job_train():
+    try:
+        import subprocess
+        log.info("Starting weekly model retraining...")
+        subprocess.run([sys.executable, "prediction/train.py"], check=True)
+        log.info("Weekly model retraining complete.")
+    except Exception as e:
+        log.error(f"Training job failed: {e}")
+
+
 def main():
     scheduler = BlockingScheduler(timezone="UTC")
 
@@ -97,10 +107,13 @@ def main():
         job_gdelt, IntervalTrigger(minutes=GDELT_POLL_MINS), id="gdelt",
         name="GDELT Fetcher", misfire_grace_time=60,
     )
-    scheduler.add_job(
-        job_newsapi, IntervalTrigger(minutes=NEWSAPI_POLL_MINS), id="newsapi",
-        name="NewsAPI Fetcher", misfire_grace_time=60,
-    )
+    if NEWSAPI_KEY:
+        scheduler.add_job(
+            job_newsapi, IntervalTrigger(minutes=NEWSAPI_POLL_MINS), id="newsapi",
+            name="NewsAPI Fetcher", misfire_grace_time=60,
+        )
+    else:
+        log.warning("NEWSAPI_KEY not set — NewsAPI job disabled")
     scheduler.add_job(
         job_market, IntervalTrigger(minutes=MARKET_POLL_MINS), id="market",
         name="Market Fetcher", misfire_grace_time=60,
@@ -120,6 +133,11 @@ def main():
         id="predict", name="Predictor", misfire_grace_time=60,
     )
 
+    # Weekly model retraining
+    scheduler.add_job(
+        job_train, IntervalTrigger(days=7), id="train", name="Model Retraining", misfire_grace_time=3600
+    )
+
     log.info("=" * 55)
     log.info("  Geo-Market Scheduler started")
     log.info(f"  RSS:     every {RSS_POLL_MINS} min")
@@ -133,14 +151,16 @@ def main():
 
     # Run everything once immediately so dashboard has data on first open
     log.info("Running all jobs once on startup...")
-    for name, fn in [
-        ("RSS",     job_rss),
-        ("GDELT",   job_gdelt),
-        ("NewsAPI", job_newsapi),
-        ("Market",  job_market),
-        ("GTI",     job_gti),
+    startup_jobs = [
+        ("RSS",    job_rss),
+        ("GDELT",  job_gdelt),
+        ("Market", job_market),
+        ("GTI",    job_gti),
         ("Predict", job_predict),
-    ]:
+    ]
+    if NEWSAPI_KEY:
+        startup_jobs.insert(2, ("NewsAPI", job_newsapi))
+    for name, fn in startup_jobs:
         log.info(f"  → {name}")
         fn()
 

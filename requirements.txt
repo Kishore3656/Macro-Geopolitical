@@ -6,7 +6,6 @@ yfinance==0.2.40
 pandas-datareader==0.10.0
 pandas==2.2.0
 numpy==1.26.4
-SQLAlchemy==2.0.28
 
 # NLP — CPU only, no torch needed
 vaderSentiment==3.3.2
@@ -21,15 +20,8 @@ APScheduler==3.10.4
 
 # Dashboard
 streamlit==1.33.0
+streamlit-autorefresh==1.0.1
 plotly==5.20.0
-
-# Web API — uncomment when going web
-# fastapi==0.110.0
-# uvicorn==0.29.0
-# pydantic==2.6.4
 
 # Utilities
 python-dotenv==1.0.1
-
-# Testing
-playwright==1.44.0

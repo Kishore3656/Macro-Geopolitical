@@ -33,7 +33,8 @@ def _init_news_db():
             published_at     TEXT,
             vader_compound   REAL,
             vader_label      TEXT,
-            fetched_at       TEXT
+            fetched_at       TEXT,
+            UNIQUE(title, source)
         );
         CREATE TABLE IF NOT EXISTS newsapi_headlines (
             id               INTEGER PRIMARY KEY AUTOINCREMENT,

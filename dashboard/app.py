@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 
 from config import GTI_DB, NEWS_DB, MARKET_DB, PREDICTIONS_DB, MAX_ROWS
 
@@ -30,8 +31,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Auto-refresh every 60s
-st.markdown('<meta http-equiv="refresh" content="60">', unsafe_allow_html=True)
+# Auto-refresh every 60s (60000 milliseconds)
+st_autorefresh(interval=60000, key="data_refresh")
 
 
 # ── Data helpers ──────────────────────────────────────────────────────────

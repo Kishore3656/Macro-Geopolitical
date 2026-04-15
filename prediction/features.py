@@ -131,7 +131,7 @@ def build_feature_matrix(
     # ── Engineered market features ────────────────────────────────────────
     df["returns_1h"] = df["close"].pct_change(1)
     df["returns_4h"] = df["close"].pct_change(4)
-    df["vol_20h"]    = df["returns_1h"].rolling(20, min_periods=5).std()
+    df["vol_20h"]    = df["returns_1h"].rolling(20, min_periods=20).std()
 
     # ── Targets (next-hour prediction) ────────────────────────────────────
     next_close       = df["close"].shift(-1)
