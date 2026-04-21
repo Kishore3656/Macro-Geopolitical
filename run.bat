@@ -1,15 +1,20 @@
 @echo off
 setlocal
 cd /d "%~dp0"
+
 set "ROOT=%~dp0"
 set "VENV_PY=%ROOT%venv\Scripts\python.exe"
+set "VENV_ACTIVATE=%ROOT%venv\Scripts\activate.bat"
+set "PYTHONUTF8=1"
+set "PYTHONIOENCODING=utf-8"
 
 echo ============================================================
-echo   Geo-Market ML - Startup
+echo   GeoMarket Intelligence Dashboard
 echo ============================================================
 
+echo [1/5] Checking virtual environment...
 if not exist "%VENV_PY%" (
-    echo [1/5] Creating virtual environment...
+    echo       Creating virtual environment...
     python -m venv venv
     if errorlevel 1 (
         echo [ERROR] Could not create venv. Is Python installed and on PATH?
@@ -17,13 +22,14 @@ if not exist "%VENV_PY%" (
         exit /b 1
     )
 ) else (
-    echo [1/5] Virtual environment found.
+    echo       Virtual environment found.
 )
 
-call "%ROOT%venv\Scripts\activate.bat"
+call "%VENV_ACTIVATE%"
 
-echo [2/5] Installing dependencies (this may take a minute on first run)...
+echo [2/5] Installing dependencies...
 "%VENV_PY%" -m pip install -q -r requirements.txt
+"%VENV_PY%" -m pip install -q setuptools
 if errorlevel 1 (
     echo [ERROR] pip install failed. Check your internet connection.
     pause
@@ -40,26 +46,30 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+echo       Done.
 
-echo [4/5] Starting scheduler...
-start "Scheduler - Geo-Market ML" cmd /k ""%ROOT%launch_scheduler.bat""
+echo [4/5] Starting scheduler terminal...
+start "GeoMarket Scheduler" /D "%ROOT%" cmd /k "set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8 && call venv\Scripts\activate.bat && python scheduler.py"
 
-echo [5/5] Checking for trained models...
+echo [5/5] Starting Streamlit dashboard terminal...
+start "GeoMarket Dashboard" /D "%ROOT%" cmd /k "set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8 && call venv\Scripts\activate.bat && python -m streamlit run dashboard\app.py"
+
 if not exist "prediction\models\lgbm_volatility.pkl" (
-    echo       No models found - launching backfill + training in a separate window.
-    echo       This takes 5-15 min. Dashboard will show "No data yet" until it finishes.
-    start "Backfill + Train - Geo-Market ML" cmd /k ""%ROOT%launch_backfill.bat""
+    echo.
+    echo No trained models found. Starting backfill and training in a separate terminal.
+    echo The dashboard may show "No data yet" until this finishes.
+    start "GeoMarket Training" /D "%ROOT%" cmd /k "set PYTHONUTF8=1 && set PYTHONIOENCODING=utf-8 && call venv\Scripts\activate.bat && python -m ingestion.gdelt_fetcher --backfill --days 30 && python -m ingestion.market_fetcher --backfill --days 30 && python -m prediction.train"
 ) else (
-    echo       Models found - skipping backfill.
+    echo.
+    echo Trained models found.
 )
 
 echo.
-echo Waiting for Streamlit to start...
-timeout /t 4 /nobreak >nul
+echo ============================================================
+echo   Dashboard: http://localhost:8501
+echo   Scheduler and dashboard are running in separate terminals.
+echo   Close those terminal windows to stop them.
+echo ============================================================
+echo.
 
-echo Opening dashboard at http://localhost:8501
-start "" "http://localhost:8501"
-"%VENV_PY%" -m streamlit run dashboard/app.py
-
-endlocal
 pause
