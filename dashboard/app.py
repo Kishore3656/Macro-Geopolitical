@@ -1107,6 +1107,34 @@ with tab1:
     # ── RIGHT PANEL ───────────────────────────────────────────────────────
     with right:
         st.markdown('<div class="rpanel">', unsafe_allow_html=True)
+
+        # GTI HISTORY CHART — ALWAYS AT TOP
+        st.markdown('<div class="sec-hdr">48H GTI HISTORY</div>', unsafe_allow_html=True)
+        if not gti_df.empty:
+            fig_gti = go.Figure()
+            fig_gti.add_hrect(y0=0,  y1=35,  fillcolor="rgba(157,211,170,0.03)", line_width=0)
+            fig_gti.add_hrect(y0=35, y1=60,  fillcolor="rgba(255,184,103,0.03)", line_width=0)
+            fig_gti.add_hrect(y0=60, y1=100, fillcolor="rgba(255,180,171,0.04)", line_width=0)
+            fig_gti.add_trace(go.Scatter(
+                x=gti_df["timestamp"], y=gti_df["gti_score"] * 100,
+                mode="lines", line=dict(color=AMBER, width=2),
+                fill="tozeroy", fillcolor="rgba(255,184,103,0.07)",
+            ))
+            fig_gti.add_hline(y=35, line_dash="dot", line_color="rgba(157,211,170,0.3)", line_width=1)
+            fig_gti.add_hline(y=60, line_dash="dot", line_color="rgba(255,184,103,0.3)", line_width=1)
+            fig_gti.update_layout(**PLOT_BASE, margin=_M8, height=220,
+                xaxis={**_AX}, yaxis=dict(range=[0,100], **_AX),
+                showlegend=False, hovermode="x unified")
+            st.plotly_chart(fig_gti, use_container_width=True,
+                            config={"displayModeBar":False}, key="gti_chart_tab1")
+        else:
+            st.markdown(
+                '<div style="height:80px;display:flex;align-items:center;justify-content:center;'
+                'font-family:JetBrains Mono,monospace;font-size:0.62rem;color:var(--txt-dim)">'
+                'NO GTI DATA</div>', unsafe_allow_html=True)
+
+        st.markdown('<div style="margin-top:0.8rem"></div>', unsafe_allow_html=True)
+
         selected_iso3 = st.session_state.get("selected_country_iso3")
 
         if selected_iso3:
@@ -1202,32 +1230,7 @@ with tab1:
                 st.rerun()
 
         else:
-            # Default: GTI history chart + asset signals
-            st.markdown('<div class="sec-hdr">48H GTI HISTORY</div>', unsafe_allow_html=True)
-            if not gti_df.empty:
-                fig_gti = go.Figure()
-                fig_gti.add_hrect(y0=0,  y1=35,  fillcolor="rgba(157,211,170,0.03)", line_width=0)
-                fig_gti.add_hrect(y0=35, y1=60,  fillcolor="rgba(255,184,103,0.03)", line_width=0)
-                fig_gti.add_hrect(y0=60, y1=100, fillcolor="rgba(255,180,171,0.04)", line_width=0)
-                fig_gti.add_trace(go.Scatter(
-                    x=gti_df["timestamp"], y=gti_df["gti_score"] * 100,
-                    mode="lines", line=dict(color=AMBER, width=2),
-                    fill="tozeroy", fillcolor="rgba(255,184,103,0.07)",
-                ))
-                fig_gti.add_hline(y=35, line_dash="dot", line_color="rgba(157,211,170,0.3)", line_width=1)
-                fig_gti.add_hline(y=60, line_dash="dot", line_color="rgba(255,184,103,0.3)", line_width=1)
-                fig_gti.update_layout(**PLOT_BASE, margin=_M8, height=220,
-                    xaxis={**_AX}, yaxis=dict(range=[0,100], **_AX),
-                    showlegend=False, hovermode="x unified")
-                st.plotly_chart(fig_gti, use_container_width=True,
-                                config={"displayModeBar":False}, key="gti_chart_tab1")
-            else:
-                st.markdown(
-                    '<div style="height:80px;display:flex;align-items:center;justify-content:center;'
-                    'font-family:JetBrains Mono,monospace;font-size:0.62rem;color:var(--txt-dim)">'
-                    'NO GTI DATA</div>', unsafe_allow_html=True)
-
-            st.markdown('<div class="sec-hdr" style="margin-top:0.6rem">LATEST HEADLINES</div>',
+            st.markdown('<div class="sec-hdr">LATEST HEADLINES</div>',
                         unsafe_allow_html=True)
             for item in impacts[:5]:
                 s = item["signal"]
