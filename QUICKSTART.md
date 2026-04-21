@@ -4,13 +4,13 @@
 
 ### Windows
 ```bash
-cd d:\trading bot\geo-market-ml\UI\stitch_geomarket_intelligence_redesign
+cd "d:\trading bot\geo-market-ml"
 run.bat
 ```
 
 ### macOS / Linux
 ```bash
-cd ~/trading\ bot/geo-market-ml/UI/stitch_geomarket_intelligence_redesign
+cd ~/trading\ bot/geo-market-ml
 bash run.sh
 ```
 
@@ -158,7 +158,7 @@ streamlit run app.py --server.port 8502
 ### Module Not Found
 Ensure you're in the correct directory:
 ```bash
-cd UI/stitch_geomarket_intelligence_redesign
+cd "d:\trading bot\geo-market-ml"
 ```
 
 ### CSS Not Loading

@@ -1,285 +1,288 @@
-# Sovereign Intelligence Framework - UI
+# Sovereign Intelligence Framework
 
-**Status:** ✅ PRODUCTION READY  
-**Build:** April 2026  
-**Version:** 2.0.0  
+## The Tactical Archive
 
----
+A military-grade market intelligence dashboard featuring **Monastic Brutalism** design principles—a fusion of stark technical precision and editorial authority. Built for high-consequence decision-making in global financial markets.
 
-## 🚀 Quick Start (30 Seconds)
+### Core Aesthetic
 
-### Windows
-```bash
-run.bat
-```
-
-### macOS/Linux
-```bash
-bash run.sh
-```
-
-Then open **http://localhost:8501**
+- **Midnight Tonal Scale:** Dark surfaces (0c0e14 → 33343b) minimize eye fatigue
+- **Amber Pulse:** Critical alerts and live status via #ffb867 accent
+- **No Borders:** Tonal shifts define boundaries, not 1px lines
+- **Precision:** Hard (0px) corner radius reinforces tactical accuracy
+- **Typography War:** Lora serif for narrative authority + JetBrains Mono for data alignment
 
 ---
 
-## What Is This?
+## Architecture
 
-A military-grade market intelligence dashboard with **5 integrated modules**:
+### Views
 
-- 🎯 **Tactical Archive** - Real-time market surveillance
-- 🌍 **Earth Pulse** - Geospatial intelligence
-- 📈 **Market Intelligence** - Equity analysis
-- 🤖 **AI Signals** - ML predictions & signals
-- 🌐 **Geo Map** - Geographic markets
+1. **🎯 Tactical Archive** - Real-time market surveillance and strategic analysis
+   - Market overview metrics (S&P 500, volatility, sentiment)
+   - Critical alerts with severity ranking
+   - Sector intelligence breakdown
+   - Portfolio impact analysis
+   - Geopolitical context
+   - 24-hour forecasts
 
-Built with **Monastic Brutalism** design: dark + authoritative + precise.
+2. **🌍 Earth Pulse** - Geospatial market intelligence
+   - Global market heatmap by region
+   - Exchange-by-exchange performance (NYSE, LSE, TSE, SSE, DAX, ASX)
+   - Capital flow patterns (inbound/outbound)
+   - Geo-risk markers (geopolitical events)
+   - Economic calendar (next 7 days)
+   - Market synchronization analysis
+
+3. **📈 Market Intelligence** - Deep equity analysis
+   - Market overview (S&P 500, NASDAQ, DOW, VIX)
+   - Sector performance rankings (all 11 sectors)
+   - Top gainers/losers
+   - Earnings intelligence calendar
+   - Valuation metrics (P/E, forward P/E, dividend yield)
+   - Market breadth analysis (advance/decline)
+   - Technical analysis signals (MA, MACD, RSI, etc.)
+
+4. **🤖 AI Signals** - Machine learning intelligence
+   - Model confidence scores
+   - Active trading signals (BUY/HOLD/SELL)
+   - 24-hour forward predictions
+   - Anomaly detection alerts
+   - Model performance metrics (win rate, Sharpe ratio)
+   - Correlation matrix analysis
+   - Sentiment analysis (news + social)
+
+5. **🌐 Geo Map** - Interactive geographic intelligence
+   - Regional market performance breakdown
+   - Country-by-country heatmap
+   - Currency intelligence (FX pairs)
+   - Commodity prices (energy, metals, agriculture)
+   - Supply chain health indicators
+   - Major trade flow analysis
+
+### Design System
+
+**Colors:**
+- Surface: #0c0e14 (void) → #33343b (highest)
+- Primary: #ffb867 (amber, live indicators)
+- Status: #9dd3aa (positive), #ffb4ab (negative)
+- Text: #e2e2eb (anti-retina-burn off-white)
+
+**Typography:**
+- Serif: Lora (headlines, narrative)
+- Data: JetBrains Mono (aligned numbers)
+- UI: IBM Plex Mono (labels, utility)
+
+**Components:**
+- Buttons: Mechanical switch (0ms transition, invert on hover)
+- Cards: No dividers, vertical spacing (16px/24px/32px)
+- Inputs: Underline-only terminal style
+- Panels: Hydraulic transitions (cubic-bezier 0.4,0,0.2,1)
 
 ---
 
 ## Installation
 
-### Manual Setup
 ```bash
-# 1. Create virtual environment
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # macOS/Linux
-venv\Scripts\activate     # Windows
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
+```
 
-# 3. Run dashboard
+---
+
+## Running
+
+```bash
+# Start the dashboard
 streamlit run app.py
+
+# Or from command line
+streamlit run app.py --logger.level=debug --client.showErrorDetails=true
 ```
+
+The dashboard will be available at: `http://localhost:8501`
 
 ---
 
-## Structure
+## File Structure
 
 ```
-UI/
-├── app.py                                    ← Main entry point
-├── run.bat / run.sh                         ← Launch scripts
-├── requirements.txt                         ← Dependencies
-├── .streamlit/config.toml                   ← Configuration
-├── IMPLEMENTATION_COMPLETE.md               ← What was built
+geo-market-ml/
+├── app.py                                 # Main dashboard entry
+├── components.py                          # Reusable UI components
+├── design_tokens.py                       # Design system (colors, fonts, spacing)
+├── styles.css                             # Global CSS + design system
+├── requirements.txt                       # Dependencies
 │
-└── stitch_geomarket_intelligence_redesign/  ← All components
-    ├── components.py                        (Reusable UI library)
-    ├── design_tokens.py                     (Design system)
-    ├── styles.css                           (Global styling)
-    ├── tactical_intelligence/               (Module 1)
-    ├── earth_pulse_geomarket_intelligence/  (Module 2)
-    ├── market_geomarket_intelligence/       (Module 3)
-    ├── ai_signals_geomarket_intelligence/   (Module 4)
-    ├── geo_map_geomarket_intelligence/      (Module 5)
-    ├── README.md                            (Full docs)
-    └── DESIGN.md                            (Design spec)
+├── tactical_intelligence/
+│   ├── __init__.py
+│   ├── view.py                            # Market surveillance view
+│   └── DESIGN.md                          # Design specification
+│
+├── earth_pulse_geomarket_intelligence/
+│   ├── __init__.py
+│   └── view.py                            # Geospatial intelligence view
+│
+├── market_geomarket_intelligence/
+│   ├── __init__.py
+│   └── view.py                            # Equity analysis view
+│
+├── ai_signals_geomarket_intelligence/
+│   ├── __init__.py
+│   └── view.py                            # ML predictions view
+│
+├── geo_map_geomarket_intelligence/
+│   ├── __init__.py
+│   └── view.py                            # Geographic markets view
+│
+├── api/                                   # API module
+├── data/                                  # Data processing
+├── gti/                                   # GTI module
+├── ingestion/                             # Data ingestion pipeline
+├── nlp/                                   # NLP processing
+└── prediction/                            # ML prediction models
 ```
 
 ---
 
-## Features
+## Design Principles
 
-✅ **5 Intelligence Modules** - Each with 5-8 sections  
-✅ **Design System** - Fully specified tokens & components  
-✅ **18 UI Components** - Reusable, documented  
-✅ **Responsive** - Mobile to desktop  
-✅ **Dark Theme** - Midnight tonal scale  
-✅ **Amber Accents** - Live status indicators  
-✅ **Mock Data** - 100+ data points included  
-✅ **Production Code** - ~2,400 lines  
+### "Monastic Brutalism"
 
----
+1. **Stark Technical Precision:** Every pixel has purpose
+2. **Archival Elegance:** Serif typography suggests curated intelligence
+3. **Intentional Asymmetry:** Reject the 12-column grid for breathing room
+4. **No Soft Corners:** 0px radius = precision and authority
+5. **Tonal Layering:** Surfaces defined by color, not borders
+6. **Dead Space Signifies Clarity:** Don't fill every corner
 
-## Navigation
+### "The No-Line Rule"
 
-**Sidebar Menu:**
-- Select intelligence module
-- View market metrics
-- Configure settings
+Traditional 1px borders are forbidden. Instead:
+- Use surface color transitions (#111319 → #191b22)
+- Apply 15% opacity ghost borders with `outline_variant`
+- Embrace tonal shifts to define sections
 
-**Each Module:**
-- Command center header
-- Primary intelligence panel
-- Deep-dive sections
-- Activity feeds
-- Footer with sources
+### "Amber Pulse"
+
+All live indicators use amber (#ffb867) with:
+- 2-second linear pulse animation
+- 20px outer glow spread at 10% opacity
+- Instantly grabs attention during critical events
 
 ---
 
-## Components Available
+## Component Usage
 
-| Component | Purpose |
-|-----------|---------|
-| `data_card()` | Intelligence cards |
-| `metric_box()` | Metric displays |
-| `live_indicator()` | Amber pulse status |
-| `alert_box()` | Notifications |
-| `data_grid()` | Responsive grids |
-| `activity_timeline()` | Event timelines |
-| `hero_stat()` | Large statistics |
-| `status_badge()` | Inline status |
+### Data Card
 
-See `stitch_geomarket_intelligence_redesign/components.py` for all 18 components.
+```python
+from components import data_card, DataPoint, StatusLevel
+
+data_card(
+    "MARKET OVERVIEW",
+    [
+        DataPoint("8,247.32", "S&P 500", StatusLevel.POSITIVE),
+        DataPoint("+2.3%", "Daily Change", StatusLevel.POSITIVE),
+        DataPoint("2.1B", "Volume (24H)", StatusLevel.NEUTRAL),
+    ]
+)
+```
+
+### Metric Box
+
+```python
+from components import metric_box, StatusLevel
+
+metric_box(
+    "VIX INDEX",
+    "12.8",
+    status=StatusLevel.POSITIVE,
+    trend="↓ -8.2%"
+)
+```
+
+### Live Indicator
+
+```python
+from components import live_indicator
+
+live_indicator("LIVE FEED")
+```
 
 ---
 
 ## Customization
 
 ### Change Colors
-Edit `stitch_geomarket_intelligence_redesign/design_tokens.py`:
+
+Edit `design_tokens.py`:
 ```python
 COLORS = {
-    "primary": "#ffb867",  # Amber
-    "surface_lowest": "#0c0e14",  # Deep void
+    "primary": "#ffb867",  # Change amber to another hex
+    # ... other colors
 }
 ```
 
-### Change Theme
-Edit `.streamlit/config.toml`:
-```toml
-[theme]
-primaryColor = "#ffb867"
-backgroundColor = "#0c0e14"
+### Change Typography
+
+Edit `styles.css`:
+```css
+--font-headline: "Lora", serif;
+--font-data: "JetBrains Mono", monospace;
 ```
 
-### Add New Module
-1. Create `my_module_geomarket_intelligence/view.py`
-2. Implement `render()` function
-3. Import in `app.py` and add to sidebar
+### Modify Spacing
 
----
-
-## Design Philosophy
-
-### Monastic Brutalism
-- **Military-grade** intelligence aesthetic
-- **Editorial authority** via serif typography
-- **Precision** with hard corners (0px radius)
-- **Intentional asymmetry** - breathing room matters
-- **Tonal shifts** instead of borders
-- **Dead space** = clarity
-
-### Colors
-- **Midnight tonal scale:** #0c0e14 → #33343b
-- **Amber accents:** #ffb867 (live status)
-- **No bright white:** Use #e2e2eb (reduce eye fatigue)
-
-### Typography
-- **Headlines:** Lora (serif) - suggests curation
-- **Data:** JetBrains Mono (monospace) - ensures alignment
-- **UI:** IBM Plex Mono (monospace) - utility labels
-
----
-
-## Troubleshooting
-
-### Port Already in Use
-```bash
-streamlit run app.py --server.port 8502
-```
-
-### Module Import Error
-Ensure you're in the UI directory:
-```bash
-cd "d:\trading bot\geo-market-ml\UI"
-```
-
-### CSS Not Loading
-Clear Streamlit cache:
-```bash
-streamlit cache clear
-```
-
-### Missing Dependencies
-```bash
-pip install --upgrade -r requirements.txt
+Edit `design_tokens.py`:
+```python
+SPACING = {
+    "lg": "16px",  # Change from 16px to custom value
+}
 ```
 
 ---
 
-## Documentation
+## Performance Tips
 
-- **IMPLEMENTATION_COMPLETE.md** - What was built
-- **stitch_geomarket_intelligence_redesign/README.md** - Full guide
-- **stitch_geomarket_intelligence_redesign/DESIGN.md** - Design spec
-- **stitch_geomarket_intelligence_redesign/QUICKSTART.md** - Quick setup
-- **components.py** - Component library with docstrings
-
----
-
-## Next Steps
-
-1. **Connect Real Data** - Replace mock data with live feeds
-2. **Add WebSockets** - Real-time updates
-3. **Implement Auth** - User authentication
-4. **Custom Themes** - Theme switcher
-5. **Export Features** - PDF/CSV downloads
+1. **Lazy Load Views:** Each view is imported on-demand via sidebar selection
+2. **Memoization:** Use `@st.cache_data` for expensive computations
+3. **Session State:** Use `st.session_state` for persistent state across reruns
+4. **Conditional Rendering:** Only render visible sections
 
 ---
 
-## Statistics
+## Security Notes
 
-| Metric | Count |
-|--------|-------|
-| Files | 30+ |
-| Python Code | ~2,400 lines |
-| Design Tokens | 50+ |
-| UI Components | 18 |
-| Views | 5 |
-| Colors | 12 |
-| Typography Scales | 8 |
+- All data is local to the Streamlit session (no persistence by default)
+- For production, integrate authentication via Streamlit secrets
+- HTTPS required for production deployments
+- Consider rate limiting on data feeds
 
 ---
 
-## Production Deployment
+## Future Enhancements
 
-### Streamlit Cloud
-```bash
-git push github
-# Connect to share.streamlit.io
-```
-
-### Docker
-```dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY . .
-RUN pip install -r requirements.txt
-CMD ["streamlit", "run", "app.py"]
-```
-
-### Self-Hosted
-```bash
-# On server
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-streamlit run app.py --server.port 8501
-```
+- WebSocket integration for real-time data feeds
+- D3.js/Plotly maps for geographic visualization
+- Export dashboards to PDF/PNG
+- Dark/Light theme toggle
+- Custom alert thresholds
+- Portfolio tracking integration
+- Historical backtesting view
 
 ---
 
 ## Support
 
-**Questions?** Start with:
-1. `IMPLEMENTATION_COMPLETE.md` - Architecture overview
-2. `stitch_geomarket_intelligence_redesign/README.md` - Full docs
-3. `stitch_geomarket_intelligence_redesign/components.py` - Code examples
+For issues, enhancements, or questions: Refer to DESIGN.md for design system specification.
 
 ---
 
-## Ready?
-
-```bash
-run.bat
-```
-
-🚀 Launch into the Tactical Archive!
-
----
-
-**Built:** April 2026  
-**Status:** ✅ OPERATIONAL  
-**No compromise. Full work. Working now.**
+**Built with:** Streamlit + Python + Pure CSS  
+**Design Inspiration:** Military intelligence, financial terminals, brutalist architecture  
+**Last Updated:** April 2026

@@ -1,7 +1,6 @@
 """
 Sovereign Intelligence Framework - Main Dashboard
 Multi-view tactical market intelligence platform
-Entry point from UI root
 """
 
 import streamlit as st
@@ -9,10 +8,7 @@ from datetime import datetime
 import sys
 import os
 
-# Add stitch module to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'stitch_geomarket_intelligence_redesign'))
-
-# Import views from stitch module
+# Import views
 from tactical_intelligence import view as tactical_view
 from earth_pulse_geomarket_intelligence import view as earth_pulse_view
 from market_geomarket_intelligence import view as market_view
@@ -27,9 +23,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Apply global CSS - load from stitch folder
-styles_path = os.path.join(os.path.dirname(__file__), 'stitch_geomarket_intelligence_redesign', 'styles.css')
-with open(styles_path) as f:
+# Apply global CSS
+with open("styles.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
