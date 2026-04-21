@@ -1,5 +1,7 @@
 @echo off
 cd /d "%~dp0"
+set "PYTHONUTF8=1"
+set "PYTHONIOENCODING=utf-8"
 call venv\Scripts\activate.bat
 echo Backfilling GDELT...
 venv\Scripts\python.exe -m ingestion.gdelt_fetcher --backfill --days 30

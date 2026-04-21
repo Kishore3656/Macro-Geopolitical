@@ -49,16 +49,16 @@ if errorlevel 1 (
 echo       Done.
 
 echo [4/5] Starting scheduler terminal...
-start "GeoMarket Scheduler" /D "%ROOT%" cmd /k "set ^"PYTHONUTF8=1^" && set ^"PYTHONIOENCODING=utf-8^" && call venv\Scripts\activate.bat && python scheduler.py"
+start "GeoMarket Scheduler" cmd /k ""%ROOT%launch_scheduler.bat""
 
 echo [5/5] Starting Streamlit dashboard terminal...
-start "GeoMarket Dashboard" /D "%ROOT%" cmd /k "set ^"PYTHONUTF8=1^" && set ^"PYTHONIOENCODING=utf-8^" && call venv\Scripts\activate.bat && python -m streamlit run dashboard\app.py"
+start "GeoMarket Dashboard" cmd /k ""%ROOT%launch_dashboard.bat""
 
 if not exist "prediction\models\lgbm_volatility.pkl" (
     echo.
     echo No trained models found. Starting backfill and training in a separate terminal.
     echo The dashboard may show "No data yet" until this finishes.
-    start "GeoMarket Training" /D "%ROOT%" cmd /k "set ^"PYTHONUTF8=1^" && set ^"PYTHONIOENCODING=utf-8^" && call venv\Scripts\activate.bat && python -m ingestion.gdelt_fetcher --backfill --days 30 && python -m ingestion.market_fetcher --backfill --days 30 && python -m prediction.train"
+    start "GeoMarket Training" cmd /k ""%ROOT%launch_backfill.bat""
 ) else (
     echo.
     echo Trained models found.
