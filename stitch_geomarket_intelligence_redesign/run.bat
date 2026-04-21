@@ -17,7 +17,7 @@ pip install -r requirements.txt -q
 
 echo.
 echo Starting dashboard...
-echo ^(* Launching on http://localhost:8501
+echo ^(^* Launching on http://localhost:8501
 echo.
 
 streamlit run app.py

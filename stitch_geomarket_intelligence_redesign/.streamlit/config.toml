@@ -1,0 +1,28 @@
+[theme]
+primaryColor = "#ffb867"
+backgroundColor = "#0c0e14"
+secondaryBackgroundColor = "#1e1f26"
+textColor = "#e2e2eb"
+font = "serif"
+
+[client]
+showErrorDetails = true
+toolbarMode = "viewer"
+
+[logger]
+level = "info"
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[server]
+port = 8501
+headless = true
+runOnSave = true
+maxUploadSize = 200
+
+[deprecation]
+showPyarrowDeprecationWarning = false
+showFileUploaderEncoding = false
