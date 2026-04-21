@@ -184,19 +184,13 @@ then falls into the recurring schedule. Each job wraps its import in a
 try/except so one failure never stops the others.
 
 ### `dashboard/app.py`
-Streamlit app. Reads directly from SQLite — no network calls, instant.
-Auto-refreshes every 60 seconds via HTML meta-refresh tag.
-Data cached for 60 seconds with `st.cache_data(ttl=60)`.
+Streamlit app with custom "Tactical Archive" interface. We entirely replaced the standard, blocky Streamlit interface with a high-fidelity, custom-built frontend. We bypassed Streamlit's native component limitations by injecting a fully custom frontend payload (HTML/CSS/JS) directly into the app while keeping Python as the data engine.
 
-Panels:
-- GTI Score card with tension level label
-- Volatility prediction card (HIGH/LOW + confidence %)
-- Direction prediction card (UP/DOWN + confidence %)
-- Conflict event count card
-- GTI 48h line chart with colour bands
-- SPY 48h candlestick chart
-- GTI component breakdown (expandable)
-- Latest 25 headlines with sentiment badges
+GUI Architecture & Implementation Summary:
+- **Design System ("Sovereign Intelligence Framework")**: Shifted from a generic SaaS look to a "Monastic Brutalism" / Military-Grade HUD style. Implemented a "Midnight Tonal Scale" (deep ink-blacks and dark navys) to reduce eye strain, highlighted by high-contrast neon accents (Cyan for primary data, Amber for warnings, Red for critical alerts, Green for positive trends). Applied custom web fonts (Orbitron, Share Tech Mono, Rajdhani) to distinguish data from UI.
+- **Data Bridge (Real-Time Injection)**: Aggregated all live backend data into a single JSON dictionary (GTI Score, Conflict Counts, Predictions, Headlines). Injected directly into browser's global scope using `window.GeoMarketData = {...}` for instant JS access.
+- **"Stitch" UI Component Integration**: Makes REST calls to local FastAPI server (`http://127.0.0.1:8000/ui/windows`) to dynamically fetch UI code. Renders with `streamlit.components.v1.html` as a full-screen iframe. Calls `st.stop()` to hide old Streamlit layout, ensuring pure custom frontend.
+- **System Behavior**: Auto-refreshes every 60 seconds, pulling latest SQLite data and updating UI seamlessly without browser refresh.
 
 ---
 

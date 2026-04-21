@@ -1,0 +1,14 @@
+{
+  "projectTitle": "GeoMarket Intelligence Redesign",
+  "projectId": "4870588208705698239",
+  "screenTitle": "AI Signals - GEOMARKET INTELLIGENCE",
+  "screenId": "841925331e9d4ce49f771bf5f867bce8",
+  "deviceType": "DESKTOP",
+  "width": 1136,
+  "height": 937,
+  "imageUrl": "https://lh3.googleusercontent.com/aida/ADBb0uhIZSolVM1WKNxoj-BY8V_bTfcV997PukIv2bz6EXgRN6xgQHMxmobZzg_kYbM4Ct3qmkzdSa4cShcyg1egAWc8CtF9KKgsutAURBcx7bnAZ2ah4ZsVrFG5DmT3-lX1xZsjODFNPzIX03HaDfkgg1fBjPjufmP1X4C7P-DJOdlneJRiuUVivNAKYstickIdlmP7MKCiCg_LorCm4lu7JLdNcZKzTDrXnOJrpS-UOz9lxF9iZMkGDsYEWw8=s0",
+  "imageFile": "screen.png",
+  "htmlCode": {},
+  "codeUrl": null,
+  "note": "Stitch get_screen returned an empty htmlCode object for this screen, so no hosted code URL was available to download."
+}
