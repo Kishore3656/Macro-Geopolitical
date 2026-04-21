@@ -121,7 +121,7 @@ div[data-baseweb="tag"] { background: var(--amber-glow) !important; color: var(-
 .nav-logo span { color: var(--amber); }
 .nav-tab-row { display: flex; gap: 0; flex: 1; }
 .ntab {
-  padding: 0 1.2rem; height: 52px; line-height: 50px;
+  padding: 0 1.6rem; height: 52px; line-height: 50px;
   font-family: 'Space Grotesk', sans-serif !important;
   font-size: 0.68rem; font-weight: 600; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--txt-low);
@@ -931,7 +931,7 @@ st.markdown(f"""
   </div>
   <div class="nav-right">
     <div class="nav-gti">
-      &#9889;&nbsp;GTI SCORE:&nbsp;{score_100:.0f}
+      &#9889;&nbsp;GTI SCORE:&nbsp;{score_100:.1f}
       <span class="nav-gti-badge {lev_cls}">{lev_lbl}</span>
     </div>
     <div class="live-pip"><div class="pip-wrap"><div class="pip"></div></div>&nbsp;LIVE</div>
@@ -1009,6 +1009,7 @@ with tab1:
         vader_desc = "Social clusters showing negative recovery trends." if vader_avg < 0 else "Positive signal aggregate detected."
         vol_desc = f"VOLATILITY: {vol_pred} · {vol_conf:.0%} confidence"
         vol_col = NEG if vol_pred == "HIGH" else POS
+        vol_bar_html = ''.join(f'<div style="flex:1;height:10px;background:{NEG if i<int(vol_conf*5) else "var(--hover)"};margin-right:2px"></div>' for i in range(5))
 
         st.markdown(f"""
         <div style="padding:0 0.9rem">
@@ -1021,7 +1022,7 @@ with tab1:
               <div class="gti-badge {'gb-high' if vol_pred=='HIGH' else 'gb-low'}">{vol_pred}</div>
             </div>
             <div style="display:flex;gap:3px;margin-top:7px">
-              {''.join(f'<div style="flex:1;height:10px;background:{NEG if i<int(vol_conf*5) else "var(--hover)"};margin-right:2px"></div>' for i in range(5))}
+              {vol_bar_html}
             </div>
           </div>
         </div>
@@ -1672,7 +1673,7 @@ with tab4:
 
     mc1, mc2, mc3 = st.columns(3)
     with mc1:
-        st.markdown(mkt_tile(spy_df, "S&P 500", "US EQUITIES · TACTICAL SURVEILLANCE"),
+        st.markdown(mkt_tile(spy_df, "SPY", "S&P 500 ETF · TACTICAL SURVEILLANCE"),
                     unsafe_allow_html=True)
     with mc2:
         st.markdown(mkt_tile(vix_df, "VOLATILITY · VIX", "CBOE FEAR GAUGE"),
