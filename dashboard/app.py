@@ -15,10 +15,14 @@ Run:  streamlit run dashboard/app.py
 import sqlite3
 import time
 from datetime import datetime, timedelta
+import os
 
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import requests
+import json
+import streamlit.components.v1 as components
 
 try:
     from streamlit_plotly_events import plotly_events
@@ -767,6 +771,75 @@ total_news = pos_ct + neg_ct + neu_ct
 gdelt_raw_df  = load_gdelt_country_tension(48)
 country_df    = build_country_tension_df(gdelt_raw_df)
 
+# ═══════════════════════════════════════════════════════════════════════════
+#  STITCH MCP "WINDOWS" UI INTEGRATION
+# ═══════════════════════════════════════════════════════════════════════════
+
+# 1. Prepare the live data payload for the Stitch UI
+live_data = {
+    "gti_score": score_100,
+    "conflict_count": conflict_ct,
+    "volatility_prediction": vol_pred,
+    "volatility_confidence": vol_conf,
+    "direction_prediction": dir_pred,
+    "direction_confidence": dir_conf,
+    "latest_headlines": news_df[["title", "source", "vader_label"]].head(15).to_dict(orient="records") if not news_df.empty else []
+}
+
+# 2. Fetch the "windows" UI directly from Stitch MCP
+api_url = "https://stitch.googleapis.com/mcp/ui/windows"
+headers = {"X-Goog-Api-Key": os.getenv("STITCH_API_KEY", "")}
+
+try:
+    response = requests.get(api_url, headers=headers, timeout=10)
+    response.raise_for_status()
+    ui_payload = response.json()
+except Exception as e:
+    ui_payload = {"error": str(e)}
+
+# 3. Render the dynamic UI
+if "error" in ui_payload:
+    st.error(f"Failed to load the Windows UI from Stitch MCP: {ui_payload['error']}")
+    st.info("Make sure STITCH_API_KEY is set in your .env file.")
+    st.json(live_data)
+else:
+    # Handle both string (raw HTML) and JSON dictionary responses
+    if isinstance(ui_payload, str):
+        html_content, css_content, js_content = ui_payload, "", ""
+    else:
+        html_content = ui_payload.get("html", "<div style='color:white; font-family: sans-serif;'>UI loaded, but no HTML found.</div>")
+        css_content = ui_payload.get("css", "")
+        js_content = ui_payload.get("js", "")
+
+    # Inject the working data directly into the window object for the JS to consume
+    injected_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ margin: 0; padding: 0; background-color: transparent; }}
+            {css_content}
+        </style>
+        <script>
+            // Expose real backend data to the Stitch UI component
+            window.GeoMarketData = {json.dumps(live_data)};
+        </script>
+    </head>
+    <body>
+        {html_content}
+        <script>{js_content}</script>
+    </body>
+    </html>
+    """
+    components.html(injected_html, height=850, scrolling=True)
+
+# ── Non-blocking 60-second auto-refresh ───────────────────────────────────
+if time.time() - st.session_state.get("last_refresh", time.time()) > 60:
+    st.session_state["last_refresh"] = time.time()
+    st.rerun()
+
+# Stop execution here to entirely replace the old manual UI with the new Stitch UI
+st.stop()
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  NAVBAR  (always visible)
