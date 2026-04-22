@@ -29,8 +29,7 @@ now_str = datetime.now().strftime("%H:%M:%S")
 tab_links_html = ""
 for tab in TABS:
     active_cls = "nav-tab-active" if tab == st.session_state.active_tab else ""
-    tab_key = TAB_KEYS[tab]
-    tab_links_html += f'<a class="nav-tab {active_cls}" href="?tab={tab_key}">{tab}</a>'
+    tab_links_html += f'<span class="nav-tab {active_cls}" data-tab-name="{tab}">{tab}</span>'
 
 st.markdown(f"""
 <div class="topnav">
@@ -46,6 +45,23 @@ st.markdown(f"""
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Render invisible buttons for Streamlit to track tab changes
+col1, col2, col3, col4 = st.columns(4)
+if col1.button("Earth Pulse", key="tab_earth_pulse", use_container_width=False):
+    st.session_state.active_tab = "Earth Pulse"
+    st.query_params["tab"] = "earth_pulse"
+if col2.button("Geo Map", key="tab_geo_map", use_container_width=False):
+    st.session_state.active_tab = "Geo Map"
+    st.query_params["tab"] = "geo_map"
+if col3.button("AI Signals", key="tab_ai_signals", use_container_width=False):
+    st.session_state.active_tab = "AI Signals"
+    st.query_params["tab"] = "ai_signals"
+if col4.button("Market", key="tab_market", use_container_width=False):
+    st.session_state.active_tab = "Market"
+    st.query_params["tab"] = "market"
+
+st.markdown('<div style="height: -20px;"></div>', unsafe_allow_html=True)
 
 # ── Handle tab switching via query param ──────────────────────────────────────
 # Update session state from query params immediately so nav renders with correct active state

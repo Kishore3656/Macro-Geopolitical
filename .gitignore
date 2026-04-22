@@ -35,6 +35,9 @@ Thumbs.db
 .coverage
 htmlcov/
 .playwright-mcp/
+test-results/
+playwright-report/
+.playwright/
 
 # Logs & Temp
 *.log
