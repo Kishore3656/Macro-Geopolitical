@@ -118,9 +118,10 @@ def render():
   <span class="feature-value" style="color:{color};">{pct:.0f}%</span>
 </div>""", unsafe_allow_html=True)
 
+        last_updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
         st.markdown(f"""
 <div class="caption-mono" style="margin-top:6px;">
-  LAST_UPDATED: {signals_current.get('timestamp', 'N/A')}<br/>
+  LAST_UPDATED: {last_updated}<br/>
   MODEL: LGBM_V2 | STATUS: {signals_current.get('status', 'UNKNOWN')}
 </div>
 """, unsafe_allow_html=True)

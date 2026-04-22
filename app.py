@@ -29,7 +29,8 @@ now_str = datetime.now().strftime("%H:%M:%S")
 tab_links_html = ""
 for tab in TABS:
     active_cls = "nav-tab-active" if tab == st.session_state.active_tab else ""
-    tab_links_html += f'<a class="nav-tab {active_cls}" href="?tab={tab}">{tab}</a>'
+    tab_key = TAB_KEYS[tab]
+    tab_links_html += f'<a class="nav-tab {active_cls}" href="?tab={tab_key}">{tab}</a>'
 
 st.markdown(f"""
 <div class="topnav">
@@ -47,9 +48,12 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Handle tab switching via query param ──────────────────────────────────────
-qp = st.query_params.get("tab", st.session_state.active_tab)
-if qp in TABS:
-    st.session_state.active_tab = qp
+# Update session state from query params immediately so nav renders with correct active state
+qp = st.query_params.get("tab")
+if qp:
+    tab_name = next((t for t, k in TAB_KEYS.items() if k == qp), None)
+    if tab_name:
+        st.session_state.active_tab = tab_name
 
 # ── Page layout: left sidebar + main content ──────────────────────────────────
 sidebar_col, main_col = st.columns([1, 6])

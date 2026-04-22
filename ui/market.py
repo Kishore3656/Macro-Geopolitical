@@ -4,6 +4,7 @@ import streamlit as st
 from datetime import datetime
 import plotly.graph_objects as go
 import numpy as np
+import random
 from api.client import get_client
 
 
