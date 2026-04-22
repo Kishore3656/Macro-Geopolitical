@@ -1,25 +1,23 @@
 """Earth Pulse - GEOMARKET INTELLIGENCE"""
 
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime
 import plotly.graph_objects as go
 import numpy as np
-import random
+from api.client import get_client
 
 
-def _gti_history_chart() -> go.Figure:
-    """48H GTI history sparkline chart."""
-    random.seed(42)
-    hours = 48
-    t = [datetime.now() - timedelta(hours=hours - i) for i in range(hours)]
-    base = 24.0
-    vals = [base]
-    for _ in range(hours - 1):
-        vals.append(max(0, min(100, vals[-1] + random.gauss(0.3, 1.2))))
+def _gti_history_chart(history_data: list) -> go.Figure:
+    """GTI history sparkline chart from real data."""
+    if not history_data:
+        return _empty_chart("No GTI history data")
+
+    timestamps = [datetime.fromisoformat(d["timestamp"]) for d in history_data]
+    values = [d["gti_score"] * 100 for d in history_data]  # Scale to 0-100
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=t, y=vals,
+        x=timestamps, y=values,
         mode="lines",
         line=dict(color="#ffb867", width=1.5),
         fill="tozeroy",
@@ -40,7 +38,40 @@ def _gti_history_chart() -> go.Figure:
     return fig
 
 
+def _empty_chart(message: str) -> go.Figure:
+    """Return empty chart with message."""
+    fig = go.Figure()
+    fig.add_annotation(text=message, x=0.5, y=0.5, showarrow=False)
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        height=100,
+        margin=dict(l=0, r=0, t=0, b=0),
+    )
+    return fig
+
+
+def _format_percentage_change(new_val: float, old_val: float) -> str:
+    """Format percentage change for display."""
+    if old_val == 0:
+        return "N/A"
+    change = ((new_val - old_val) / old_val) * 100
+    symbol = "↑" if change >= 0 else "↓"
+    return f"{symbol} {abs(change):.1f}%"
+
+
 def render():
+    client = get_client()
+
+    # Fetch real data
+    gti_data = client.get_gti_current()
+    gti_history = client.get_gti_history(hours=48)
+    headlines_data = client.get_headlines(limit=4)
+
+    if "error" in gti_data:
+        st.error(f"API Error: {gti_data['error']}")
+        return
+
     # ── Page header ───────────────────────────────────────────────────────────
     st.markdown("""
 <div class="system-status-row">
@@ -53,13 +84,17 @@ def render():
 
     # ────────────────── LEFT: GTI + Signal Cards ─────────────────────────────
     with left:
+        gti_score = gti_data.get("gti_score", 0.0)
+        gti_display = gti_score * 100  # Scale to 0-100 for display
+        risk_level = gti_data.get("risk_level", "UNKNOWN")
+
         # GTI Hero
-        st.markdown("""
+        st.markdown(f"""
 <div class="gti-hero-wrapper">
-  <div class="gti-hero-number">26.5</div>
+  <div class="gti-hero-number">{gti_display:.1f}</div>
   <div class="gti-hero-meta">
-    <span class="gti-hero-badge">LOW_CONFLICT</span>
-    <span class="gti-hero-change">-4.2% (24H)</span>
+    <span class="gti-hero-badge">{risk_level}</span>
+    <span class="gti-hero-change">LIVE_FEED</span>
   </div>
 </div>
 <div class="gti-hero-feed-label">REAL-TIME_GEOPOLITICAL_FEED</div>
@@ -67,54 +102,62 @@ def render():
 
         st.markdown('<div class="section-header" style="margin-top:14px;">SIGNAL COMPONENTS</div>', unsafe_allow_html=True)
 
-        # Conflict score
-        st.markdown("""
-<div class="signal-card signal-card-elevated">
+        # Conflict score (from conflict_ratio)
+        conflict_pct = gti_data.get("conflict_ratio", 0.5) * 100
+        conflict_class = "signal-card-elevated" if conflict_pct > 60 else "signal-card"
+        st.markdown(f"""
+<div class="signal-card {conflict_class}">
   <div class="signal-card-header">
     <span class="signal-card-name">CONFLICT</span>
   </div>
-  <div class="signal-card-value">85.2</div>
-  <div class="signal-card-desc">Escalation detected in Sector T-G.<br/>A kinetic energy report sliding.</div>
-  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-error" style="width:85.2%;"></div></div>
+  <div class="signal-card-value">{conflict_pct:.1f}</div>
+  <div class="signal-card-desc">GDELT event conflict ratio<br/>from live event stream.</div>
+  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-error" style="width:{conflict_pct}%;"></div></div>
 </div>
 """, unsafe_allow_html=True)
 
-        # Tone index
-        st.markdown("""
+        # Tone index (normalized GDELT AvgTone)
+        tone_val = gti_data.get("tone_index", 0.0)
+        tone_display = tone_val if tone_val else 50.0  # Default to neutral
+        st.markdown(f"""
 <div class="signal-card">
   <div class="signal-card-header">
     <span class="signal-card-name">TONE_INDEX</span>
   </div>
-  <div class="signal-card-value">42.1</div>
-  <div class="signal-desc signal-card-desc">Nuclear Diplomatic pulse<br/>deterred by diplomatic talks.</div>
-  <div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:42.1%;"></div></div>
+  <div class="signal-card-value">{tone_display:.1f}</div>
+  <div class="signal-desc signal-card-desc">GDELT media sentiment<br/>from global news analysis.</div>
+  <div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:{tone_display}%;"></div></div>
 </div>
 """, unsafe_allow_html=True)
 
-        # VADER sentiment
-        st.markdown("""
-<div class="signal-card signal-card-stable">
+        # VADER sentiment (from RSS headlines)
+        vader_val = gti_data.get("vader_sentiment", 0.5) * 100
+        vader_class = "signal-card-stable" if vader_val > 50 else "signal-card"
+        st.markdown(f"""
+<div class="signal-card {vader_class}">
   <div class="signal-card-header">
     <span class="signal-card-name">VADER_SENTIMENT</span>
   </div>
-  <div class="signal-card-value">0.46</div>
-  <div class="signal-card-desc">Solid sources showing positive<br/>recovery trends.</div>
-  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-green" style="width:46%;"></div></div>
+  <div class="signal-card-value">{vader_val:.1f}</div>
+  <div class="signal-card-desc">RSS headline sentiment score<br/>from aggregated news feeds.</div>
+  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-green" style="width:{vader_val}%;"></div></div>
 </div>
 """, unsafe_allow_html=True)
 
-        # Volatility
-        st.markdown("""
-<div class="signal-card signal-card-critical">
+        # Volatility (estimated from GTI)
+        vol_badge = "HIGH" if gti_score > 0.6 else "VARIABLE" if gti_score > 0.3 else "LOW"
+        vol_color = "signal-card-critical" if vol_badge == "HIGH" else "signal-card"
+        st.markdown(f"""
+<div class="signal-card {vol_color}">
   <div class="signal-card-header">
     <span class="signal-card-name">VOLATILITY</span>
-    <span class="vol-badge vol-badge-high">HIGH</span>
+    <span class="vol-badge vol-badge-{'high' if vol_badge == 'HIGH' else 'low'}">{vol_badge}</span>
   </div>
   <div style="display:flex;gap:4px;margin-top:6px;">
-    <div style="flex:1;height:16px;background:#ff2d2d;opacity:0.9;"></div>
-    <div style="flex:1;height:16px;background:#ff4d1a;opacity:0.7;"></div>
-    <div style="flex:1;height:16px;background:#ff6600;opacity:0.5;"></div>
-    <div style="flex:1;height:16px;background:#ff8800;opacity:0.3;"></div>
+    <div style="flex:1;height:16px;background:#ff2d2d;opacity:{0.9 if gti_score > 0.6 else 0.3};"></div>
+    <div style="flex:1;height:16px;background:#ff4d1a;opacity:{0.7 if gti_score > 0.5 else 0.3};"></div>
+    <div style="flex:1;height:16px;background:#ff6600;opacity:{0.5 if gti_score > 0.4 else 0.3};"></div>
+    <div style="flex:1;height:16px;background:#ff8800;opacity:{0.3 if gti_score > 0.3 else 0.1};"></div>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -124,19 +167,26 @@ def render():
         # Risk legend
         st.markdown("""
 <div class="risk-legend">
-  <div class="risk-legend-item"><div class="risk-dot risk-dot-critical"></div> CRITICAL_THREAT (75–100)</div>
-  <div class="risk-legend-item"><div class="risk-dot risk-dot-elevated"></div> ELEVATED_WATCH (40–74)</div>
-  <div class="risk-legend-item"><div class="risk-dot risk-dot-stable"></div> NOMINAL_STABLE (0–39)</div>
+  <div class="risk-legend-item"><div class="risk-dot risk-dot-critical"></div> HIGH_CONFLICT (60–100)</div>
+  <div class="risk-legend-item"><div class="risk-dot risk-dot-elevated"></div> MODERATE_TENSION (30–60)</div>
+  <div class="risk-legend-item"><div class="risk-dot risk-dot-stable"></div> LOW_CONFLICT (0–30)</div>
 </div>
 """, unsafe_allow_html=True)
 
     # ────────────────── CENTER: Globe + coordinate ───────────────────────────
     with center:
-        # Simulated globe using a dark sphere with plotly
+        # Globe using hardcoded hotspots (in production, feed from GDELT events)
         lats_conflict = [50.4, 48.0, 35.7, 15.5, 12.5, 16.9, 33.5, 23.7]
         lons_conflict = [30.5, 37.6, 51.4, 44.2, 42.8, 96.1, 36.3, 90.4]
         sizes_conflict = [20, 15, 18, 12, 10, 14, 16, 11]
-        colors_conflict = ["#ff2d2d", "#ff2d2d", "#ffb867", "#ffb867", "#8a9baa", "#ffb867", "#ff2d2d", "#8a9baa"]
+
+        # Color based on GTI risk level
+        if gti_score > 0.6:
+            colors_conflict = ["#ff2d2d"] * 4 + ["#ffb867"] * 4
+        elif gti_score > 0.3:
+            colors_conflict = ["#ffb867"] * 8
+        else:
+            colors_conflict = ["#8a9baa"] * 8
 
         fig_globe = go.Figure()
 
@@ -185,43 +235,39 @@ def render():
         )
         st.plotly_chart(fig_globe, use_container_width=True, config={"displayModeBar": False})
 
-        st.markdown("""
+        st.markdown(f"""
 <div class="coord-display" style="margin-top:0;">
-  <div class="caption-mono">COORDINATE_USER_ACTIVE_v4</div>
+  <div class="caption-mono">GLOBAL_CONFLICT_HEATMAP | GTI={gti_display:.1f} | {risk_level}</div>
 </div>
 """, unsafe_allow_html=True)
 
     # ────────────────── RIGHT: 48H History + Headlines ───────────────────────
     with right:
         st.markdown('<div class="section-header">48H GTI HISTORY</div>', unsafe_allow_html=True)
-        st.plotly_chart(_gti_history_chart(), use_container_width=True, config={"displayModeBar": False})
+        history_list = gti_history.get("data", [])
+        st.plotly_chart(_gti_history_chart(history_list), use_container_width=True, config={"displayModeBar": False})
 
         st.markdown('<div class="section-header" style="margin-top:8px;">LATEST HEADLINES</div>', unsafe_allow_html=True)
 
-        headlines = [
-            ("13:09 UTC", "-9.71", "neg",
-             "Maritime blockade tightening in southern trade corridors.",
-             "SOURCE: AP_REUTERS_108", "CONFIDENCE: 96"),
-            ("13:00 UTC", "+8.02", "pos",
-             "Bilateral trade agreement signed between Baltic alliance.",
-             "SOURCE: REUTERS_411", "CONFIDENCE: 88"),
-            ("12:55 UTC", "+8.12", "neg",
-             "Energy grid fluctuation reported across central hub.",
-             "SOURCE: GDELT_309", "CONFIDENCE: 74"),
-            ("12:51 UTC", "-6.08", "neg",
-             "Cyber-reconnaissance detected in national bank infrastructure.",
-             "SOURCE: CYBER_SRC", "CONFIDENCE: 91"),
-        ]
+        headlines_list = headlines_data.get("data", [])
+        if not headlines_list:
+            st.markdown('<div style="color:#8a9baa;font-size:12px;">No recent headlines</div>', unsafe_allow_html=True)
+        else:
+            for h in headlines_list[:4]:
+                title = h.get("title", "")[:70] + "..." if len(h.get("title", "")) > 70 else h.get("title", "")
+                score = h.get("compound_score", 0.0)
+                score_cls = "neg" if h.get("sentiment") == "negative" else "pos" if h.get("sentiment") == "positive" else "neu"
+                ts = h.get("timestamp", "").split(" ")[1] if " " in h.get("timestamp", "") else "N/A"
+                source = h.get("source", "UNKNOWN")[:15]
 
-        for time, score, score_cls, title, source1, source2 in headlines:
-            cls = "headline-score-neg" if score_cls == "neg" else "headline-score-pos"
-            st.markdown(f"""
+                cls = "headline-score-neg" if score_cls == "neg" else "headline-score-pos" if score_cls == "pos" else "headline-score-neu"
+                st.markdown(f"""
 <div class="headline-item">
   <div class="headline-meta">
-    <span class="headline-time">{time}</span>
-    <span class="headline-score {cls}">{score}</span>
+    <span class="headline-time">{ts}</span>
+    <span class="headline-score {cls}">{score:+.2f}</span>
   </div>
   <div class="headline-title">{title}</div>
-  <div class="headline-source">{source1} &nbsp;|&nbsp; {source2}</div>
+  <div class="headline-source">{source}</div>
 </div>
 """, unsafe_allow_html=True)

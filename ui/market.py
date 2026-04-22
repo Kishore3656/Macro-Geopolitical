@@ -1,28 +1,27 @@
 """Market - GEOMARKET INTELLIGENCE"""
 
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime
 import plotly.graph_objects as go
 import numpy as np
-import random
+from api.client import get_client
 
 
-def _spy_candlestick() -> go.Figure:
-    """S&P 500 candlestick chart — simulated OHLCV data."""
-    random.seed(99)
-    bars = 40
-    dates = [datetime.now() - timedelta(hours=bars - i) for i in range(bars)]
-    close = [508.0]
-    for _ in range(bars - 1):
-        close.append(close[-1] * (1 + random.gauss(0.0002, 0.003)))
-    opens, highs, lows, closes = [], [], [], []
-    for c in close:
-        o = c * (1 + random.gauss(0, 0.001))
-        h = max(o, c) * (1 + abs(random.gauss(0, 0.001)))
-        l = min(o, c) * (1 - abs(random.gauss(0, 0.001)))
-        opens.append(o); highs.append(h); lows.append(l); closes.append(c)
+def _spy_candlestick(market_data: dict) -> go.Figure:
+    """S&P 500 candlestick chart from real market data."""
+    bars = market_data.get("data", [])
+    if not bars or len(bars) < 2:
+        fig = go.Figure()
+        fig.add_annotation(text="No market data available", x=0.5, y=0.5, showarrow=False)
+        fig.update_layout(height=240, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        return fig
 
-    colors = ["#6ecf8a" if closes[i] >= opens[i] else "#ff6b6b" for i in range(bars)]
+    dates = [datetime.fromisoformat(b["timestamp"]) for b in bars[-40:]]
+    opens = [b["open"] for b in bars[-40:]]
+    highs = [b["high"] for b in bars[-40:]]
+    lows = [b["low"] for b in bars[-40:]]
+    closes = [b["close"] for b in bars[-40:]]
+
     fig = go.Figure()
     fig.add_trace(go.Candlestick(
         x=dates,
@@ -104,39 +103,57 @@ def _gld_liquidity() -> go.Figure:
 
 
 def render():
+    client = get_client()
+
+    # Fetch real market data
+    market_spy = client.get_market_spy(bars=100)
+    market_sectors = client.get_market_sectors()
+
     # ── Page header ───────────────────────────────────────────────────────────
     now_str = datetime.now().strftime("%H:%M:%S")
+
+    # Get SPY info
+    spy_price = market_spy.get("current_price", 0)
+    spy_change = market_spy.get("daily_change", 0)
+    spy_change_cls = "market-hero-change-pos" if spy_change >= 0 else "market-hero-change-neg"
+    spy_arrow = "▲" if spy_change >= 0 else "▼"
 
     # ── 3 hero metric cards ───────────────────────────────────────────────────
     c1, c2, c3 = st.columns(3)
     with c1:
-        st.markdown("""
+        st.markdown(f"""
 <div class="market-hero-card">
-  <div class="market-hero-corner">NYSE Source: 96</div>
+  <div class="market-hero-corner">LIVE DATA: ACTIVE</div>
   <div class="market-hero-ticker">EQUITY_INDEX / SPY</div>
-  <div class="market-hero-change market-hero-change-pos">▲ +1.245</div>
-  <div class="market-hero-value">508.42</div>
-  <div class="market-hero-sub">VOL_3090: 42.1M</div>
+  <div class="market-hero-change {spy_change_cls}">{spy_arrow} {abs(spy_change):+.3f}%</div>
+  <div class="market-hero-value">${spy_price:.2f}</div>
+  <div class="market-hero-sub">PRICE_LIVE_FEED</div>
 </div>
 """, unsafe_allow_html=True)
 
+    # Get top sector
+    sectors = market_sectors.get("sectors", [])
+    top_sector = max(sectors, key=lambda s: s["change"]) if sectors else {"name": "N/A", "change": 0, "price": 0}
+    top_change_cls = "market-hero-change-pos" if top_sector["change"] >= 0 else "market-hero-change-neg"
+    top_arrow = "▲" if top_sector["change"] >= 0 else "▼"
+
     with c2:
-        st.markdown("""
+        st.markdown(f"""
 <div class="market-hero-card">
-  <div class="market-hero-ticker">VOLATILITY / VIX</div>
-  <div class="market-hero-change market-hero-change-pos">▲ +4.826</div>
-  <div class="market-hero-value">14.92</div>
-  <div class="market-hero-sub">FEAR_INDEX_ACTIVE</div>
+  <div class="market-hero-ticker">TOP_SECTOR / {top_sector['name'].upper()}</div>
+  <div class="market-hero-change {top_change_cls}">{top_arrow} {abs(top_sector['change']):+.3f}%</div>
+  <div class="market-hero-value">${top_sector['price']:.2f}</div>
+  <div class="market-hero-sub">SECTOR_PERFORMANCE</div>
 </div>
 """, unsafe_allow_html=True)
 
     with c3:
-        st.markdown("""
+        st.markdown(f"""
 <div class="market-hero-card">
-  <div class="market-hero-ticker">COMMODITY / GLD</div>
-  <div class="market-hero-change market-hero-change-neg">▼ -0.345</div>
-  <div class="market-hero-value">201.18</div>
-  <div class="market-hero-sub">AU_SPOT_REFERENCE</div>
+  <div class="market-hero-ticker">MARKET_VOLATILITY / EST</div>
+  <div class="market-hero-change market-hero-change-pos">DYNAMIC</div>
+  <div class="market-hero-value">{spy_change * 2:.2f}%</div>
+  <div class="market-hero-sub">ESTIMATED_VIX</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -148,7 +165,7 @@ def render():
   <div class="chart-panel-header">
     <div>
       <div class="chart-panel-title">S&P 500 Tactical Surveillance</div>
-      <div class="chart-panel-meta">INTERVAL: 48H CANDLESTICK / REFRESH: LIVE</div>
+      <div class="chart-panel-meta">INTERVAL: HOURLY CANDLESTICK / REFRESH: LIVE | {now_str}</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div class="interval-btns">
@@ -162,34 +179,31 @@ def render():
 </div>
 """, unsafe_allow_html=True)
 
-    spy_chart = _spy_candlestick()
+    spy_chart = _spy_candlestick(market_spy)
     st.plotly_chart(spy_chart, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
 
-    # ── Bottom: VIX surface + GLD liquidity (side by side) ───────────────────
-    v_col, g_col = st.columns(2)
-
-    with v_col:
-        st.markdown("""
+    # ── Sector performance table ──────────────────────────────────────────────
+    st.markdown("""
 <div class="chart-panel">
   <div class="chart-panel-header">
-    <div class="chart-panel-title">● VIX_VOLATILITY_SURFACE</div>
-    <div class="chart-panel-meta">REF_X1_AREA</div>
+    <div class="chart-panel-title">● SECTOR_PERFORMANCE_GRID</div>
+    <div class="chart-panel-meta">ALL_11_SECTORS | UPDATED LIVE</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
-        st.plotly_chart(_vix_surface(), use_container_width=True, config={"displayModeBar": False})
-        st.markdown('<div class="chart-panel-ref">{ AREA_PLOT_LOADED }</div>', unsafe_allow_html=True)
 
-    with g_col:
-        st.markdown("""
-<div class="chart-panel">
-  <div class="chart-panel-header">
-    <div class="chart-panel-title">● GLD_LIQUIDITY_MAP</div>
-    <div class="chart-panel-meta">REF_X2_AREA</div>
-  </div>
+    # Render sectors as grid
+    sector_cols = st.columns(5)
+    for i, sector in enumerate(sectors):
+        col = sector_cols[i % 5]
+        change_cls = "positive" if sector["change"] >= 0 else "negative"
+        with col:
+            st.markdown(f"""
+<div style="border:1px solid #2e3140;padding:8px;border-radius:4px;text-align:center;margin:4px;background:#0a0b0f;">
+  <div style="font-size:11px;color:#8a9baa;">{sector['name']}</div>
+  <div style="font-size:14px;color:#d8dae8;font-weight:bold;">${sector['price']:.2f}</div>
+  <div style="font-size:12px;color:{'#6ecf8a' if sector['change'] >= 0 else '#ff6b6b'};">{sector['change']:+.2f}%</div>
 </div>
 """, unsafe_allow_html=True)
-        st.plotly_chart(_gld_liquidity(), use_container_width=True, config={"displayModeBar": False})
-        st.markdown('<div class="chart-panel-ref">{ AREA_PLOT_LOADED }</div>', unsafe_allow_html=True)
