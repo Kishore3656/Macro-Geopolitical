@@ -23,6 +23,3 @@ headless = true
 runOnSave = true
 maxUploadSize = 200
 
-[deprecation]
-showPyarrowDeprecationWarning = false
-showFileUploaderEncoding = false

@@ -47,3 +47,4 @@ data/
 *.pkl
 *.h5
 *.joblib
+stitch_designs/

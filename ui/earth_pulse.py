@@ -1,160 +1,227 @@
-"""Earth Pulse - Geospatial market analysis and global intelligence"""
+"""Earth Pulse - GEOMARKET INTELLIGENCE"""
 
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
+import plotly.graph_objects as go
+import numpy as np
+import random
 
-from components import (
-    data_card, live_indicator, status_badge, divider_section,
-    alert_box, hero_stat,
-    StatusLevel, DataPoint
-)
+
+def _gti_history_chart() -> go.Figure:
+    """48H GTI history sparkline chart."""
+    random.seed(42)
+    hours = 48
+    t = [datetime.now() - timedelta(hours=hours - i) for i in range(hours)]
+    base = 24.0
+    vals = [base]
+    for _ in range(hours - 1):
+        vals.append(max(0, min(100, vals[-1] + random.gauss(0.3, 1.2))))
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=t, y=vals,
+        mode="lines",
+        line=dict(color="#ffb867", width=1.5),
+        fill="tozeroy",
+        fillcolor="rgba(255,184,103,0.06)",
+        hovertemplate="%{y:.1f}<extra></extra>",
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=100,
+        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False, color="#2e3140"),
+        yaxis=dict(showgrid=True, gridcolor="#1f2129", showticklabels=True,
+                   tickfont=dict(size=8, color="#4a5060"), zeroline=False,
+                   tickformat=".0f"),
+        showlegend=False,
+    )
+    return fig
 
 
 def render():
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.markdown("## EARTH PULSE")
-        st.caption("Global Market Movement & Geospatial Intelligence")
-    with col2:
-        live_indicator("SATELLITE FEED")
-    with col3:
-        st.markdown(f'<div class="data-md">{datetime.now().strftime("%H:%M:%S")}</div>', unsafe_allow_html=True)
-    st.divider()
+    # ── Page header ───────────────────────────────────────────────────────────
+    st.markdown("""
+<div class="system-status-row">
+  <span class="system-status-label">SYSTEM_STATUS: GTI_INDEX</span>
+</div>
+""", unsafe_allow_html=True)
 
-    # Global heatmap
-    st.markdown("### GLOBAL MARKET HEATMAP")
-    col1, col2, col3 = st.columns(3)
-    regions = [
-        ("Asia-Pacific", "+4.2%", StatusLevel.POSITIVE, "12"),
-        ("Europe",       "+1.8%", StatusLevel.POSITIVE, "8"),
-        ("Americas",     "+2.9%", StatusLevel.POSITIVE, "15"),
-    ]
-    for col, (name, value, status, markets) in zip([col1, col2, col3], regions):
-        with col:
-            st.markdown(f"**{name}**")
-            st.markdown(f"<p class='data-lg {status.value}'>{value}</p>", unsafe_allow_html=True)
-            st.caption(f"{markets} active markets")
+    # ── 3-column layout ───────────────────────────────────────────────────────
+    left, center, right = st.columns([1.2, 2.2, 1.4])
 
-    divider_section()
+    # ────────────────── LEFT: GTI + Signal Cards ─────────────────────────────
+    with left:
+        # GTI Hero
+        st.markdown("""
+<div class="gti-hero-wrapper">
+  <div class="gti-hero-number">26.5</div>
+  <div class="gti-hero-meta">
+    <span class="gti-hero-badge">LOW_CONFLICT</span>
+    <span class="gti-hero-change">-4.2% (24H)</span>
+  </div>
+</div>
+<div class="gti-hero-feed-label">REAL-TIME_GEOPOLITICAL_FEED</div>
+""", unsafe_allow_html=True)
 
-    # Major exchanges
-    st.markdown("### MAJOR EXCHANGE PULSE")
-    exchanges = [
-        ("NYSE", "USA",       "S&P 500",            "8,247.32",  "+2.3%", StatusLevel.POSITIVE, "12.8"),
-        ("LSE",  "UK",        "FTSE 100",            "7,842.55",  "+1.2%", StatusLevel.POSITIVE, "8.4"),
-        ("TSE",  "Japan",     "Nikkei 225",          "29,156.82", "+3.1%", StatusLevel.POSITIVE, "14.2"),
-        ("SSE",  "China",     "Shanghai Composite",  "3,087.42",  "-0.8%", StatusLevel.NEGATIVE, "16.5"),
-        ("DAX",  "Germany",   "DAX 40",              "17,823.45", "+0.9%", StatusLevel.POSITIVE, "9.2"),
-        ("ASX",  "Australia", "ASX 200",             "7,456.23",  "+1.4%", StatusLevel.POSITIVE, "11.3"),
-    ]
-    for exch, region, index, value, change, status, vol in exchanges:
-        c1, c2, c3, c4, c5 = st.columns([1.5, 1.5, 1.5, 1, 1])
-        with c1:
-            st.markdown(f"**{exch}**")
-            st.caption(region)
-        with c2:
-            st.markdown(f"<span class='label-md'>{index}</span>", unsafe_allow_html=True)
-        with c3:
-            st.markdown(f"<span class='data-md'>{value}</span>", unsafe_allow_html=True)
-        with c4:
-            st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
-        with c5:
-            vol_status = StatusLevel.NEGATIVE if float(vol) > 13 else StatusLevel.POSITIVE
-            st.markdown(f"<span class='{vol_status.value} data-sm'>σ{vol}</span>", unsafe_allow_html=True)
-        st.divider()
+        st.markdown('<div class="section-header" style="margin-top:14px;">SIGNAL COMPONENTS</div>', unsafe_allow_html=True)
 
-    divider_section()
+        # Conflict score
+        st.markdown("""
+<div class="signal-card signal-card-elevated">
+  <div class="signal-card-header">
+    <span class="signal-card-name">CONFLICT</span>
+  </div>
+  <div class="signal-card-value">85.2</div>
+  <div class="signal-card-desc">Escalation detected in Sector T-G.<br/>A kinetic energy report sliding.</div>
+  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-error" style="width:85.2%;"></div></div>
+</div>
+""", unsafe_allow_html=True)
 
-    # Capital flows
-    st.markdown("### CAPITAL FLOW INTELLIGENCE")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### Inbound Capital")
-        for source, amount in [("Emerging Markets", "$8.4B"), ("Sovereign Funds", "$5.2B"), ("Retail Investors", "$2.1B")]:
-            c1, c2 = st.columns([3, 1])
-            with c1:
-                st.markdown(f"**{source}**")
-            with c2:
-                st.markdown(f"<span class='text-positive'>{amount}</span>", unsafe_allow_html=True)
-            st.divider()
-    with col2:
-        st.markdown("#### Outbound Capital")
-        for dest, amount, status in [("Currency Markets", "$3.2B", StatusLevel.NEGATIVE), ("Commodities", "$1.8B", StatusLevel.NEGATIVE), ("Bonds", "$2.5B", StatusLevel.NEUTRAL)]:
-            c1, c2 = st.columns([3, 1])
-            with c1:
-                st.markdown(f"**{dest}**")
-            with c2:
-                st.markdown(f"<span class='{status.value}'>{amount}</span>", unsafe_allow_html=True)
-            st.divider()
+        # Tone index
+        st.markdown("""
+<div class="signal-card">
+  <div class="signal-card-header">
+    <span class="signal-card-name">TONE_INDEX</span>
+  </div>
+  <div class="signal-card-value">42.1</div>
+  <div class="signal-desc signal-card-desc">Nuclear Diplomatic pulse<br/>deterred by diplomatic talks.</div>
+  <div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:42.1%;"></div></div>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+        # VADER sentiment
+        st.markdown("""
+<div class="signal-card signal-card-stable">
+  <div class="signal-card-header">
+    <span class="signal-card-name">VADER_SENTIMENT</span>
+  </div>
+  <div class="signal-card-value">0.46</div>
+  <div class="signal-card-desc">Solid sources showing positive<br/>recovery trends.</div>
+  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-green" style="width:46%;"></div></div>
+</div>
+""", unsafe_allow_html=True)
 
-    # Geo-risk markers
-    st.markdown("### GEO-RISK MARKERS")
-    risks = [
-        ("Eastern Europe",       "HIGH",     StatusLevel.NEGATIVE, "Energy prices, defense stocks",           "↑ Escalating"),
-        ("US-Taiwan Strait",     "MODERATE", StatusLevel.PRIMARY,  "Tech supply chains, semiconductor prices", "→ Stable"),
-        ("Middle East Oil Routes","MODERATE", StatusLevel.PRIMARY,  "Oil & gas, shipping costs",               "↓ Improving"),
-        ("EU Regulatory Changes","MODERATE", StatusLevel.PRIMARY,  "Tech fines, banking regulations",         "→ Ongoing"),
-    ]
-    for loc, risk_level, status, impact, trend in risks:
-        c1, c2, c3, c4 = st.columns([1.5, 1.2, 2, 1.3])
-        with c1:
-            st.markdown(f"**{loc}**")
-        with c2:
-            st.markdown(f"<span class='{status.value} label-md'>{risk_level}</span>", unsafe_allow_html=True)
-        with c3:
-            st.caption(impact)
-        with c4:
-            st.markdown(f"<span class='text-secondary'>{trend}</span>", unsafe_allow_html=True)
-        st.divider()
+        # Volatility
+        st.markdown("""
+<div class="signal-card signal-card-critical">
+  <div class="signal-card-header">
+    <span class="signal-card-name">VOLATILITY</span>
+    <span class="vol-badge vol-badge-high">HIGH</span>
+  </div>
+  <div style="display:flex;gap:4px;margin-top:6px;">
+    <div style="flex:1;height:16px;background:#ff2d2d;opacity:0.9;"></div>
+    <div style="flex:1;height:16px;background:#ff4d1a;opacity:0.7;"></div>
+    <div style="flex:1;height:16px;background:#ff6600;opacity:0.5;"></div>
+    <div style="flex:1;height:16px;background:#ff8800;opacity:0.3;"></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+        st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
 
-    # Economic calendar
-    st.markdown("### ECONOMIC CALENDAR (NEXT 7 DAYS)")
-    calendar = [
-        ("Today",    "14:30", "USA", "Fed Minutes",      "HIGH"),
-        ("Tomorrow", "09:00", "EUR", "CPI Release",      "HIGH"),
-        ("Wed",      "15:00", "GBP", "BOE Decision",     "CRITICAL"),
-        ("Thu",      "08:30", "JPY", "Employment Data",  "MEDIUM"),
-        ("Fri",      "13:30", "USA", "Jobs Report",      "CRITICAL"),
-    ]
-    for date, time, country, event, impact in calendar:
-        c1, c2, c3, c4, c5 = st.columns([1, 1, 1, 2, 1])
-        with c1:
-            st.caption(f"**{date}**")
-        with c2:
-            st.caption(time)
-        with c3:
-            st.markdown(f"<span class='label-md'>{country}</span>", unsafe_allow_html=True)
-        with c4:
-            st.markdown(f"**{event}**")
-        with c5:
-            impact_status = StatusLevel.NEGATIVE if impact == "CRITICAL" else StatusLevel.PRIMARY
-            st.markdown(f"<span class='{impact_status.value}'>{impact}</span>", unsafe_allow_html=True)
-        st.divider()
+        # Risk legend
+        st.markdown("""
+<div class="risk-legend">
+  <div class="risk-legend-item"><div class="risk-dot risk-dot-critical"></div> CRITICAL_THREAT (75–100)</div>
+  <div class="risk-legend-item"><div class="risk-dot risk-dot-elevated"></div> ELEVATED_WATCH (40–74)</div>
+  <div class="risk-legend-item"><div class="risk-dot risk-dot-stable"></div> NOMINAL_STABLE (0–39)</div>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+    # ────────────────── CENTER: Globe + coordinate ───────────────────────────
+    with center:
+        # Simulated globe using a dark sphere with plotly
+        lats_conflict = [50.4, 48.0, 35.7, 15.5, 12.5, 16.9, 33.5, 23.7]
+        lons_conflict = [30.5, 37.6, 51.4, 44.2, 42.8, 96.1, 36.3, 90.4]
+        sizes_conflict = [20, 15, 18, 12, 10, 14, 16, 11]
+        colors_conflict = ["#ff2d2d", "#ff2d2d", "#ffb867", "#ffb867", "#8a9baa", "#ffb867", "#ff2d2d", "#8a9baa"]
 
-    # Market synchronization
-    st.markdown("### MARKET SYNCHRONIZATION INDEX")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        data_card("EQUITY CORRELATION", [
-            DataPoint("0.87", "All Markets", StatusLevel.POSITIVE),
-            DataPoint("0.92", "Developed",   StatusLevel.POSITIVE),
-            DataPoint("0.65", "Emerging",    StatusLevel.NEUTRAL),
-        ])
-    with col2:
-        data_card("SECTOR COHERENCE", [
-            DataPoint("0.76", "Tech Leading",    StatusLevel.POSITIVE),
-            DataPoint("0.43", "Energy Lagging",  StatusLevel.NEGATIVE),
-            DataPoint("0.81", "Financials",      StatusLevel.POSITIVE),
-        ])
-    with col3:
-        data_card("CURRENCY MOVES", [
-            DataPoint("USD Index: 104.2", "Strong Dollar", StatusLevel.POSITIVE),
-            DataPoint("EUR/USD: 1.09",    "Euro Weak",     StatusLevel.NEGATIVE),
-            DataPoint("JPY Vol: 18.4%",   "Elevated",      StatusLevel.NEUTRAL),
-        ])
+        fig_globe = go.Figure()
+
+        # Globe base
+        theta = np.linspace(0, 2 * np.pi, 300)
+        phi = np.linspace(0, np.pi, 300)
+        x = np.outer(np.sin(phi), np.cos(theta))
+        y = np.outer(np.sin(phi), np.sin(theta))
+        z = np.outer(np.cos(phi), np.ones(300))
+
+        fig_globe.add_trace(go.Surface(
+            x=x, y=y, z=z,
+            colorscale=[[0, "#0d1117"], [1, "#1a2030"]],
+            showscale=False,
+            opacity=0.95,
+            lighting=dict(ambient=0.6, diffuse=0.4),
+        ))
+
+        # Conflict hotspots
+        for lat, lon, sz, col in zip(lats_conflict, lons_conflict, sizes_conflict, colors_conflict):
+            lat_r = np.radians(lat)
+            lon_r = np.radians(lon)
+            cx = np.cos(lat_r) * np.cos(lon_r)
+            cy = np.cos(lat_r) * np.sin(lon_r)
+            cz = np.sin(lat_r)
+            fig_globe.add_trace(go.Scatter3d(
+                x=[cx], y=[cy], z=[cz],
+                mode="markers",
+                marker=dict(size=sz / 3, color=col, opacity=0.9),
+                showlegend=False,
+                hoverinfo="skip",
+            ))
+
+        fig_globe.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            scene=dict(
+                bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                zaxis=dict(visible=False),
+                camera=dict(eye=dict(x=1.4, y=0.8, z=0.6)),
+                aspectmode="cube",
+            ),
+            margin=dict(l=0, r=0, t=0, b=0),
+            height=320,
+        )
+        st.plotly_chart(fig_globe, use_container_width=True, config={"displayModeBar": False})
+
+        st.markdown("""
+<div class="coord-display" style="margin-top:0;">
+  <div class="caption-mono">COORDINATE_USER_ACTIVE_v4</div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ────────────────── RIGHT: 48H History + Headlines ───────────────────────
+    with right:
+        st.markdown('<div class="section-header">48H GTI HISTORY</div>', unsafe_allow_html=True)
+        st.plotly_chart(_gti_history_chart(), use_container_width=True, config={"displayModeBar": False})
+
+        st.markdown('<div class="section-header" style="margin-top:8px;">LATEST HEADLINES</div>', unsafe_allow_html=True)
+
+        headlines = [
+            ("13:09 UTC", "-9.71", "neg",
+             "Maritime blockade tightening in southern trade corridors.",
+             "SOURCE: AP_REUTERS_108", "CONFIDENCE: 96"),
+            ("13:00 UTC", "+8.02", "pos",
+             "Bilateral trade agreement signed between Baltic alliance.",
+             "SOURCE: REUTERS_411", "CONFIDENCE: 88"),
+            ("12:55 UTC", "+8.12", "neg",
+             "Energy grid fluctuation reported across central hub.",
+             "SOURCE: GDELT_309", "CONFIDENCE: 74"),
+            ("12:51 UTC", "-6.08", "neg",
+             "Cyber-reconnaissance detected in national bank infrastructure.",
+             "SOURCE: CYBER_SRC", "CONFIDENCE: 91"),
+        ]
+
+        for time, score, score_cls, title, source1, source2 in headlines:
+            cls = "headline-score-neg" if score_cls == "neg" else "headline-score-pos"
+            st.markdown(f"""
+<div class="headline-item">
+  <div class="headline-meta">
+    <span class="headline-time">{time}</span>
+    <span class="headline-score {cls}">{score}</span>
+  </div>
+  <div class="headline-title">{title}</div>
+  <div class="headline-source">{source1} &nbsp;|&nbsp; {source2}</div>
+</div>
+""", unsafe_allow_html=True)

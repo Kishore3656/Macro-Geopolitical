@@ -1,172 +1,232 @@
-"""Geo Map - Interactive geographic market intelligence"""
+"""Geo Map - GEOMARKET INTELLIGENCE"""
 
 import streamlit as st
 from datetime import datetime
+import plotly.graph_objects as go
+import numpy as np
 
-from components import (
-    data_card, live_indicator, divider_section, hero_stat,
-    StatusLevel, DataPoint
-)
+
+def _make_bar_html(pct: float, css_class: str = "") -> str:
+    return f"""
+<div class="signal-bar-wrap">
+  <div class="signal-bar-fill {css_class}" style="width:{min(pct,100):.1f}%;"></div>
+</div>"""
 
 
 def render():
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.markdown("## GEO MAP")
-        st.caption("Interactive Geographic Market Intelligence")
-    with col2:
-        live_indicator("MAP DATA LIVE")
-    with col3:
-        st.markdown(f'<div class="data-md">{datetime.now().strftime("%H:%M:%S")}</div>', unsafe_allow_html=True)
-    st.divider()
+    # ── Page header ───────────────────────────────────────────────────────────
+    st.markdown("""
+<div class="system-status-row">
+  <span class="system-status-label">SYSTEM_STATUS: GTI_INDEX</span>
+</div>
+<div class="page-title-row">
+  <span class="page-title">GEO MAP</span>
+</div>
+<div class="page-subtitle">GEOGRAPHIC INTELLIGENCE FEED</div>
+""", unsafe_allow_html=True)
 
-    # Regional breakdown
-    st.markdown("### REGIONAL MARKET PERFORMANCE")
-    regions = [
-        ("North America",   "S&P 500",  "8,247.32", "+2.3%", StatusLevel.POSITIVE, "2,847", "$2.1T"),
-        ("Europe",          "STOXX 600","487.24",    "+1.2%", StatusLevel.POSITIVE, "600",   "$890B"),
-        ("Asia-Pacific",    "MSCI APJ", "3,456.78",  "+3.4%", StatusLevel.POSITIVE, "1,230", "$5.2T"),
-        ("Emerging Markets","MSCI EM",  "1,087.34",  "+1.8%", StatusLevel.POSITIVE, "789",   "$1.1T"),
-    ]
-    for region, index, value, change, status, companies, volume in regions:
-        c1, c2, c3, c4, c5 = st.columns([1.5, 1.5, 1, 1.5, 1.5])
-        with c1:
-            st.markdown(f"**{region}**")
-            st.caption(index)
-        with c2:
-            st.markdown(f"<span class='data-lg'>{value}</span>", unsafe_allow_html=True)
-        with c3:
-            st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
-        with c4:
-            st.caption(f"Companies: {companies}")
-        with c5:
-            st.caption(f"Volume: {volume}")
-        st.divider()
+    # ── 3-column layout: left panel | map | right panel ──────────────────────
+    left, center, right = st.columns([1.1, 2.5, 1.3])
 
-    divider_section()
+    # ────────────────── LEFT PANEL ───────────────────────────────────────────
+    with left:
+        # Map legend
+        st.markdown('<div class="map-legend">', unsafe_allow_html=True)
+        st.markdown('<div class="map-legend-title">MAP LEGEND</div>', unsafe_allow_html=True)
+        st.markdown("""
+<div class="map-legend-item">
+  <div class="legend-dot legend-dot-extreme"></div> Extreme Conflict
+</div>
+<div class="map-legend-item">
+  <div class="legend-dot legend-dot-elevated"></div> Elevated Tension
+</div>
+<div class="map-legend-item">
+  <div class="legend-dot legend-dot-stable"></div> Stable Region
+</div>
+""", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    # Country heatmap
-    st.markdown("### COUNTRY PERFORMANCE HEATMAP")
-    countries = [
-        ("USA",         "+2.8%", StatusLevel.POSITIVE, "$48.2T"),
-        ("Japan",       "+3.2%", StatusLevel.POSITIVE, "$5.1T"),
-        ("UK",          "+1.1%", StatusLevel.POSITIVE, "$3.4T"),
-        ("Germany",     "+0.9%", StatusLevel.POSITIVE, "$2.8T"),
-        ("France",      "+1.2%", StatusLevel.POSITIVE, "$2.5T"),
-        ("Switzerland", "+0.7%", StatusLevel.POSITIVE, "$1.9T"),
-        ("India",       "+4.2%", StatusLevel.POSITIVE, "$4.2T"),
-        ("China",       "-0.8%", StatusLevel.NEGATIVE, "$9.8T"),
-        ("Australia",   "+1.4%", StatusLevel.POSITIVE, "$1.8T"),
-        ("Brazil",      "+2.1%", StatusLevel.POSITIVE, "$0.9T"),
-        ("Canada",      "+1.8%", StatusLevel.POSITIVE, "$2.3T"),
-        ("South Korea", "+2.9%", StatusLevel.POSITIVE, "$1.8T"),
-    ]
-    cols = st.columns(4)
-    for idx, (country, ret, status, mcap) in enumerate(countries):
-        with cols[idx % 4]:
-            st.markdown(f"**{country}**")
-            st.markdown(f"<span class='{status.value} data-md'>{ret}</span>", unsafe_allow_html=True)
-            st.caption(f"MCap: {mcap}")
-            st.divider()
+        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
 
-    divider_section()
+        # Arc type filter
+        st.markdown('<div class="section-header">ARC TYPE FILTER</div>', unsafe_allow_html=True)
+        st.markdown("""
+<div class="filter-group">
+  <div class="filter-chip filter-chip-active">MILITARY</div>
+  <div class="filter-chip">SANCTIONS</div>
+  <div class="filter-chip">TRADE</div>
+</div>
+<div class="filter-group">
+  <div class="filter-chip">DIPLOMATIC</div>
+</div>
+""", unsafe_allow_html=True)
 
-    # Currency flows
-    st.markdown("### CURRENCY INTELLIGENCE")
-    col1, col2, col3 = st.columns(3)
-    for col, (pair, rate, change, status) in zip(
-        [col1, col2, col3],
-        [("EUR/USD", "1.0892", "-0.8%", StatusLevel.NEGATIVE),
-         ("GBP/USD", "1.2734", "-1.2%", StatusLevel.NEGATIVE),
-         ("USD/JPY", "148.25", "+2.1%", StatusLevel.POSITIVE)]
-    ):
-        with col:
-            st.markdown(f"**{pair}**")
-            st.markdown(f"<span class='data-lg'>{rate}</span>", unsafe_allow_html=True)
-            st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
+        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
 
-    divider_section()
+        # Global statistics
+        st.markdown('<div class="section-header">GLOBAL STATISTICS</div>', unsafe_allow_html=True)
+        stats = [
+            ("Active Conflicts", "42"),
+            ("METRIC", "VALUE"),
+            ("POS_SENTIMENT", "14.2%"),
+            ("NEG_SENTIMENT", "68.0%"),
+            ("NEU_STABILITY", "17.3%"),
+        ]
+        for i, (label, value) in enumerate(stats):
+            if i == 1:
+                st.markdown(f"""
+<div class="global-stat-row" style="opacity:0.5;">
+  <span class="global-stat-label">{label}</span>
+  <span class="global-stat-value">{value}</span>
+</div>""", unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+<div class="global-stat-row">
+  <span class="global-stat-label">{label}</span>
+  <span class="global-stat-value">{value}</span>
+</div>""", unsafe_allow_html=True)
 
-    # Commodity map
-    st.markdown("### COMMODITY INTELLIGENCE")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("#### Energy")
-        for name, price, change, status in [("WTI Crude", "$82.45", "-1.2%", StatusLevel.NEGATIVE), ("Brent", "$87.23", "-0.8%", StatusLevel.NEGATIVE), ("Natural Gas", "$2.84", "+3.2%", StatusLevel.POSITIVE)]:
-            c1, c2, c3 = st.columns([1.5, 1, 1])
-            with c1:
-                st.markdown(f"**{name}**")
-            with c2:
-                st.markdown(price)
-            with c3:
-                st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
-            st.divider()
-    with col2:
-        st.markdown("#### Metals")
-        for name, price, change, status in [("Gold", "$2,087.50", "+0.8%", StatusLevel.POSITIVE), ("Silver", "$24.67", "+1.2%", StatusLevel.POSITIVE), ("Copper", "$4.28", "-0.5%", StatusLevel.NEGATIVE)]:
-            c1, c2, c3 = st.columns([1.5, 1, 1])
-            with c1:
-                st.markdown(f"**{name}**")
-            with c2:
-                st.markdown(price)
-            with c3:
-                st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
-            st.divider()
-    with col3:
-        st.markdown("#### Agriculture")
-        for name, price, change, status in [("Wheat", "$586.75", "+2.1%", StatusLevel.POSITIVE), ("Corn", "$456.25", "-1.8%", StatusLevel.NEGATIVE), ("Soybeans", "$1,234.50", "+0.9%", StatusLevel.POSITIVE)]:
-            c1, c2, c3 = st.columns([1.5, 1, 1])
-            with c1:
-                st.markdown(f"**{name}**")
-            with c2:
-                st.markdown(price)
-            with c3:
-                st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
-            st.divider()
+    # ────────────────── CENTER: MAP ──────────────────────────────────────────
+    with center:
+        # World choropleth with conflict overlays
+        conflict_countries = {
+            "RUS": 9.8, "UKR": 9.5, "SYR": 8.1, "YEM": 7.2,
+            "SDN": 6.5, "MMR": 7.0, "ETH": 6.2, "IRQ": 5.9,
+            "LBY": 5.5, "MLI": 5.8, "AFG": 8.9, "PAK": 5.2,
+            "IRN": 7.1, "SAU": 4.8, "TWN": 6.0,
+        }
+        all_countries = list(conflict_countries.keys())
+        scores = list(conflict_countries.values())
 
-    divider_section()
+        fig = go.Figure()
+        fig.add_trace(go.Choropleth(
+            locations=all_countries,
+            z=scores,
+            locationmode="ISO-3",
+            colorscale=[
+                [0.0,  "#0e1017"],
+                [0.3,  "#1f2535"],
+                [0.55, "#4a2d00"],
+                [0.75, "#8b4800"],
+                [0.9,  "#cc6600"],
+                [1.0,  "#ff2d2d"],
+            ],
+            zmin=0, zmax=10,
+            showscale=False,
+            marker_line_color="#2e3140",
+            marker_line_width=0.5,
+        ))
 
-    # Supply chain
-    st.markdown("### SUPPLY CHAIN HEALTH")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        data_card("SHIPPING RATES", [
-            DataPoint("$1,847.50", "Shanghai-Rotterdam", StatusLevel.NEUTRAL),
-            DataPoint("↑ 2.3%",   "Weekly Change",       StatusLevel.NEUTRAL),
-            DataPoint("34 days",  "Transit Time",         StatusLevel.NEUTRAL),
-        ])
-    with col2:
-        data_card("PORT CONGESTION", [
-            DataPoint("2.1 days", "Singapore", StatusLevel.POSITIVE),
-            DataPoint("3.4 days", "Rotterdam", StatusLevel.NEUTRAL),
-            DataPoint("1.8 days", "Shanghai",  StatusLevel.POSITIVE),
-        ])
-    with col3:
-        data_card("FREIGHT INDEX", [
-            DataPoint("1,234.5",       "Current Level",    StatusLevel.NEUTRAL),
-            DataPoint("-4.2%",         "30-Day Change",    StatusLevel.POSITIVE),
-            DataPoint("Avg: 1,456.8",  "Historical",       StatusLevel.NEUTRAL),
-        ])
+        # Arc lines for conflict arcs (simplified as annotations)
+        arc_pairs = [
+            ("RUS", "UKR", 55.0, 37.0, 48.5, 32.0),
+            ("IRN", "ISR", 32.0, 53.0, 31.5, 34.8),
+            ("CHN", "TWN", 35.0, 105.0, 23.5, 121.0),
+            ("SAU", "YEM", 23.5, 45.5, 15.5, 44.0),
+        ]
 
-    divider_section()
+        fig.update_layout(
+            geo=dict(
+                showframe=False,
+                showcoastlines=True,
+                coastlinecolor="#2e3140",
+                showland=True,
+                landcolor="#13151d",
+                showocean=True,
+                oceancolor="#0a0b0f",
+                showlakes=False,
+                showcountries=True,
+                countrycolor="#2e3140",
+                countrywidth=0.5,
+                bgcolor="#0a0b0f",
+                projection_type="natural earth",
+            ),
+            paper_bgcolor="#0a0b0f",
+            plot_bgcolor="#0a0b0f",
+            margin=dict(l=0, r=0, t=0, b=0),
+            height=350,
+        )
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-    # Trade flows
-    st.markdown("### MAJOR TRADE FLOWS")
-    flows = [
-        ("USA → Asia",            "$2.3T annually", "↑ +8.4% YoY", StatusLevel.POSITIVE, "Electronics, Machinery"),
-        ("Europe → USA",          "$890B annually", "→ +1.2% YoY", StatusLevel.NEUTRAL,  "Chemicals, Automotive"),
-        ("Asia → Europe",         "$1.2T annually", "↑ +5.1% YoY", StatusLevel.POSITIVE, "Electronics, Textiles"),
-        ("Emerging → Developed",  "$3.8T annually", "↑ +3.8% YoY", StatusLevel.POSITIVE, "Raw Materials, Energy"),
-    ]
-    for route, volume, trend, status, goods in flows:
-        c1, c2, c3, c4 = st.columns([1.8, 1.5, 1, 2])
-        with c1:
-            st.markdown(f"**{route}**")
-            st.caption(f"Volume: {volume}")
-        with c2:
-            st.markdown(f"<span class='{status.value}'>{trend}</span>", unsafe_allow_html=True)
-        with c3:
-            st.button("Details", key=f"flow_{route}")
-        with c4:
-            st.caption(f"Goods: {goods}")
-        st.divider()
+        # Coordinate / focus display
+        st.markdown("""
+<div class="coord-display">
+  <div class="coord-value">55.7558° N, 37.6173° E</div>
+  <div class="coord-label">REGION_CRITICAL_SECTOR</div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
+
+        # Headline density chart (bar chart)
+        cities = ["Moscow", "Kyiv", "Tehran", "Beijing", "Riyadh", "Kabul", "Damascus", "Aden"]
+        density = [42, 38, 29, 25, 18, 22, 31, 14]
+
+        fig2 = go.Figure(go.Bar(
+            x=cities, y=density,
+            marker_color=["#ff2d2d" if d > 35 else "#ffb867" if d > 20 else "#4a6080" for d in density],
+            marker_line_width=0,
+        ))
+        fig2.update_layout(
+            paper_bgcolor="#0a0b0f",
+            plot_bgcolor="#13151d",
+            font=dict(family="JetBrains Mono", size=9, color="#8a9baa"),
+            margin=dict(l=0, r=0, t=24, b=0),
+            height=110,
+            title=dict(text="HEADLINE DENSITY BY STRATEGIC CITY", font=dict(size=9, color="#8a9baa"), x=0),
+            xaxis=dict(showgrid=False, tickfont=dict(size=8), color="#4a5060"),
+            yaxis=dict(showgrid=True, gridcolor="#1f2129", tickfont=dict(size=8), color="#4a5060"),
+            bargap=0.2,
+        )
+        st.plotly_chart(fig2, use_container_width=True, config={"displayModeBar": False})
+
+        st.markdown('<div class="caption-mono" style="text-align:right;">LINE_FEED_SYNCED</div>', unsafe_allow_html=True)
+
+    # ────────────────── RIGHT PANEL ──────────────────────────────────────────
+    with right:
+        st.markdown('<div class="section-header">TOP RELATION STRESS</div>', unsafe_allow_html=True)
+
+        relations = [
+            ("US — UA",           "KINSHIP_ENGAGEMENT", "OPTIMAL",   None,    9.8,  "ok"),
+            ("CN — TW",           "NAVAL_PROXIMITY",    "ELEVATED",  None,    8.4,  "warn"),
+            ("IR — IL",           "PROXY_SECURITY",     "CRITICAL",  None,    8.1,  "bad"),
+            ("US — CN",           "TRADE_SANCTIONS",    "MONITORED", None,    7.2,  "warn"),
+            ("SA — YE",           "CEASEFIRE_STATUS",   "MONITORED", None,    5.1,  "ok"),
+        ]
+
+        for pair, label, status, _, score, tier in relations:
+            score_cls = "relation-score" if tier == "bad" else ("relation-score relation-score-warn" if tier == "warn" else "relation-score relation-score-ok")
+            st.markdown(f"""
+<div class="relation-item">
+  <div>
+    <div class="relation-pair">{pair}</div>
+    <div class="relation-status">{label}<br/>{status}</div>
+  </div>
+  <div class="{score_cls}">{score}</div>
+</div>""", unsafe_allow_html=True)
+
+        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
+
+        # Reliability score
+        st.markdown("""
+<div class="reliability-box">
+  <div class="reliability-label">RELIABILITY_SCORE</div>
+  <div class="reliability-value">8.9+</div>
+  <div class="reliability-desc">
+    "Algorithmic synthesis suggests 12% probability<br/>
+    of escalation in South China Sea within 72<br/>
+    hours."
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
+
+        # Status badges
+        st.markdown("""
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+  <span class="vol-badge vol-badge-low" style="font-size:8px;">SYSTEM_STABLE</span>
+  <span class="vol-badge vol-badge-low" style="font-size:8px;">ENCRYPTION_AES256</span>
+  <span class="gti-badge" style="font-size:8px;padding:2px 6px;">LATENCY_12MS</span>
+</div>
+""", unsafe_allow_html=True)

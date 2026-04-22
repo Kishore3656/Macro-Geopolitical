@@ -1,169 +1,212 @@
-"""AI Signals - Machine learning predictions and algorithmic intelligence"""
+"""AI Signals - GEOMARKET INTELLIGENCE"""
 
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
+import plotly.graph_objects as go
+import numpy as np
+import random
 
-from components import (
-    data_card, alert_box, live_indicator, status_badge,
-    divider_section, hero_stat,
-    StatusLevel, DataPoint
-)
+
+def _gti_breakdown_chart() -> go.Figure:
+    """GTI Component Breakdown — Time-Series Attribution Analysis (CMA)."""
+    random.seed(7)
+    hours = 24
+    t = [datetime.now() - timedelta(hours=hours - i) for i in range(hours)]
+
+    macro = [20 + random.gauss(0, 2) for _ in range(hours)]
+    micro = [10 + random.gauss(0, 1.5) for _ in range(hours)]
+    quant = [8 + random.gauss(0, 1) for _ in range(hours)]
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=t, y=macro, name="MACRO",
+        mode="lines", line=dict(color="#ffb867", width=1.5),
+        fill="tozeroy", fillcolor="rgba(255,184,103,0.08)",
+    ))
+    fig.add_trace(go.Scatter(
+        x=t, y=micro, name="MICRO",
+        mode="lines", line=dict(color="#6eaacf", width=1.2),
+        fill="tozeroy", fillcolor="rgba(110,170,207,0.06)",
+    ))
+    fig.add_trace(go.Scatter(
+        x=t, y=quant, name="QUANT",
+        mode="lines", line=dict(color="#6ecf8a", width=1.0),
+        fill="tozeroy", fillcolor="rgba(110,207,138,0.05)",
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, t=28, b=0),
+        height=180,
+        title=dict(
+            text="GTI Component Breakdown",
+            font=dict(size=10, color="#d8dae8", family="JetBrains Mono"),
+            x=0,
+        ),
+        xaxis=dict(showgrid=False, tickfont=dict(size=8, color="#4a5060"),
+                   color="#4a5060", showticklabels=True),
+        yaxis=dict(showgrid=True, gridcolor="#1f2129", tickfont=dict(size=8, color="#4a5060"),
+                   zeroline=False),
+        legend=dict(
+            orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+            font=dict(size=8, color="#8a9baa"),
+            bgcolor="rgba(0,0,0,0)",
+        ),
+        showlegend=True,
+    )
+    return fig
 
 
 def render():
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.markdown("## AI SIGNALS")
-        st.caption("Machine Learning Predictions & Algorithmic Intelligence")
-    with col2:
-        live_indicator("ML MODELS ACTIVE")
-    with col3:
-        st.markdown(f'<div class="data-md">{datetime.now().strftime("%H:%M:%S")}</div>', unsafe_allow_html=True)
-    st.divider()
-
-    # Model confidence
-    st.markdown("### MODEL CONFIDENCE SCORES")
-    col1, col2, col3, col4 = st.columns(4)
-    for col, (name, score, status) in zip(
-        [col1, col2, col3, col4],
-        [("Price Direction",    "87.4%", StatusLevel.POSITIVE),
-         ("Volatility Pred",    "72.1%", StatusLevel.POSITIVE),
-         ("Sentiment Analysis", "64.8%", StatusLevel.NEUTRAL),
-         ("Anomaly Detection",  "91.3%", StatusLevel.POSITIVE)]
-    ):
-        with col:
-            hero_stat(score, name, accent=(status == StatusLevel.POSITIVE))
-
-    divider_section()
-
-    # Active trading signals
-    st.markdown("### ACTIVE TRADING SIGNALS")
-    signals = [
-        ("SIG-001", "NVDA", "BUY",  "94.2%", "$892.50", "$945.00", "$865.00", "Breakout above 200-DMA with bullish divergence",     StatusLevel.POSITIVE),
-        ("SIG-002", "SPY",  "HOLD", "72.8%", "$425.30", "$435.00", "$420.00", "Consolidation pattern — await breakout confirmation", StatusLevel.NEUTRAL),
-        ("SIG-003", "QQQ",  "SELL", "81.5%", "$356.80", "$340.00", "$365.00", "Overbought conditions with negative divergence",      StatusLevel.NEGATIVE),
-        ("SIG-004", "GLD",  "BUY",  "77.3%", "$187.25", "$198.00", "$182.50", "Safe-haven accumulation amid volatility",             StatusLevel.POSITIVE),
-    ]
-    for sig_id, asset, sig_type, conf, entry, target, stop, reason, strength in signals:
-        c1, c2, c3, c4, c5 = st.columns([0.8, 1, 1.2, 1.5, 2])
-        with c1:
-            st.markdown(f"<span class='label-md'>{sig_id}</span>", unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"**{asset}**")
-        with c3:
-            color = "text-positive" if sig_type == "BUY" else "text-negative" if sig_type == "SELL" else "text-secondary"
-            st.markdown(f"<span class='{color}'>{sig_type}</span>", unsafe_allow_html=True)
-        with c4:
-            st.markdown(f"<span class='{strength.value}'>{conf}</span>", unsafe_allow_html=True)
-        with c5:
-            st.caption(reason)
-        ca, cb, cc = st.columns(3)
-        with ca:
-            st.caption(f"Entry: {entry}")
-        with cb:
-            st.caption(f"Target: {target}")
-        with cc:
-            st.caption(f"Stop: {stop}")
-        st.divider()
-
-    divider_section()
-
-    # Forward predictions
-    st.markdown("### FORWARD PREDICTIONS (24-HOUR)")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        data_card("S&P 500", [
-            DataPoint("+0.8%", "Expected Move", StatusLevel.POSITIVE),
-            DataPoint("8,315", "Fair Value",    StatusLevel.NEUTRAL),
-            DataPoint("68%",   "Probability",   StatusLevel.POSITIVE),
-        ], footer="Based on 50M historical patterns")
-    with col2:
-        data_card("VIX INDEX", [
-            DataPoint("-1.2%", "Expected Move", StatusLevel.POSITIVE),
-            DataPoint("12.2",  "Fair Value",    StatusLevel.POSITIVE),
-            DataPoint("73%",   "Probability",   StatusLevel.POSITIVE),
-        ], footer="Volatility mean-reversion signal")
-    with col3:
-        data_card("USD INDEX", [
-            DataPoint("+0.3%", "Expected Move", StatusLevel.NEUTRAL),
-            DataPoint("104.5", "Fair Value",    StatusLevel.NEUTRAL),
-            DataPoint("52%",   "Probability",   StatusLevel.NEUTRAL),
-        ], footer="Range-bound consolidation expected")
-
-    divider_section()
-
-    # Anomaly detection
-    st.markdown("### ANOMALY ALERTS")
-    anomalies = [
-        (StatusLevel.NEGATIVE, "Large Block Trade Detected",  "10M shares of MSFT accumulating over 90 minutes",     "96%", "Monitor for institutional buying"),
-        (StatusLevel.PRIMARY,  "Unusual Options Activity",    "Call options on SPY with 2-week expiration spiking",   "78%", "Check implied volatility changes"),
-        (StatusLevel.NEGATIVE, "Liquidity Withdrawal",        "Bid-ask spreads widening on corporate bonds",          "82%", "Risk-off sentiment emerging"),
-    ]
-    for severity, pattern, details, conf, action in anomalies:
-        c1, c2, c3 = st.columns([0.1, 4, 1])
-        with c1:
-            st.markdown(f"<span class='{severity.value}'>●</span>", unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"**{pattern}**")
-            st.caption(details)
-            st.caption(f"<span class='text-secondary'>Confidence: {conf} — {action}</span>", unsafe_allow_html=True)
-        with c3:
-            st.button("Act", key=f"anomaly_{pattern[:20]}")
-        st.divider()
-
-    divider_section()
-
-    # Model performance
-    st.markdown("### MODEL PERFORMANCE (30-DAY)")
-    col1, col2, col3, col4 = st.columns(4)
-    for col, (label, value, status) in zip(
-        [col1, col2, col3, col4],
-        [("Win Rate",     "67.3%", StatusLevel.POSITIVE),
-         ("Avg Return",   "+2.45%", StatusLevel.POSITIVE),
-         ("Max Drawdown", "-3.2%",  StatusLevel.NEUTRAL),
-         ("Sharpe Ratio", "1.87",   StatusLevel.POSITIVE)]
-    ):
-        with col:
-            hero_stat(value, label, accent=(status == StatusLevel.POSITIVE))
-
-    divider_section()
-
-    # Correlation matrix
-    st.markdown("### CORRELATION ANALYSIS")
+    # ── Page header ───────────────────────────────────────────────────────────
     st.markdown("""
-| Asset | S&P 500 | QQQ | VIX | USD | Gold |
-|-------|---------|-----|-----|-----|------|
-| **S&P 500** | 1.00 | 0.92 | -0.78 | -0.45 | 0.12 |
-| **QQQ** | 0.92 | 1.00 | -0.82 | -0.52 | 0.08 |
-| **VIX** | -0.78 | -0.82 | 1.00 | 0.34 | -0.08 |
-| **USD** | -0.45 | -0.52 | 0.34 | 1.00 | -0.68 |
-| **Gold** | 0.12 | 0.08 | -0.08 | -0.68 | 1.00 |
-""")
-    st.caption("Strong negative correlation between stocks and VIX indicates flight-to-safety potential")
+<div class="system-status-row">
+  <span class="system-status-label">GTI Scores: 55</span>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+    # ── 3-column layout: left | center | right ────────────────────────────────
+    left, center, right = st.columns([1.0, 2.4, 1.2])
 
-    # Sentiment analysis
-    st.markdown("### SENTIMENT ANALYSIS")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### News Sentiment")
-        for source, sentiment, score in [("Financial Times", "Bullish", "+0.72"), ("Bloomberg", "Neutral", "+0.18"), ("Reuters", "Bullish", "+0.64"), ("CNBC", "Very Bullish", "+0.88")]:
-            c1, c2, c3 = st.columns([2, 1.5, 1])
-            with c1:
-                st.markdown(f"**{source}**")
-            with c2:
-                st.caption(sentiment)
-            with c3:
-                s = StatusLevel.POSITIVE if "+" in score else StatusLevel.NEGATIVE
-                st.markdown(f"<span class='{s.value}'>{score}</span>", unsafe_allow_html=True)
-            st.divider()
-    with col2:
-        st.markdown("#### Social Sentiment")
-        for platform, trend in [("Twitter Mentions", "+145%"), ("Reddit Communities", "+89%"), ("StockTwits", "+234%"), ("Fear & Greed Index", "75 (Greed)")]:
-            c1, c2 = st.columns([2, 1])
-            with c1:
-                st.markdown(f"**{platform}**")
-            with c2:
-                st.markdown(f"<span class='text-positive'>{trend}</span>", unsafe_allow_html=True)
-            st.divider()
+    # ────────────────── LEFT: Model output + GTI features ───────────────────
+    with left:
+        st.markdown('<div class="section-header">▸ MODEL OUTPUT</div>', unsafe_allow_html=True)
+
+        # Model output panel — volatility
+        st.markdown("""
+<div class="model-output-panel">
+  <div class="model-output-title">PREDICTED VOLATILITY</div>
+  <div class="model-volatility">14.82<span style="font-size:16px;color:#8a9baa;">%</span></div>
+  <div class="model-vol-label">▼VARIABLE</div>
+  <div class="model-direction">MARKET DIRECTION: <span style="color:#ffb867;">BULLISH</span> <span style="font-size:10px;color:#8a9baa;">30% CONF.</span></div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown('<div class="section-header" style="margin-top:10px;">GTI INPUT FEATURES</div>', unsafe_allow_html=True)
+
+        features = [
+            ("MACRO_SATELLITE", "#ff8c42", 42),
+            ("GEOPOLITICAL_RISK", "#ffb867", 28),
+            ("SENTIMENT_AGGREGATE", "#8a9baa", 15),
+            ("LIQUIDITY_DEPTH", "#6eaacf", 18),
+            ("SOCIAL_VOLUME", "#6ecf8a", 60),
+        ]
+        for name, color, pct in features:
+            st.markdown(f"""
+<div class="feature-row">
+  <span class="feature-name">{name}</span>
+  <div class="feature-bar-wrap">
+    <div class="feature-bar-fill" style="width:{pct}%;background:{color};"></div>
+  </div>
+  <span class="feature-value" style="color:{color};">{pct}%</span>
+</div>""", unsafe_allow_html=True)
+
+        st.markdown("""
+<div class="caption-mono" style="margin-top:6px;">
+  LAST_UPDATED: 2026-08-16 19:33:09 UTC<br/>
+  MODEL: LGBM_V2 | FEATURE_DIM: 12
+</div>
+""", unsafe_allow_html=True)
+
+    # ────────────────── CENTER: Breakdown chart + prediction history ─────────
+    with center:
+        # GTI breakdown chart
+        st.plotly_chart(_gti_breakdown_chart(), use_container_width=True, config={"displayModeBar": False})
+
+        st.markdown('<div class="caption-mono" style="margin-top:-8px;margin-bottom:8px;">TIME-SERIES ATTRIBUTION ANALYSIS (CMA)</div>', unsafe_allow_html=True)
+
+        # Prediction history
+        st.markdown('<div class="section-header">PREDICTION HISTORY (SIMULATION MODE)</div>', unsafe_allow_html=True)
+
+        st.markdown("""
+<div class="history-empty">
+  <div class="history-empty-icon">📊</div>
+  <div class="history-empty-title">HISTORY LOG EMPTY</div>
+  <div class="history-empty-sub">INITIATE TACTICAL SCAN TO POPULATE<br/>PREDICTION DATASET.</div>
+  <div class="history-empty-action">▶ INITIATE_SCAN</div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
+
+        # Sentiment footer
+        st.markdown("""
+<div class="section-header">SENTIMENT MOMENTUM</div>
+<div class="sentiment-bar-row">
+  <span class="sentiment-bar-label">SENTIMENT SCORE</span>
+  <div class="sentiment-bar-track">
+    <div class="sent-pos" style="width:22%;height:100%;"></div>
+    <div class="sent-neu" style="width:56%;height:100%;"></div>
+    <div class="sent-neg" style="width:22%;height:100%;"></div>
+  </div>
+  <span class="sentiment-stat">22% POSITIVE &nbsp;|&nbsp; 56% NEUTRAL &nbsp;|&nbsp; 22% NEGATIVE</span>
+</div>
+""", unsafe_allow_html=True)
+
+    # ────────────────── RIGHT: Full impact analysis ──────────────────────────
+    with right:
+        st.markdown('<div class="section-header">FULL IMPACT ANALYSIS</div>', unsafe_allow_html=True)
+
+        # Bullish assets
+        st.markdown("""
+<div class="impact-category">
+  <div class="impact-category-label">
+    ASSET CATEGORY:
+    <span class="impact-badge-bullish">BULLISH</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">XAU/USD</span>
+    <span class="impact-arrow impact-arrow-up">↑</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">USD/JPY</span>
+    <span class="impact-arrow impact-arrow-up">↑</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">BTC/COIN</span>
+    <span class="impact-arrow impact-arrow-up">↑</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+        # Neutral assets
+        st.markdown("""
+<div class="impact-category">
+  <div class="impact-category-label">
+    ASSET CATEGORY:
+    <span class="impact-badge-neutral">NEUTRAL</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">EUR/USD</span>
+    <span class="impact-arrow impact-arrow-neut">→</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">BRENT_OEL</span>
+    <span class="impact-arrow impact-arrow-neut">→</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+        # Bearish assets
+        st.markdown("""
+<div class="impact-category">
+  <div class="impact-category-label">
+    ASSET CATEGORY:
+    <span class="impact-badge-bearish">BEARISH</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">SPX_500</span>
+    <span class="impact-arrow impact-arrow-down">↓</span>
+  </div>
+  <div class="impact-asset-row">
+    <span class="impact-asset-name">NAS_100</span>
+    <span class="impact-arrow impact-arrow-down">↓</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("""
+<div style="margin-top:12px;">
+  <div class="caption-mono">SYSTEM_STABLE &nbsp;|&nbsp; ENCRYPTION_AES256 &nbsp;|&nbsp; LATENCY_12MS</div>
+</div>
+""", unsafe_allow_html=True)

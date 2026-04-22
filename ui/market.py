@@ -1,179 +1,195 @@
-"""Market Intelligence - Deep equity analysis and strategic positioning"""
+"""Market - GEOMARKET INTELLIGENCE"""
 
 import streamlit as st
-from datetime import datetime
+from datetime import datetime, timedelta
+import plotly.graph_objects as go
+import numpy as np
+import random
 
-from components import (
-    data_card, live_indicator, status_badge, divider_section,
-    alert_box, hero_stat,
-    StatusLevel, DataPoint
-)
+
+def _spy_candlestick() -> go.Figure:
+    """S&P 500 candlestick chart — simulated OHLCV data."""
+    random.seed(99)
+    bars = 40
+    dates = [datetime.now() - timedelta(hours=bars - i) for i in range(bars)]
+    close = [508.0]
+    for _ in range(bars - 1):
+        close.append(close[-1] * (1 + random.gauss(0.0002, 0.003)))
+    opens, highs, lows, closes = [], [], [], []
+    for c in close:
+        o = c * (1 + random.gauss(0, 0.001))
+        h = max(o, c) * (1 + abs(random.gauss(0, 0.001)))
+        l = min(o, c) * (1 - abs(random.gauss(0, 0.001)))
+        opens.append(o); highs.append(h); lows.append(l); closes.append(c)
+
+    colors = ["#6ecf8a" if closes[i] >= opens[i] else "#ff6b6b" for i in range(bars)]
+    fig = go.Figure()
+    fig.add_trace(go.Candlestick(
+        x=dates,
+        open=opens, high=highs, low=lows, close=closes,
+        increasing=dict(line=dict(color="#6ecf8a", width=1), fillcolor="#6ecf8a"),
+        decreasing=dict(line=dict(color="#ff6b6b", width=1), fillcolor="#ff6b6b"),
+        showlegend=False,
+        whiskerwidth=0.3,
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="#0a0b0f",
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=240,
+        xaxis=dict(
+            showgrid=False, rangeslider=dict(visible=False),
+            tickfont=dict(size=8, color="#4a5060"), color="#4a5060",
+        ),
+        yaxis=dict(
+            showgrid=True, gridcolor="#1f2129",
+            tickfont=dict(size=8, color="#4a5060"),
+            tickformat=".2f", zeroline=False,
+            side="right",
+        ),
+        xaxis_rangeslider_visible=False,
+    )
+    return fig
+
+
+def _vix_surface() -> go.Figure:
+    """VIX volatility surface — heatmap-style."""
+    random.seed(11)
+    x = np.linspace(1, 30, 15)
+    y = np.linspace(10, 25, 10)
+    z = [[14.9 + random.gauss(0, 1.5) + 0.05 * xi - 0.1 * yi for xi in x] for yi in y]
+    fig = go.Figure(go.Heatmap(
+        z=z,
+        colorscale=[
+            [0.0, "#0a0b0f"],
+            [0.3, "#1a2530"],
+            [0.6, "#4a3000"],
+            [0.8, "#8b5a00"],
+            [1.0, "#ffb867"],
+        ],
+        showscale=False,
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=120,
+        xaxis=dict(showticklabels=False, showgrid=False),
+        yaxis=dict(showticklabels=False, showgrid=False),
+    )
+    return fig
+
+
+def _gld_liquidity() -> go.Figure:
+    """GLD liquidity map — bar chart style."""
+    random.seed(22)
+    hours = list(range(1, 13))
+    vols = [random.randint(40, 180) for _ in hours]
+    colors = ["#ffb867" if v > 120 else "#4a6080" for v in vols]
+    fig = go.Figure(go.Bar(
+        x=hours, y=vols,
+        marker_color=colors,
+        marker_line_width=0,
+    ))
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=120,
+        xaxis=dict(showticklabels=False, showgrid=False),
+        yaxis=dict(showticklabels=False, showgrid=False, zeroline=False),
+        bargap=0.15,
+    )
+    return fig
 
 
 def render():
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.markdown("## MARKET INTELLIGENCE")
-        st.caption("Deep Equity Analysis & Strategic Positioning")
-    with col2:
-        live_indicator("MARKET FEED")
-    with col3:
-        st.markdown(f'<div class="data-md">{datetime.now().strftime("%H:%M:%S")}</div>', unsafe_allow_html=True)
-    st.divider()
+    # ── Page header ───────────────────────────────────────────────────────────
+    now_str = datetime.now().strftime("%H:%M:%S")
 
-    # Market overview
-    st.markdown("### MARKET OVERVIEW")
-    col1, col2, col3, col4 = st.columns(4)
-    for col, (label, value, change, status) in zip(
-        [col1, col2, col3, col4],
-        [("S&P 500", "8,247", "+2.3%", StatusLevel.POSITIVE),
-         ("NASDAQ",  "16,542", "+4.1%", StatusLevel.POSITIVE),
-         ("DOW 30",  "42,156", "+1.8%", StatusLevel.POSITIVE),
-         ("VIX",     "12.8",  "-8.2%", StatusLevel.POSITIVE)]
-    ):
-        with col:
-            hero_stat(value, label, accent=True)
-            st.markdown(f"<span class='{status.value}'>{change}</span>", unsafe_allow_html=True)
+    # ── 3 hero metric cards ───────────────────────────────────────────────────
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.markdown("""
+<div class="market-hero-card">
+  <div class="market-hero-corner">NYSE Source: 96</div>
+  <div class="market-hero-ticker">EQUITY_INDEX / SPY</div>
+  <div class="market-hero-change market-hero-change-pos">▲ +1.245</div>
+  <div class="market-hero-value">508.42</div>
+  <div class="market-hero-sub">VOL_3090: 42.1M</div>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+    with c2:
+        st.markdown("""
+<div class="market-hero-card">
+  <div class="market-hero-ticker">VOLATILITY / VIX</div>
+  <div class="market-hero-change market-hero-change-pos">▲ +4.826</div>
+  <div class="market-hero-value">14.92</div>
+  <div class="market-hero-sub">FEAR_INDEX_ACTIVE</div>
+</div>
+""", unsafe_allow_html=True)
 
-    # Sector rankings
-    st.markdown("### SECTOR PERFORMANCE RANKINGS")
-    sectors = [
-        (1,  "Technology",       "+8.24%", StatusLevel.POSITIVE, "28%", "STRONG"),
-        (2,  "Healthcare",       "+4.10%", StatusLevel.POSITIVE, "13%", "SOLID"),
-        (3,  "Financials",       "+2.85%", StatusLevel.POSITIVE, "14%", "NEUTRAL"),
-        (4,  "Consumer Disc",    "+1.92%", StatusLevel.POSITIVE, "10%", "WEAK"),
-        (5,  "Industrials",      "+1.23%", StatusLevel.POSITIVE, "9%",  "WEAK"),
-        (6,  "Utilities",        "+0.84%", StatusLevel.POSITIVE, "3%",  "FLAT"),
-        (7,  "Materials",        "-1.02%", StatusLevel.NEGATIVE, "5%",  "DECLINING"),
-        (8,  "Energy",           "-2.34%", StatusLevel.NEGATIVE, "4%",  "DETERIORATING"),
-        (9,  "Consumer Staples", "-0.92%", StatusLevel.NEGATIVE, "7%",  "WEAK"),
-        (10, "Real Estate",      "-3.15%", StatusLevel.NEGATIVE, "3%",  "DECLINING"),
-    ]
-    for rank, name, ret, status, weight, momentum in sectors:
-        c1, c2, c3, c4, c5, c6 = st.columns([0.5, 2, 1.5, 1.5, 1, 1.5])
-        with c1:
-            st.markdown(f"<span class='label-md'>{rank}</span>", unsafe_allow_html=True)
-        with c2:
-            st.markdown(f"**{name}**")
-        with c3:
-            st.markdown(f"<span class='{status.value} data-md'>{ret}</span>", unsafe_allow_html=True)
-        with c4:
-            st.caption(f"Index wgt: {weight}")
-        with c5:
-            mom_status = StatusLevel.POSITIVE if momentum in ("STRONG", "SOLID") else StatusLevel.NEGATIVE if momentum in ("DECLINING", "DETERIORATING") else StatusLevel.NEUTRAL
-            st.markdown(f"<span class='{mom_status.value} data-sm'>{momentum}</span>", unsafe_allow_html=True)
-        with c6:
-            st.button("View", key=f"sector_{name}", use_container_width=True)
-        st.divider()
+    with c3:
+        st.markdown("""
+<div class="market-hero-card">
+  <div class="market-hero-ticker">COMMODITY / GLD</div>
+  <div class="market-hero-change market-hero-change-neg">▼ -0.345</div>
+  <div class="market-hero-value">201.18</div>
+  <div class="market-hero-sub">AU_SPOT_REFERENCE</div>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+    st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
 
-    # Market movers
-    st.markdown("### MARKET MOVERS")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### Top Gainers")
-        for sym, name, change in [("NVDA", "NVIDIA", "+12.8%"), ("MSFT", "Microsoft", "+8.2%"), ("TSLA", "Tesla", "+6.5%"), ("META", "Meta", "+5.3%"), ("AMZN", "Amazon", "+4.1%")]:
-            c1, c2, c3 = st.columns([1, 2, 1.2])
-            with c1:
-                st.markdown(f"<span class='label-md'>{sym}</span>", unsafe_allow_html=True)
-            with c2:
-                st.caption(name)
-            with c3:
-                st.markdown(f"<span class='text-positive data-md'>{change}</span>", unsafe_allow_html=True)
-            st.divider()
-    with col2:
-        st.markdown("#### Top Losers")
-        for sym, name, change in [("XLE", "Energy ETF", "-4.2%"), ("URA", "Uranium ETF", "-3.8%"), ("IYR", "Real Estate ETF", "-3.1%"), ("BDX", "Becton Dickinson", "-2.9%"), ("GD", "General Dynamics", "-2.3%")]:
-            c1, c2, c3 = st.columns([1, 2, 1.2])
-            with c1:
-                st.markdown(f"<span class='label-md'>{sym}</span>", unsafe_allow_html=True)
-            with c2:
-                st.caption(name)
-            with c3:
-                st.markdown(f"<span class='text-negative data-md'>{change}</span>", unsafe_allow_html=True)
-            st.divider()
+    # ── S&P 500 tactical surveillance (full width chart) ──────────────────────
+    st.markdown(f"""
+<div class="chart-panel">
+  <div class="chart-panel-header">
+    <div>
+      <div class="chart-panel-title">S&P 500 Tactical Surveillance</div>
+      <div class="chart-panel-meta">INTERVAL: 48H CANDLESTICK / REFRESH: LIVE</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="interval-btns">
+        <div class="interval-btn interval-btn-active">1H</div>
+        <div class="interval-btn">4H</div>
+        <div class="interval-btn">1D</div>
+      </div>
+      <span class="live-badge">LIVE</span>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    divider_section()
+    spy_chart = _spy_candlestick()
+    st.plotly_chart(spy_chart, use_container_width=True, config={"displayModeBar": False})
 
-    # Earnings calendar
-    st.markdown("### EARNINGS INTELLIGENCE")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("#### This Week")
-        for date, company, time, est, last in [("Today", "NVIDIA", "Post-Market", "0.64", "0.58"), ("Tomorrow", "Meta", "Post-Market", "4.85", "4.12"), ("Wed", "Tesla", "Post-Market", "0.72", "0.68"), ("Thu", "Microsoft", "Post-Market", "2.94", "2.45")]:
-            c1, c2, c3 = st.columns([1.5, 2, 1.5])
-            with c1:
-                st.markdown(f"**{company}**")
-            with c2:
-                st.caption(f"EPS Est: {est} vs {last}")
-            with c3:
-                st.caption(time)
-            st.divider()
-    with col2:
-        st.markdown("#### Market Impact Analysis")
-        alert_box("Earnings season in full swing. Tech earnings likely to drive market direction. Watch for guidance changes and margin pressures.", StatusLevel.PRIMARY)
+    st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
 
-    divider_section()
+    # ── Bottom: VIX surface + GLD liquidity (side by side) ───────────────────
+    v_col, g_col = st.columns(2)
 
-    # Valuation metrics
-    st.markdown("### VALUATION METRICS")
-    col1, col2, col3, col4 = st.columns(4)
-    for col, (label, value, desc, status) in zip(
-        [col1, col2, col3, col4],
-        [("S&P 500 P/E",    "22.3x", "Elevated", StatusLevel.NEUTRAL),
-         ("Forward P/E",    "19.8x", "Fair",      StatusLevel.POSITIVE),
-         ("Dividend Yield", "1.68%", "Rising",    StatusLevel.POSITIVE),
-         ("PEG Ratio",      "1.42x", "Fair",      StatusLevel.NEUTRAL)]
-    ):
-        with col:
-            st.markdown(f"<span class='label-md'>{label}</span>", unsafe_allow_html=True)
-            st.markdown(f"<span class='data-lg {status.value}'>{value}</span>", unsafe_allow_html=True)
-            st.caption(desc)
+    with v_col:
+        st.markdown("""
+<div class="chart-panel">
+  <div class="chart-panel-header">
+    <div class="chart-panel-title">● VIX_VOLATILITY_SURFACE</div>
+    <div class="chart-panel-meta">REF_X1_AREA</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+        st.plotly_chart(_vix_surface(), use_container_width=True, config={"displayModeBar": False})
+        st.markdown('<div class="chart-panel-ref">{ AREA_PLOT_LOADED }</div>', unsafe_allow_html=True)
 
-    divider_section()
-
-    # Market breadth
-    st.markdown("### MARKET BREADTH")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        data_card("NYSE BREADTH", [
-            DataPoint("2,847", "Advancing", StatusLevel.POSITIVE),
-            DataPoint("892",   "Declining", StatusLevel.NEGATIVE),
-            DataPoint("3.2:1", "Ratio",     StatusLevel.POSITIVE),
-        ])
-    with col2:
-        data_card("NASDAQ BREADTH", [
-            DataPoint("4,128", "Advancing", StatusLevel.POSITIVE),
-            DataPoint("1,245", "Declining", StatusLevel.NEGATIVE),
-            DataPoint("3.3:1", "Ratio",     StatusLevel.POSITIVE),
-        ])
-    with col3:
-        data_card("S&P 500 BREADTH", [
-            DataPoint("438",   "Above 50-DMA", StatusLevel.POSITIVE),
-            DataPoint("62",    "Below 50-DMA", StatusLevel.NEGATIVE),
-            DataPoint("87.6%", "Bullish %",    StatusLevel.POSITIVE),
-        ])
-
-    divider_section()
-
-    # Technical signals
-    st.markdown("### TECHNICAL ANALYSIS SIGNALS")
-    signals = [
-        ("50-Day Moving Average",  StatusLevel.POSITIVE, "Price above — Bullish"),
-        ("200-Day Moving Average", StatusLevel.POSITIVE, "Price above — Strong Uptrend"),
-        ("RSI (14)",               StatusLevel.NEUTRAL,  "55.2 — Neither Overbought nor Oversold"),
-        ("MACD",                   StatusLevel.POSITIVE, "Positive Histogram — Bullish Momentum"),
-        ("Bollinger Bands",        StatusLevel.NEUTRAL,  "Mid-band — Consolidating"),
-    ]
-    for name, status, signal in signals:
-        c1, c2, c3 = st.columns([2, 1.5, 2])
-        with c1:
-            st.markdown(f"**{name}**")
-        with c2:
-            st.markdown(f"<span class='{status.value} label-md'>●</span>", unsafe_allow_html=True)
-        with c3:
-            st.caption(signal)
-        st.divider()
+    with g_col:
+        st.markdown("""
+<div class="chart-panel">
+  <div class="chart-panel-header">
+    <div class="chart-panel-title">● GLD_LIQUIDITY_MAP</div>
+    <div class="chart-panel-meta">REF_X2_AREA</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+        st.plotly_chart(_gld_liquidity(), use_container_width=True, config={"displayModeBar": False})
+        st.markdown('<div class="chart-panel-ref">{ AREA_PLOT_LOADED }</div>', unsafe_allow_html=True)

@@ -1,97 +1,110 @@
-"""Sovereign Intelligence Framework - Main Dashboard"""
+"""GeoMarket Intelligence - Sovereign Intelligence Framework"""
 
 import streamlit as st
 from datetime import datetime
 import os
 
-from ui import tactical, earth_pulse, market, ai_signals, geo_map, trading_guide
+from ui import earth_pulse, geo_map, ai_signals, market
 
 st.set_page_config(
-    page_title="Sovereign Intelligence | Tactical Archive",
-    page_icon="🎯",
+    page_title="GeoMarket Intelligence",
+    page_icon="🌐",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed",
 )
 
 with open(os.path.join(os.path.dirname(__file__), "styles.css")) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-VIEWS = {
-    "🎯 Tactical Archive":    tactical,
-    "🌍 Earth Pulse":         earth_pulse,
-    "📈 Market Intelligence": market,
-    "🤖 AI Signals":          ai_signals,
-    "🌐 Geo Map":             geo_map,
-    "📖 Trading Guide":       trading_guide,
-}
+TABS = ["Earth Pulse", "Geo Map", "AI Signals", "Market"]
+TAB_KEYS = {t: t.lower().replace(" ", "_") for t in TABS}
 
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "Earth Pulse"
 
-def render_sidebar() -> str:
-    with st.sidebar:
-        st.markdown("## COMMAND CENTER")
-        st.markdown("---")
+# ── Top navbar ────────────────────────────────────────────────────────────────
+gti_score = 26.5
+now_str = datetime.now().strftime("%H:%M:%S")
 
-        selected = st.radio(
-            "Intelligence Module",
-            list(VIEWS.keys()),
-            index=0,
-            label_visibility="collapsed"
-        )
+tab_links_html = ""
+for tab in TABS:
+    active_cls = "nav-tab-active" if tab == st.session_state.active_tab else ""
+    tab_links_html += f'<a class="nav-tab {active_cls}" href="?tab={tab}">{tab}</a>'
 
-        st.markdown("---")
-        st.markdown("### MARKET STATUS")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("S&P 500", "8,247", "+2.3%", delta_color="normal")
-        with col2:
-            st.metric("VIX", "12.8", "-8.2%", delta_color="inverse")
+st.markdown(f"""
+<div class="topnav">
+  <div class="topnav-left">
+    <span class="topnav-logo">GEOMARKET INTELLIGENCE</span>
+    <div class="topnav-tabs">{tab_links_html}</div>
+  </div>
+  <div class="topnav-right">
+    <span class="topnav-search">⌕ search...</span>
+    <span class="topnav-icon">🔔</span>
+    <span class="topnav-icon">⚙</span>
+    <span class="gti-badge">GTI Score: {gti_score:.0f}</span>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.markdown("### SYSTEM STATUS")
-        st.markdown('<div class="live-indicator">SYSTEMS ONLINE</div>', unsafe_allow_html=True)
-        st.caption("Data: Real-time • Models: Active • Connections: Secure")
+# ── Handle tab switching via query param ──────────────────────────────────────
+qp = st.query_params.get("tab", st.session_state.active_tab)
+if qp in TABS:
+    st.session_state.active_tab = qp
 
-        st.markdown("---")
-        with st.expander("⚙️ Settings"):
-            st.select_slider("Update Frequency", options=["1 Min", "5 Min", "15 Min", "1 Hour"], value="5 Min")
-            st.selectbox("Theme", ["Tactical (Dark)", "Archive (Darker)", "Minimal"])
-            st.checkbox("Enable Alerts", value=True)
+# ── Page layout: left sidebar + main content ──────────────────────────────────
+sidebar_col, main_col = st.columns([1, 6])
 
-        st.markdown("---")
-        st.caption(f"Last Update: {datetime.now().strftime('%H:%M:%S')}")
+with sidebar_col:
+    st.markdown("""
+<div class="left-sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-meta">ARCHIVE_01</div>
+    <div class="sidebar-meta">OPERATOR_SESSION_ACTIVE</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-nav-item sidebar-nav-active">
+      <span class="sidebar-nav-icon">◈</span> INTELLIGENCE
+    </div>
+    <div class="sidebar-nav-item">
+      <span class="sidebar-nav-icon">◉</span> Archive
+    </div>
+    <div class="sidebar-nav-item">
+      <span class="sidebar-nav-icon">◎</span> Surveillance
+    </div>
+    <div class="sidebar-nav-item">
+      <span class="sidebar-nav-icon">◆</span> Tactical
+    </div>
+  </nav>
+  <div class="sidebar-spacer"></div>
+  <div class="sidebar-bottom">
+    <div class="sidebar-nav-item">
+      <span class="sidebar-nav-icon">⚙</span> Settings
+    </div>
+    <button class="scan-btn">INITIATE SCAN</button>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-    return selected
+with main_col:
+    active = st.session_state.active_tab
+    if active == "Earth Pulse":
+        earth_pulse.render()
+    elif active == "Geo Map":
+        geo_map.render()
+    elif active == "AI Signals":
+        ai_signals.render()
+    elif active == "Market":
+        market.render()
 
-
-def render_header():
-    col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        st.markdown("## SOVEREIGN INTELLIGENCE FRAMEWORK")
-        st.caption("Tactical Archive • Real-Time Market Intelligence")
-    with col2:
-        st.markdown('<div class="live-indicator">LIVE FEED</div>', unsafe_allow_html=True)
-    with col3:
-        st.markdown(f'<div class="data-md">{datetime.now().strftime("%H:%M:%S UTC")}</div>', unsafe_allow_html=True)
-    st.divider()
-
-
-def render_footer():
-    st.divider()
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.caption("**Data Sources:** Reuters | BBC | GDELT | NewsAPI")
-    with col2:
-        st.caption("**Models:** LightGBM v2 | VADER Sentiment | GTI Index")
-    with col3:
-        st.caption("**Storage:** SQLite (news · market · gti · predictions)")
-
-
-def main():
-    selected = render_sidebar()
-    render_header()
-    VIEWS[selected].render()
-    render_footer()
-
-
-if __name__ == "__main__":
-    main()
+# ── Footer status bar ─────────────────────────────────────────────────────────
+st.markdown(f"""
+<div class="status-bar">
+  <span class="status-bar-left">Sovereign Intelligence Framework v4.0.2</span>
+  <span class="status-bar-center">
+    <span class="status-dot-green">●</span> SYSTEM_STABLE &nbsp;
+    <span class="status-item">ENCRYPTION_AES256</span> &nbsp;
+    <span class="status-item">LATENCY_12MS</span>
+  </span>
+  <span class="status-bar-right">{now_str} UTC</span>
+</div>
+""", unsafe_allow_html=True)
