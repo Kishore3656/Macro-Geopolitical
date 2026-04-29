@@ -1,102 +1,86 @@
-"""Geo Map - GEOMARKET INTELLIGENCE"""
+"""Geo Map - Exact Stitch UI design implementation."""
 
 import streamlit as st
-from datetime import datetime
 import plotly.graph_objects as go
-import numpy as np
-
-
-def _make_bar_html(pct: float, css_class: str = "") -> str:
-    return f"""
-<div class="signal-bar-wrap">
-  <div class="signal-bar-fill {css_class}" style="width:{min(pct,100):.1f}%;"></div>
-</div>"""
+from api.client import get_client
 
 
 def render():
-    # ── Page header ───────────────────────────────────────────────────────────
+    client = get_client()
+    conflicts_data = client.get_conflicts(limit=15)
+    bilateral_data = client.get_bilateral_relations(limit=5)
+    events_data = client.get_recent_events(event_type="all", limit=50)
+
+    conflicts_list = conflicts_data.get("data", [])
+    bilateral_list = bilateral_data.get("data", [])
+    events_list = events_data.get("data", [])
+
+    # ── Page title ───────────────────────────────────────────────────────────
     st.markdown("""
-<div class="system-status-row">
-  <span class="system-status-label">SYSTEM_STATUS: GTI_INDEX</span>
+<div style="margin-bottom:20px;">
+  <h2 style="font-size:32px;margin:0;color:#ffffff;font-family:'Courier New';">GEO MAP</h2>
+  <p style="font-size:11px;color:#8a9baa;margin:4px 0;">GEOGRAPHIC_INTELLIGENCE_FEED</p>
 </div>
-<div class="page-title-row">
-  <span class="page-title">GEO MAP</span>
-</div>
-<div class="page-subtitle">GEOGRAPHIC INTELLIGENCE FEED</div>
 """, unsafe_allow_html=True)
 
-    # ── 3-column layout: left panel | map | right panel ──────────────────────
-    left, center, right = st.columns([1.1, 2.5, 1.3])
+    # ── 3-column layout ───────────────────────────────────────────────────────
+    left, center, right = st.columns([1.0, 2.2, 1.2])
 
-    # ────────────────── LEFT PANEL ───────────────────────────────────────────
+    # ────────────────── LEFT COLUMN ───────────────────────────────────────────
     with left:
         # Map legend
-        st.markdown('<div class="map-legend">', unsafe_allow_html=True)
-        st.markdown('<div class="map-legend-title">MAP LEGEND</div>', unsafe_allow_html=True)
         st.markdown("""
-<div class="map-legend-item">
-  <div class="legend-dot legend-dot-extreme"></div> Extreme Conflict
-</div>
-<div class="map-legend-item">
-  <div class="legend-dot legend-dot-elevated"></div> Elevated Tension
-</div>
-<div class="map-legend-item">
-  <div class="legend-dot legend-dot-stable"></div> Stable Region
+<div style="margin-bottom:16px;">
+  <div style="font-size:10px;color:#8a9baa;font-weight:bold;margin-bottom:8px;">MAP LEGEND</div>
+  <div style="font-size:9px;color:#8a9baa;">
+    <div style="margin:4px 0;"><span style="display:inline-block;width:10px;height:10px;background:#ff2d2d;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Extreme Conflict</div>
+    <div style="margin:4px 0;"><span style="display:inline-block;width:10px;height:10px;background:#ffb867;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Elevated Tension</div>
+    <div style="margin:4px 0;"><span style="display:inline-block;width:10px;height:10px;background:#4a6080;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>Stable Region</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
 
         # Arc type filter
-        st.markdown('<div class="section-header">ARC TYPE FILTER</div>', unsafe_allow_html=True)
         st.markdown("""
-<div class="filter-group">
-  <div class="filter-chip filter-chip-active">MILITARY</div>
-  <div class="filter-chip">SANCTIONS</div>
-  <div class="filter-chip">TRADE</div>
-</div>
-<div class="filter-group">
-  <div class="filter-chip">DIPLOMATIC</div>
+<div style="margin-bottom:16px;">
+  <div style="font-size:10px;color:#8a9baa;font-weight:bold;margin-bottom:8px;">ARC TYPE FILTER</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <div style="border:1px solid #ffb867;padding:6px 12px;font-size:9px;color:#ffb867;cursor:pointer;">MILITARY</div>
+    <div style="border:1px solid #2e3140;padding:6px 12px;font-size:9px;color:#4a5060;cursor:pointer;">SANCTIONS</div>
+    <div style="border:1px solid #2e3140;padding:6px 12px;font-size:9px;color:#4a5060;cursor:pointer;">TRADE</div>
+    <div style="border:1px solid #2e3140;padding:6px 12px;font-size:9px;color:#4a5060;cursor:pointer;">DIPLOMATIC</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
-        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
-
         # Global statistics
-        st.markdown('<div class="section-header">GLOBAL STATISTICS</div>', unsafe_allow_html=True)
-        stats = [
-            ("Active Conflicts", "42"),
-            ("METRIC", "VALUE"),
-            ("POS_SENTIMENT", "14.2%"),
-            ("NEG_SENTIMENT", "68.0%"),
-            ("NEU_STABILITY", "17.3%"),
-        ]
-        for i, (label, value) in enumerate(stats):
-            if i == 1:
-                st.markdown(f"""
-<div class="global-stat-row" style="opacity:0.5;">
-  <span class="global-stat-label">{label}</span>
-  <span class="global-stat-value">{value}</span>
-</div>""", unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-<div class="global-stat-row">
-  <span class="global-stat-label">{label}</span>
-  <span class="global-stat-value">{value}</span>
-</div>""", unsafe_allow_html=True)
+        st.markdown("""
+<div style="margin-bottom:16px;">
+  <div style="font-size:10px;color:#8a9baa;font-weight:bold;margin-bottom:8px;">GLOBAL STATISTICS</div>
+  <div style="font-size:9px;color:#8a9baa;">
+""", unsafe_allow_html=True)
 
-    # ────────────────── CENTER: MAP ──────────────────────────────────────────
+        active_conflicts = len(conflicts_list)
+        st.markdown(f"""
+    <div style="display:flex;justify-content:space-between;margin:4px 0;"><span>Active Conflicts</span><span style="color:#ffffff;">{active_conflicts}</span></div>
+    <div style="display:flex;justify-content:space-between;margin:4px 0;"><span>POS_SENTIMENT</span><span style="color:#6ecf8a;">14.2%</span></div>
+    <div style="display:flex;justify-content:space-between;margin:4px 0;"><span>NEG_SENTIMENT</span><span style="color:#ff2d2d;">68.0%</span></div>
+    <div style="display:flex;justify-content:space-between;margin:4px 0;"><span>NEU_STABILITY</span><span style="color:#ffb867;">17.3%</span></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+    # ────────────────── CENTER: Map ──────────────────────────────────────────
     with center:
-        # World choropleth with conflict overlays
-        conflict_countries = {
-            "RUS": 9.8, "UKR": 9.5, "SYR": 8.1, "YEM": 7.2,
-            "SDN": 6.5, "MMR": 7.0, "ETH": 6.2, "IRQ": 5.9,
-            "LBY": 5.5, "MLI": 5.8, "AFG": 8.9, "PAK": 5.2,
-            "IRN": 7.1, "SAU": 4.8, "TWN": 6.0,
-        }
-        all_countries = list(conflict_countries.keys())
-        scores = list(conflict_countries.values())
+        # Build conflict country map
+        conflict_countries = {}
+        for conflict in conflicts_list[:15]:
+            cc = conflict.get("country_code", "")
+            if cc:
+                conflict_countries[cc] = min(10, conflict.get("severity_score", 0) * 10)
+
+        all_countries = list(conflict_countries.keys()) if conflict_countries else ["RUS", "UKR", "SYR"]
+        scores = list(conflict_countries.values()) if conflict_countries else [9.8, 9.5, 8.1]
 
         fig = go.Figure()
         fig.add_trace(go.Choropleth(
@@ -104,7 +88,7 @@ def render():
             z=scores,
             locationmode="ISO-3",
             colorscale=[
-                [0.0,  "#0e1017"],
+                [0.0,  "#0a0b0f"],
                 [0.3,  "#1f2535"],
                 [0.55, "#4a2d00"],
                 [0.75, "#8b4800"],
@@ -116,14 +100,6 @@ def render():
             marker_line_color="#2e3140",
             marker_line_width=0.5,
         ))
-
-        # Arc lines for conflict arcs (simplified as annotations)
-        arc_pairs = [
-            ("RUS", "UKR", 55.0, 37.0, 48.5, 32.0),
-            ("IRN", "ISR", 32.0, 53.0, 31.5, 34.8),
-            ("CHN", "TWN", 35.0, 105.0, 23.5, 121.0),
-            ("SAU", "YEM", 23.5, 45.5, 15.5, 44.0),
-        ]
 
         fig.update_layout(
             geo=dict(
@@ -139,26 +115,23 @@ def render():
                 countrycolor="#2e3140",
                 countrywidth=0.5,
                 bgcolor="#0a0b0f",
-                projection_type="natural earth",
             ),
             paper_bgcolor="#0a0b0f",
             plot_bgcolor="#0a0b0f",
             margin=dict(l=0, r=0, t=0, b=0),
-            height=350,
+            height=300,
         )
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-        # Coordinate / focus display
+        # Coordinate display
         st.markdown("""
-<div class="coord-display">
-  <div class="coord-value">55.7558° N, 37.6173° E</div>
-  <div class="coord-label">REGION_CRITICAL_SECTOR</div>
+<div style="text-align:center;font-size:10px;color:#8a9baa;margin-top:8px;padding:8px;border:1px solid #2e3140;">
+  <div style="font-size:12px;color:#ffffff;font-family:'Courier New';">55.7558° N, 37.6173° E</div>
+  <div style="font-size:8px;color:#4a5060;">REGION_CRITICAL_SECTOR</div>
 </div>
 """, unsafe_allow_html=True)
 
-        st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
-
-        # Headline density chart (bar chart)
+        # Headline density chart
         cities = ["Moscow", "Kyiv", "Tehran", "Beijing", "Riyadh", "Kabul", "Damascus", "Aden"]
         density = [42, 38, 29, 25, 18, 22, 31, 14]
 
@@ -170,63 +143,61 @@ def render():
         fig2.update_layout(
             paper_bgcolor="#0a0b0f",
             plot_bgcolor="#13151d",
-            font=dict(family="JetBrains Mono", size=9, color="#8a9baa"),
-            margin=dict(l=0, r=0, t=24, b=0),
-            height=110,
+            font=dict(family="Courier New", size=8, color="#8a9baa"),
+            margin=dict(l=0, r=0, t=20, b=0),
+            height=100,
             title=dict(text="HEADLINE DENSITY BY STRATEGIC CITY", font=dict(size=9, color="#8a9baa"), x=0),
-            xaxis=dict(showgrid=False, tickfont=dict(size=8), color="#4a5060"),
-            yaxis=dict(showgrid=True, gridcolor="#1f2129", tickfont=dict(size=8), color="#4a5060"),
+            xaxis=dict(showgrid=False, tickfont=dict(size=7), color="#4a5060"),
+            yaxis=dict(showgrid=True, gridcolor="#1f2129", tickfont=dict(size=7), color="#4a5060"),
             bargap=0.2,
         )
         st.plotly_chart(fig2, use_container_width=True, config={"displayModeBar": False})
 
-        st.markdown('<div class="caption-mono" style="text-align:right;">LINE_FEED_SYNCED</div>', unsafe_allow_html=True)
-
-    # ────────────────── RIGHT PANEL ──────────────────────────────────────────
+    # ────────────────── RIGHT: Relations ──────────────────────────────────────
     with right:
-        st.markdown('<div class="section-header">TOP RELATION STRESS</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:11px;color:#8a9baa;font-weight:bold;margin-bottom:8px;">TOP RELATION STRESS</div>', unsafe_allow_html=True)
 
-        relations = [
-            ("US — UA",           "KINSHIP_ENGAGEMENT", "OPTIMAL",   None,    9.8,  "ok"),
-            ("CN — TW",           "NAVAL_PROXIMITY",    "ELEVATED",  None,    8.4,  "warn"),
-            ("IR — IL",           "PROXY_SECURITY",     "CRITICAL",  None,    8.1,  "bad"),
-            ("US — CN",           "TRADE_SANCTIONS",    "MONITORED", None,    7.2,  "warn"),
-            ("SA — YE",           "CEASEFIRE_STATUS",   "MONITORED", None,    5.1,  "ok"),
-        ]
+        if bilateral_list:
+            relations_display = bilateral_list[:5]
+        else:
+            relations_display = [
+                {"pair": "US — UA", "stress_level": 9.8},
+                {"pair": "CN — TW", "stress_level": 8.4},
+                {"pair": "IR — IL", "stress_level": 8.1},
+            ]
 
-        for pair, label, status, _, score, tier in relations:
-            score_cls = "relation-score" if tier == "bad" else ("relation-score relation-score-warn" if tier == "warn" else "relation-score relation-score-ok")
+        for rel in relations_display:
+            pair = rel.get("pair", "N/A")
+            stress = rel.get("stress_level", 5.0)
+            status = "CRITICAL" if stress > 8 else "ELEVATED" if stress > 6 else "STABLE"
+            color = "#ff2d2d" if status == "CRITICAL" else "#ffb867" if status == "ELEVATED" else "#6ecf8a"
+
             st.markdown(f"""
-<div class="relation-item">
-  <div>
-    <div class="relation-pair">{pair}</div>
-    <div class="relation-status">{label}<br/>{status}</div>
-  </div>
-  <div class="{score_cls}">{score}</div>
-</div>""", unsafe_allow_html=True)
+<div style="border:1px solid #2e3140;padding:8px;margin-bottom:8px;background:#0a0b0f;">
+  <div style="font-size:10px;color:#ffffff;font-weight:bold;">{pair}</div>
+  <div style="font-size:8px;color:#8a9baa;">BILATERAL_RELATION<br/>{status}</div>
+  <div style="text-align:right;font-size:14px;color:{color};font-weight:bold;margin-top:4px;">{stress:.1f}</div>
+</div>
+""", unsafe_allow_html=True)
 
         st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
 
         # Reliability score
         st.markdown("""
-<div class="reliability-box">
-  <div class="reliability-label">RELIABILITY_SCORE</div>
-  <div class="reliability-value">8.9+</div>
-  <div class="reliability-desc">
-    "Algorithmic synthesis suggests 12% probability<br/>
-    of escalation in South China Sea within 72<br/>
-    hours."
-  </div>
+<div style="border:1px solid #ffb867;padding:12px;text-align:center;">
+  <div style="font-size:10px;color:#8a9baa;margin-bottom:4px;">RELIABILITY_SCORE</div>
+  <div style="font-size:28px;color:#ffffff;font-weight:bold;">8.9+</div>
+  <div style="font-size:8px;color:#4a5060;margin-top:4px;">Algorithmic synthesis suggests escalation probability in high-tension zones within 72 hours.</div>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_html=True)
 
-        st.markdown('<div style="height:8px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:8px;"></div>', unsafe_home="True)
 
         # Status badges
         st.markdown("""
-<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
-  <span class="vol-badge vol-badge-low" style="font-size:8px;">SYSTEM_STABLE</span>
-  <span class="vol-badge vol-badge-low" style="font-size:8px;">ENCRYPTION_AES256</span>
-  <span class="gti-badge" style="font-size:8px;padding:2px 6px;">LATENCY_12MS</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap;">
+  <div style="border:1px solid #4a5060;padding:4px 8px;font-size:8px;color:#8a9baa;border-radius:2px;">SYSTEM_STABLE</div>
+  <div style="border:1px solid #4a5060;padding:4px 8px;font-size:8px;color:#8a9baa;border-radius:2px;">ENCRYPTION_AES256</div>
+  <div style="border:1px solid #ffb867;padding:4px 8px;font-size:8px;color:#ffb867;border-radius:2px;">LATENCY_12MS</div>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_html=True)

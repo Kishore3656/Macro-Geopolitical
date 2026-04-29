@@ -62,6 +62,21 @@ class APIClient:
         """Get sector performance data."""
         return self._get("/api/market/sectors")
 
+    @st.cache_data(ttl=60)
+    def get_conflicts(self, limit: int = 15) -> Dict[str, Any]:
+        """Get active conflicts from GDELT."""
+        return self._get("/api/conflicts", {"limit": limit})
+
+    @st.cache_data(ttl=60)
+    def get_bilateral_relations(self, limit: int = 10) -> Dict[str, Any]:
+        """Get bilateral geopolitical relationships."""
+        return self._get("/api/bilateral", {"limit": limit})
+
+    @st.cache_data(ttl=60)
+    def get_recent_events(self, event_type: str = "all", limit: int = 20) -> Dict[str, Any]:
+        """Get recent geopolitical events."""
+        return self._get("/api/events", {"event_type": event_type, "limit": limit})
+
     def health_check(self) -> bool:
         """Check if API is healthy."""
         try:

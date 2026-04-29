@@ -23,7 +23,13 @@ if "active_tab" not in st.session_state:
     st.session_state.active_tab = "Earth Pulse"
 
 # ── Top navbar ────────────────────────────────────────────────────────────────
-gti_score = 26.5
+try:
+    from api.client import get_client
+    client = get_client()
+    gti_data = client.get_gti_current()
+    gti_score = gti_data.get("gti_score", 0)
+except Exception:
+    gti_score = 0
 now_str = datetime.now().strftime("%H:%M:%S")
 
 tab_links_html = ""
@@ -50,22 +56,22 @@ st.markdown(f"""
 col1, col2, col3, col4 = st.columns(4)
 if col1.button("Earth Pulse", key="tab_earth_pulse", use_container_width=False):
     st.session_state.active_tab = "Earth Pulse"
-    st.query_params["tab"] = "earth_pulse"
+    st.experimental_set_query_params(tab="earth_pulse")
 if col2.button("Geo Map", key="tab_geo_map", use_container_width=False):
     st.session_state.active_tab = "Geo Map"
-    st.query_params["tab"] = "geo_map"
+    st.experimental_set_query_params(tab="geo_map")
 if col3.button("AI Signals", key="tab_ai_signals", use_container_width=False):
     st.session_state.active_tab = "AI Signals"
-    st.query_params["tab"] = "ai_signals"
+    st.experimental_set_query_params(tab="ai_signals")
 if col4.button("Market", key="tab_market", use_container_width=False):
     st.session_state.active_tab = "Market"
-    st.query_params["tab"] = "market"
+    st.experimental_set_query_params(tab="market")
 
 st.markdown('<div style="height: -20px;"></div>', unsafe_allow_html=True)
 
 # ── Handle tab switching via query param ──────────────────────────────────────
 # Update session state from query params immediately so nav renders with correct active state
-qp = st.query_params.get("tab")
+qp = st.experimental_get_query_params().get("tab", [None])[0]
 if qp:
     tab_name = next((t for t, k in TAB_KEYS.items() if k == qp), None)
     if tab_name:

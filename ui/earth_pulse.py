@@ -1,63 +1,10 @@
-"""Earth Pulse - GEOMARKET INTELLIGENCE"""
+"""Earth Pulse - Exact Stitch UI design implementation."""
 
 import streamlit as st
 from datetime import datetime
 import plotly.graph_objects as go
 import numpy as np
 from api.client import get_client
-
-
-def _gti_history_chart(history_data: list) -> go.Figure:
-    """GTI history sparkline chart from real data."""
-    if not history_data:
-        return _empty_chart("No GTI history data")
-
-    timestamps = [datetime.fromisoformat(d["timestamp"]) for d in history_data]
-    values = [d["gti_score"] * 100 for d in history_data]  # Scale to 0-100
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=timestamps, y=values,
-        mode="lines",
-        line=dict(color="#ffb867", width=1.5),
-        fill="tozeroy",
-        fillcolor="rgba(255,184,103,0.06)",
-        hovertemplate="%{y:.1f}<extra></extra>",
-    ))
-    fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        margin=dict(l=0, r=0, t=0, b=0),
-        height=100,
-        xaxis=dict(showgrid=False, showticklabels=False, zeroline=False, color="#2e3140"),
-        yaxis=dict(showgrid=True, gridcolor="#1f2129", showticklabels=True,
-                   tickfont=dict(size=8, color="#4a5060"), zeroline=False,
-                   tickformat=".0f"),
-        showlegend=False,
-    )
-    return fig
-
-
-def _empty_chart(message: str) -> go.Figure:
-    """Return empty chart with message."""
-    fig = go.Figure()
-    fig.add_annotation(text=message, x=0.5, y=0.5, showarrow=False)
-    fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=100,
-        margin=dict(l=0, r=0, t=0, b=0),
-    )
-    return fig
-
-
-def _format_percentage_change(new_val: float, old_val: float) -> str:
-    """Format percentage change for display."""
-    if old_val == 0:
-        return "N/A"
-    change = ((new_val - old_val) / old_val) * 100
-    symbol = "↑" if change >= 0 else "↓"
-    return f"{symbol} {abs(change):.1f}%"
 
 
 def render():
@@ -67,160 +14,126 @@ def render():
     gti_data = client.get_gti_current()
     gti_history = client.get_gti_history(hours=48)
     headlines_data = client.get_headlines(limit=4)
+    events_data = client.get_recent_events(event_type="conflict", limit=8)
 
     if "error" in gti_data:
         st.error(f"API Error: {gti_data['error']}")
         return
 
-    # ── Page header ───────────────────────────────────────────────────────────
+    # ── Page title ───────────────────────────────────────────────────────────
     st.markdown("""
-<div class="system-status-row">
-  <span class="system-status-label">SYSTEM_STATUS: GTI_INDEX</span>
+<div style="text-align:center;margin-bottom:20px;">
+  <h1 style="font-size:48px;margin:0;color:#ffffff;font-family:'Courier New';">EARTH PULSE</h1>
+  <p style="font-size:12px;color:#8a9baa;margin:4px 0;">REAL-TIME_GEOPOLITICAL_ANALYSIS</p>
 </div>
 """, unsafe_allow_html=True)
 
     # ── 3-column layout ───────────────────────────────────────────────────────
-    left, center, right = st.columns([1.2, 2.2, 1.4])
+    left, center, right = st.columns([1.1, 2.0, 1.3])
 
-    # ────────────────── LEFT: GTI + Signal Cards ─────────────────────────────
+    gti_score = gti_data.get("gti_score", 0.0)
+    gti_display = min(100, gti_score * 100)
+    risk_level = gti_data.get("risk_level", "UNKNOWN")
+
+    # ────────────────── LEFT COLUMN ───────────────────────────────────────────
     with left:
-        gti_score = gti_data.get("gti_score", 0.0)
-        gti_display = gti_score * 100  # Scale to 0-100 for display
-        risk_level = gti_data.get("risk_level", "UNKNOWN")
-
-        # GTI Hero
+        # GTI Hero number
         st.markdown(f"""
-<div class="gti-hero-wrapper">
-  <div class="gti-hero-number">{gti_display:.1f}</div>
-  <div class="gti-hero-meta">
-    <span class="gti-hero-badge">{risk_level}</span>
-    <span class="gti-hero-change">LIVE_FEED</span>
-  </div>
-</div>
-<div class="gti-hero-feed-label">REAL-TIME_GEOPOLITICAL_FEED</div>
-""", unsafe_allow_html=True)
-
-        st.markdown('<div class="section-header" style="margin-top:14px;">SIGNAL COMPONENTS</div>', unsafe_allow_html=True)
-
-        # Conflict score (from conflict_ratio)
-        conflict_pct = gti_data.get("conflict_ratio", 0.5) * 100
-        conflict_class = "signal-card-elevated" if conflict_pct > 60 else "signal-card"
-        st.markdown(f"""
-<div class="signal-card {conflict_class}">
-  <div class="signal-card-header">
-    <span class="signal-card-name">CONFLICT</span>
-  </div>
-  <div class="signal-card-value">{conflict_pct:.1f}</div>
-  <div class="signal-card-desc">GDELT event conflict ratio<br/>from live event stream.</div>
-  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-error" style="width:{conflict_pct}%;"></div></div>
+<div style="text-align:center;margin-bottom:20px;">
+  <div style="font-size:96px;font-weight:bold;color:#ffffff;line-height:1;font-family:'Courier New';">{gti_display:.1f}</div>
+  <div style="font-size:11px;color:#8a9baa;margin-top:4px;">Geopolitical Tension Index</div>
+  <div style="font-size:9px;color:#ffb867;margin-top:2px;">CURRENT_ASSESSMENT</div>
 </div>
 """, unsafe_allow_html=True)
 
-        # Tone index (normalized GDELT AvgTone)
-        tone_val = gti_data.get("tone_index", 0.0)
-        tone_display = tone_val if tone_val else 50.0  # Default to neutral
-        st.markdown(f"""
-<div class="signal-card">
-  <div class="signal-card-header">
-    <span class="signal-card-name">TONE_INDEX</span>
-  </div>
-  <div class="signal-card-value">{tone_display:.1f}</div>
-  <div class="signal-desc signal-card-desc">GDELT media sentiment<br/>from global news analysis.</div>
-  <div class="signal-bar-wrap"><div class="signal-bar-fill" style="width:{tone_display}%;"></div></div>
-</div>
-""", unsafe_allow_html=True)
+        st.markdown('<div style="height:16px;"></div>', unsafe_allow_html=True)
 
-        # VADER sentiment (from RSS headlines)
-        vader_val = gti_data.get("vader_sentiment", 0.5) * 100
-        vader_class = "signal-card-stable" if vader_val > 50 else "signal-card"
-        st.markdown(f"""
-<div class="signal-card {vader_class}">
-  <div class="signal-card-header">
-    <span class="signal-card-name">VADER_SENTIMENT</span>
-  </div>
-  <div class="signal-card-value">{vader_val:.1f}</div>
-  <div class="signal-card-desc">RSS headline sentiment score<br/>from aggregated news feeds.</div>
-  <div class="signal-bar-wrap"><div class="signal-bar-fill signal-bar-fill-green" style="width:{vader_val}%;"></div></div>
-</div>
-""", unsafe_allow_html=True)
+        # Signal cards
+        signal_cards = [
+            ("CONFLICT", gti_data.get("conflict_ratio", 0.5) * 100, "GDELT event conflict ratio from live event stream."),
+            ("TONE_INDEX", gti_data.get("tone_index", 50.0), "GDELT media sentiment from global news analysis."),
+            ("VADER_SENTIMENT", gti_data.get("vader_sentiment", 0.5) * 100, "RSS headline sentiment score from aggregated news feeds."),
+            ("VOLATILITY", (gti_score * 100 * 2) if gti_score > 0 else 20, "Market volatility estimate based on GTI."),
+        ]
 
-        # Volatility (estimated from GTI)
-        vol_badge = "HIGH" if gti_score > 0.6 else "VARIABLE" if gti_score > 0.3 else "LOW"
-        vol_color = "signal-card-critical" if vol_badge == "HIGH" else "signal-card"
-        st.markdown(f"""
-<div class="signal-card {vol_color}">
-  <div class="signal-card-header">
-    <span class="signal-card-name">VOLATILITY</span>
-    <span class="vol-badge vol-badge-{'high' if vol_badge == 'HIGH' else 'low'}">{vol_badge}</span>
-  </div>
-  <div style="display:flex;gap:4px;margin-top:6px;">
-    <div style="flex:1;height:16px;background:#ff2d2d;opacity:{0.9 if gti_score > 0.6 else 0.3};"></div>
-    <div style="flex:1;height:16px;background:#ff4d1a;opacity:{0.7 if gti_score > 0.5 else 0.3};"></div>
-    <div style="flex:1;height:16px;background:#ff6600;opacity:{0.5 if gti_score > 0.4 else 0.3};"></div>
-    <div style="flex:1;height:16px;background:#ff8800;opacity:{0.3 if gti_score > 0.3 else 0.1};"></div>
+        for name, value, desc in signal_cards:
+            color = "#ff2d2d" if value > 70 else "#ffb867" if value > 40 else "#4a6080"
+            st.markdown(f"""
+<div style="border-left:3px solid {color};padding:8px;margin-bottom:8px;background:#0a0b0f;">
+  <div style="font-size:11px;color:#8a9baa;font-weight:bold;">{name}</div>
+  <div style="font-size:24px;color:#ffffff;font-weight:bold;">{value:.1f}</div>
+  <div style="font-size:8px;color:#4a5060;margin-top:2px;">{desc}</div>
+  <div style="width:100%;height:6px;background:#1f2129;margin-top:6px;border-radius:2px;">
+    <div style="width:{min(value, 100)}%;height:100%;background:{color};border-radius:2px;"></div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-        st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
 
         # Risk legend
         st.markdown("""
-<div class="risk-legend">
-  <div class="risk-legend-item"><div class="risk-dot risk-dot-critical"></div> HIGH_CONFLICT (60–100)</div>
-  <div class="risk-legend-item"><div class="risk-dot risk-dot-elevated"></div> MODERATE_TENSION (30–60)</div>
-  <div class="risk-legend-item"><div class="risk-dot risk-dot-stable"></div> LOW_CONFLICT (0–30)</div>
+<div style="font-size:9px;color:#8a9baa;">
+  <div style="margin:4px 0;"><span style="display:inline-block;width:12px;height:12px;background:#ff2d2d;border-radius:2px;margin-right:6px;vertical-align:middle;"></span>CRITICAL (80-100)</div>
+  <div style="margin:4px 0;"><span style="display:inline-block;width:12px;height:12px;background:#ffb867;border-radius:2px;margin-right:6px;vertical-align:middle;"></span>ELEVATED (40-80)</div>
+  <div style="margin:4px 0;"><span style="display:inline-block;width:12px;height:12px;background:#4a6080;border-radius:2px;margin-right:6px;vertical-align:middle;"></span>STABLE (0-40)</div>
 </div>
 """, unsafe_allow_html=True)
 
-    # ────────────────── CENTER: Globe + coordinate ───────────────────────────
+    # ────────────────── CENTER: Globe ─────────────────────────────────────────
     with center:
-        # Globe using hardcoded hotspots (in production, feed from GDELT events)
-        lats_conflict = [50.4, 48.0, 35.7, 15.5, 12.5, 16.9, 33.5, 23.7]
-        lons_conflict = [30.5, 37.6, 51.4, 44.2, 42.8, 96.1, 36.3, 90.4]
-        sizes_conflict = [20, 15, 18, 12, 10, 14, 16, 11]
+        # Fetch real hotspot data
+        events_list = events_data.get("data", [])
 
-        # Color based on GTI risk level
-        if gti_score > 0.6:
-            colors_conflict = ["#ff2d2d"] * 4 + ["#ffb867"] * 4
-        elif gti_score > 0.3:
-            colors_conflict = ["#ffb867"] * 8
+        if events_list:
+            lats = [e.get("latitude", 0) for e in events_list if e.get("latitude") is not None]
+            lons = [e.get("longitude", 0) for e in events_list if e.get("longitude") is not None]
+            sizes = [min(25, abs(e.get("goldstein_scale", -5)) * 2) for e in events_list]
         else:
-            colors_conflict = ["#8a9baa"] * 8
+            # Fallback hardcoded data
+            lats = [50.4, 48.0, 35.7, 15.5, 12.5, 16.9, 33.5, 23.7]
+            lons = [30.5, 37.6, 51.4, 44.2, 42.8, 96.1, 36.3, 90.4]
+            sizes = [20, 15, 18, 12, 10, 14, 16, 11]
 
-        fig_globe = go.Figure()
+        # Create 3D globe
+        fig = go.Figure()
 
-        # Globe base
+        # Globe surface
         theta = np.linspace(0, 2 * np.pi, 300)
         phi = np.linspace(0, np.pi, 300)
         x = np.outer(np.sin(phi), np.cos(theta))
         y = np.outer(np.sin(phi), np.sin(theta))
         z = np.outer(np.cos(phi), np.ones(300))
 
-        fig_globe.add_trace(go.Surface(
+        fig.add_trace(go.Surface(
             x=x, y=y, z=z,
             colorscale=[[0, "#0d1117"], [1, "#1a2030"]],
             showscale=False,
             opacity=0.95,
-            lighting=dict(ambient=0.6, diffuse=0.4),
         ))
 
         # Conflict hotspots
-        for lat, lon, sz, col in zip(lats_conflict, lons_conflict, sizes_conflict, colors_conflict):
+        num_hotspots = len(lats)
+        for i, (lat, lon, sz) in enumerate(zip(lats, lons, sizes)):
             lat_r = np.radians(lat)
             lon_r = np.radians(lon)
             cx = np.cos(lat_r) * np.cos(lon_r)
             cy = np.cos(lat_r) * np.sin(lon_r)
             cz = np.sin(lat_r)
-            fig_globe.add_trace(go.Scatter3d(
+
+            # Color based on intensity
+            intensity = (i + 1) / num_hotspots
+            color = "#ff2d2d" if intensity > 0.6 else "#ffb867"
+
+            fig.add_trace(go.Scatter3d(
                 x=[cx], y=[cy], z=[cz],
                 mode="markers",
-                marker=dict(size=sz / 3, color=col, opacity=0.9),
+                marker=dict(size=sz / 2.5, color=color, opacity=0.9),
                 showlegend=False,
                 hoverinfo="skip",
             ))
 
-        fig_globe.update_layout(
+        fig.update_layout(
             paper_bgcolor="rgba(0,0,0,0)",
             scene=dict(
                 bgcolor="rgba(0,0,0,0)",
@@ -231,43 +144,75 @@ def render():
                 aspectmode="cube",
             ),
             margin=dict(l=0, r=0, t=0, b=0),
-            height=320,
+            height=340,
         )
-        st.plotly_chart(fig_globe, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
-        st.markdown(f"""
-<div class="coord-display" style="margin-top:0;">
-  <div class="caption-mono">GLOBAL_CONFLICT_HEATMAP | GTI={gti_display:.1f} | {risk_level}</div>
+        # Coordinate display
+        if lats and lons:
+            sample_lat, sample_lon = lats[0], lons[0]
+            lat_dir = "N" if sample_lat >= 0 else "S"
+            lon_dir = "E" if sample_lon >= 0 else "W"
+            st.markdown(f"""
+<div style="text-align:center;font-size:11px;color:#8a9baa;margin-top:8px;">
+  <div style="font-size:14px;color:#ffffff;font-family:'Courier New';">{abs(sample_lat):.4f}° {lat_dir}, {abs(sample_lon):.4f}° {lon_dir}</div>
+  <div style="font-size:9px;color:#4a5060;">REGION_CRITICAL_SECTOR</div>
 </div>
 """, unsafe_allow_html=True)
 
-    # ────────────────── RIGHT: 48H History + Headlines ───────────────────────
+    # ────────────────── RIGHT: History + Headlines ────────────────────────────
     with right:
-        st.markdown('<div class="section-header">48H GTI HISTORY</div>', unsafe_allow_html=True)
-        history_list = gti_history.get("data", [])
-        st.plotly_chart(_gti_history_chart(history_list), use_container_width=True, config={"displayModeBar": False})
+        # 48H History chart
+        st.markdown('<div style="font-size:11px;color:#8a9baa;margin-bottom:8px;">48H GTI HISTORY</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="section-header" style="margin-top:8px;">LATEST HEADLINES</div>', unsafe_allow_html=True)
+        history_list = gti_history.get("data", [])
+        if history_list:
+            timestamps = [datetime.fromisoformat(d["timestamp"]) for d in history_list]
+            values = [d["gti_score"] * 100 for d in history_list]
+
+            fig_history = go.Figure()
+            fig_history.add_trace(go.Scatter(
+                x=timestamps, y=values,
+                mode="lines",
+                line=dict(color="#ffb867", width=2),
+                fill="tozeroy",
+                fillcolor="rgba(255,184,103,0.1)",
+                hovertemplate="%{y:.0f}<extra></extra>",
+            ))
+            fig_history.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                margin=dict(l=0, r=0, t=0, b=0),
+                height=90,
+                xaxis=dict(showgrid=False, showticklabels=False, color="#2e3140"),
+                yaxis=dict(showgrid=True, gridcolor="#1f2129", tickfont=dict(size=8, color="#4a5060")),
+                showlegend=False,
+            )
+            st.plotly_chart(fig_history, use_container_width=True, config={"displayModeBar": False})
+
+        st.markdown('<div style="height:12px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size:11px;color:#8a9baa;margin-bottom:8px;">LATEST HEADLINES</div>', unsafe_allow_html=True)
 
         headlines_list = headlines_data.get("data", [])
-        if not headlines_list:
-            st.markdown('<div style="color:#8a9baa;font-size:12px;">No recent headlines</div>', unsafe_allow_html=True)
-        else:
-            for h in headlines_list[:4]:
-                title = h.get("title", "")[:70] + "..." if len(h.get("title", "")) > 70 else h.get("title", "")
+        if headlines_list:
+            for h in headlines_list[:3]:
+                title = h.get("title", "")[:80]
+                timestamp = h.get("timestamp", "").split(" ")[1] if " " in h.get("timestamp", "") else "N/A"
+                sentiment = h.get("sentiment", "neutral")
                 score = h.get("compound_score", 0.0)
-                score_cls = "neg" if h.get("sentiment") == "negative" else "pos" if h.get("sentiment") == "positive" else "neu"
-                ts = h.get("timestamp", "").split(" ")[1] if " " in h.get("timestamp", "") else "N/A"
-                source = h.get("source", "UNKNOWN")[:15]
+                source = h.get("source", "UNKNOWN")[:12]
 
-                cls = "headline-score-neg" if score_cls == "neg" else "headline-score-pos" if score_cls == "pos" else "headline-score-neu"
+                sentiment_color = "#ff2d2d" if sentiment == "negative" else "#6ecf8a" if sentiment == "positive" else "#ffb867"
+
                 st.markdown(f"""
-<div class="headline-item">
-  <div class="headline-meta">
-    <span class="headline-time">{ts}</span>
-    <span class="headline-score {cls}">{score:+.2f}</span>
+<div style="border-bottom:1px solid #1f2129;padding:8px 0;margin-bottom:8px;">
+  <div style="font-size:8px;color:#4a5060;margin-bottom:4px;">
+    <span>{timestamp}</span>
+    <span style="float:right;color:{sentiment_color};">{score:+.2f}</span>
   </div>
-  <div class="headline-title">{title}</div>
-  <div class="headline-source">{source}</div>
+  <div style="font-size:10px;color:#d8dae8;line-height:1.3;">{title}</div>
+  <div style="font-size:8px;color:#4a5060;margin-top:2px;">{source}</div>
 </div>
 """, unsafe_allow_html=True)
+        else:
+            st.markdown('<div style="color:#4a5060;font-size:9px;">No recent headlines</div>', unsafe_allow_html=True)

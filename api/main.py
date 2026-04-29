@@ -14,10 +14,13 @@ Endpoints:
 Run: uvicorn api.main:app --reload
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime, timedelta
 import os
+import json
+import asyncio
+from typing import List
 
 from config import GTI_DB, NEWS_DB, MARKET_DB, PREDICTIONS_DB
 from gti.aggregator import compute_gti
@@ -34,6 +37,59 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# WebSocket Connection Manager
+# ────────────────────────────────────────────────────────────────────────────
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: dict[str, List[WebSocket]] = {
+            "gti": [],
+            "market": [],
+            "signals": []
+        }
+
+    async def connect(self, websocket: WebSocket, channel: str):
+        await websocket.accept()
+        if channel not in self.active_connections:
+            self.active_connections[channel] = []
+        self.active_connections[channel].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, channel: str):
+        if channel in self.active_connections and websocket in self.active_connections[channel]:
+            self.active_connections[channel].remove(websocket)
+
+    async def broadcast(self, message: dict, channel: str):
+        dead_connections = []
+        for connection in self.active_connections.get(channel, []):
+            try:
+                await connection.send_json(message)
+            except Exception:
+                dead_connections.append(connection)
+
+        for connection in dead_connections:
+            self.disconnect(connection, channel)
+
+
+manager = ConnectionManager()
+
+
+# Broadcast functions (called by scheduler)
+async def broadcast_gti_update(gti_data: dict):
+    """Broadcast GTI update to all connected clients."""
+    await manager.broadcast({"type": "gti_update", "data": gti_data}, "gti")
+
+
+async def broadcast_market_update(market_data: dict):
+    """Broadcast market update to all connected clients."""
+    await manager.broadcast({"type": "market_update", "data": market_data}, "market")
+
+
+async def broadcast_signals_update(signals_data: dict):
+    """Broadcast signals update to all connected clients."""
+    await manager.broadcast({"type": "signals_update", "data": signals_data}, "signals")
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -285,24 +341,179 @@ def get_market_spy(bars: int = 100):
 @app.get("/api/market/sectors")
 def get_market_sectors():
     """
-    Get sector performance (simulated for now).
-    In production, would fetch real sector ETF data.
+    Get sector performance from real market data.
     """
-    return {
-        "timestamp": datetime.utcnow().isoformat(),
-        "sectors": [
-            {"name": "Technology", "symbol": "XLK", "change": 1.24, "price": 185.42},
-            {"name": "Healthcare", "symbol": "XLV", "change": 0.64, "price": 142.18},
-            {"name": "Financials", "symbol": "XLF", "change": -0.32, "price": 38.29},
-            {"name": "Energy", "symbol": "XLE", "change": 2.15, "price": 89.53},
-            {"name": "Industrials", "symbol": "XLI", "change": 1.82, "price": 102.74},
-            {"name": "Consumer Disc.", "symbol": "XLY", "change": -0.18, "price": 74.62},
-            {"name": "Materials", "symbol": "XLB", "change": 0.45, "price": 91.23},
-            {"name": "Utilities", "symbol": "XLU", "change": -1.23, "price": 71.89},
-            {"name": "Real Estate", "symbol": "XLRE", "change": -0.89, "price": 60.41},
-            {"name": "Comm. Services", "symbol": "XLC", "change": 0.92, "price": 63.15},
-        ],
-    }
+    try:
+        conn = get_conn(MARKET_DB)
+        sector_symbols = ["XLK", "XLV", "XLF", "XLE", "XLI", "XLY", "XLB", "XLU", "XLRE", "XLC"]
+        sectors = []
+
+        for symbol in sector_symbols:
+            row = conn.execute(
+                "SELECT close, timestamp FROM ohlcv WHERE symbol=? ORDER BY timestamp DESC LIMIT 2",
+                (symbol,),
+            ).fetchall()
+
+            if row and len(row) >= 2:
+                current = float(row[0]["close"])
+                prev = float(row[1]["close"])
+                change = ((current - prev) / prev) * 100 if prev > 0 else 0
+            else:
+                current = 0
+                change = 0
+
+            sector_names = {
+                "XLK": "Technology", "XLV": "Healthcare", "XLF": "Financials",
+                "XLE": "Energy", "XLI": "Industrials", "XLY": "Consumer Disc.",
+                "XLB": "Materials", "XLU": "Utilities", "XLRE": "Real Estate", "XLC": "Comm. Services"
+            }
+
+            sectors.append({
+                "name": sector_names.get(symbol, symbol),
+                "symbol": symbol,
+                "change": round(change, 2),
+                "price": round(current, 2),
+            })
+
+        conn.close()
+        return {
+            "timestamp": datetime.utcnow().isoformat(),
+            "sectors": sectors,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Geopolitical Intelligence Endpoints
+# ────────────────────────────────────────────────────────────────────────────
+
+@app.get("/api/conflicts")
+def get_conflicts(limit: int = 15):
+    """
+    Get active conflict countries/regions with severity scores.
+    Data sourced from GDELT events.
+    """
+    try:
+        conn = get_conn(GTI_DB)
+        rows = conn.execute(
+            """
+            SELECT country_code, conflict_count, avg_goldstein, latest_event_time
+            FROM conflict_summary
+            ORDER BY conflict_count DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        conn.close()
+
+        if not rows:
+            return {"total": 0, "data": []}
+
+        conflicts = []
+        for r in rows:
+            goldstein = float(r["avg_goldstein"]) if r["avg_goldstein"] else -5.0
+            if goldstein < -5.0:
+                severity = "CRITICAL"
+                severity_score = 0.9
+            elif goldstein < -2.0:
+                severity = "ELEVATED"
+                severity_score = 0.6
+            else:
+                severity = "STABLE"
+                severity_score = 0.3
+
+            conflicts.append({
+                "country_code": r["country_code"],
+                "event_count": int(r["conflict_count"]),
+                "severity": severity,
+                "severity_score": severity_score,
+                "avg_goldstein": round(goldstein, 2),
+                "latest_event": r["latest_event_time"],
+            })
+
+        return {"total": len(conflicts), "data": conflicts}
+    except Exception as e:
+        return {"error": str(e), "data": []}
+
+
+@app.get("/api/bilateral")
+def get_bilateral_relations(limit: int = 10):
+    """
+    Get bilateral geopolitical relationships and their stress levels.
+    """
+    try:
+        conn = get_conn(GTI_DB)
+        rows = conn.execute(
+            """
+            SELECT actor1, actor2, relation_count, avg_goldstein, latest_time
+            FROM bilateral_summary
+            ORDER BY relation_count DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        conn.close()
+
+        if not rows:
+            return {"total": 0, "data": []}
+
+        relations = []
+        for r in rows:
+            goldstein = float(r["avg_goldstein"]) if r["avg_goldstein"] else 0.0
+            stress = min(100, max(0, (-(goldstein - 5.0)) * 10))
+
+            relations.append({
+                "pair": f"{r['actor1']} ↔ {r['actor2']}",
+                "event_count": int(r["relation_count"]),
+                "stress_level": round(stress, 1),
+                "avg_goldstein": round(goldstein, 2),
+                "latest_event": r["latest_time"],
+            })
+
+        return {"total": len(relations), "data": relations}
+    except Exception as e:
+        return {"error": str(e), "data": []}
+
+
+@app.get("/api/events")
+def get_recent_events(event_type: str = "all", limit: int = 20):
+    """
+    Get recent geopolitical events with location coordinates.
+    Supports filtering by event_type: conflict, diplomatic, economic, or all.
+    """
+    try:
+        conn = get_conn(GTI_DB)
+
+        if event_type == "conflict":
+            query = "SELECT * FROM gdelt_events WHERE goldstein_scale < -5.0 ORDER BY event_date DESC LIMIT ?"
+        elif event_type == "diplomatic":
+            query = "SELECT * FROM gdelt_events WHERE cameo_code BETWEEN 50 AND 90 ORDER BY event_date DESC LIMIT ?"
+        elif event_type == "economic":
+            query = "SELECT * FROM gdelt_events WHERE cameo_code BETWEEN 100 AND 110 ORDER BY event_date DESC LIMIT ?"
+        else:
+            query = "SELECT * FROM gdelt_events ORDER BY event_date DESC LIMIT ?"
+
+        rows = conn.execute(query, (limit,)).fetchall()
+        conn.close()
+
+        events = []
+        for r in rows:
+            events.append({
+                "event_id": r["event_id"],
+                "date": r["event_date"],
+                "actor1": r["actor1_countrycode"],
+                "actor2": r["actor2_countrycode"],
+                "latitude": float(r["latitude"]) if r["latitude"] else None,
+                "longitude": float(r["longitude"]) if r["longitude"] else None,
+                "goldstein_scale": float(r["goldstein_scale"]),
+                "article_count": int(r["num_articles"]),
+                "avg_tone": float(r["avg_tone"]) if r["avg_tone"] else 0.0,
+            })
+
+        return {"total": len(events), "event_type": event_type, "data": events}
+    except Exception as e:
+        return {"error": str(e), "data": []}
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -327,3 +538,54 @@ def root():
         "docs": "/docs",
         "status": "running",
     }
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# WebSocket Endpoints
+# ────────────────────────────────────────────────────────────────────────────
+
+@app.websocket("/ws/gti")
+async def websocket_gti(websocket: WebSocket):
+    """WebSocket endpoint for GTI real-time updates."""
+    await manager.connect(websocket, "gti")
+    try:
+        while True:
+            # Send current GTI data immediately on connect
+            gti_data = get_gti_current()
+            await websocket.send_json({"type": "gti_update", "data": gti_data})
+            # Keep connection alive
+            await asyncio.sleep(60)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, "gti")
+    except Exception:
+        manager.disconnect(websocket, "gti")
+
+
+@app.websocket("/ws/market")
+async def websocket_market(websocket: WebSocket):
+    """WebSocket endpoint for market real-time updates."""
+    await manager.connect(websocket, "market")
+    try:
+        while True:
+            market_data = get_market_spy(bars=100)
+            await websocket.send_json({"type": "market_update", "data": market_data})
+            await asyncio.sleep(60)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, "market")
+    except Exception:
+        manager.disconnect(websocket, "market")
+
+
+@app.websocket("/ws/signals")
+async def websocket_signals(websocket: WebSocket):
+    """WebSocket endpoint for ML signals real-time updates."""
+    await manager.connect(websocket, "signals")
+    try:
+        while True:
+            signals_data = get_signals_current()
+            await websocket.send_json({"type": "signals_update", "data": signals_data})
+            await asyncio.sleep(60)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, "signals")
+    except Exception:
+        manager.disconnect(websocket, "signals")
