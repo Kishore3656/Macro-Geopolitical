@@ -13,9 +13,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-with open(os.path.join(os.path.dirname(__file__), "styles.css")) as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 TABS = ["Earth Pulse", "Geo Map", "AI Signals", "Market"]
 TAB_KEYS = {t: t.lower().replace(" ", "_") for t in TABS}
 
