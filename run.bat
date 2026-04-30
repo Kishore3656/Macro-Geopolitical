@@ -1,19 +1,17 @@
 @echo off
-REM Sovereign Intelligence Framework - Windows Startup Script
+REM GeoMarket Intelligence Framework - Windows Startup Script
 
 echo.
 echo ================================
-echo SOVEREIGN INTELLIGENCE FRAMEWORK
-echo Tactical Archive Dashboard
+echo GEOMARKET INTELLIGENCE FRAMEWORK
+echo Real-time GTI & Trading Signals
 echo ================================
 echo.
 
-REM Always run from the directory this .bat file lives in
 cd /d "%~dp0"
 
 set "VENV_PY=%~dp0venv\Scripts\python.exe"
 set "VENV_PIP=%~dp0venv\Scripts\pip.exe"
-set "VENV_STREAMLIT=%~dp0venv\Scripts\streamlit.exe"
 
 REM Verify venv exists
 if not exist "%VENV_PY%" (
@@ -24,17 +22,43 @@ if not exist "%VENV_PY%" (
     exit /b 1
 )
 
-REM Show Python version
+echo Python version:
 "%VENV_PY%" --version
 
 echo.
-echo Installing/updating dependencies...
+echo Updating dependencies...
 "%VENV_PIP%" install -r requirements.txt -q
 
 echo.
-echo Starting dashboard...
-echo (* Launching on http://localhost:8501
+echo ================================
+echo STARTUP OPTIONS
+echo ================================
+echo 1. FastAPI Backend (port 8000)
+echo 2. Streamlit UI (port 8501)
+echo 3. React Frontend (port 3000)
+echo 4. All three (requires multiple terminals)
 echo.
+set /p choice="Select option (1-4): "
 
-"%VENV_STREAMLIT%" run app.py
+if "%choice%"=="1" (
+    echo Starting FastAPI backend...
+    "%VENV_PY%" -m uvicorn api.main:app --reload
+) else if "%choice%"=="2" (
+    echo Starting Streamlit dashboard...
+    "%VENV_PY%" -m streamlit run app.py
+) else if "%choice%"=="3" (
+    echo Starting React frontend...
+    cd frontend
+    npm run dev
+    cd ..
+) else if "%choice%"=="4" (
+    echo Please start each in a separate terminal window:
+    echo   Terminal 1: python -m uvicorn api.main:app --reload
+    echo   Terminal 2: streamlit run app.py
+    echo   Terminal 3: cd frontend ^&^& npm run dev
+) else (
+    echo Invalid option. Starting Streamlit by default...
+    "%VENV_PY%" -m streamlit run app.py
+)
+
 pause
