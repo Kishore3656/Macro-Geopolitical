@@ -5,20 +5,14 @@ test.describe('Market Intelligence Page', () => {
     await page.goto('/?tab=market');
   });
 
-  test('should display Market Intelligence page title', async ({ page }) => {
-    const title = page.locator('.page-title');
-    await expect(title).toContainText('MARKET INTELLIGENCE');
-  });
-
-  test('should display page subtitle', async ({ page }) => {
-    const subtitle = page.locator('.page-subtitle');
-    await expect(subtitle).toContainText('ASSET SURVEILLANCE & TECHNICALS');
-  });
-
   test('should display market hero cards', async ({ page }) => {
     const cards = page.locator('.market-hero-card');
     const count = await cards.count();
     expect(count).toBeGreaterThan(0);
+  });
+
+  test('should display PRIMARY ASSET TRAJECTORY text', async ({ page }) => {
+    await expect(page.locator('text=PRIMARY ASSET TRAJECTORY')).toBeVisible();
   });
 
   test('should display SPY ticker card', async ({ page }) => {

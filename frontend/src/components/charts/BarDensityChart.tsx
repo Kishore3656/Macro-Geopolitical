@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  LineChart as RechartLineChart,
-  Line,
+  BarChart as RechartBarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -10,26 +10,26 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-interface LineChartProps {
+interface BarDensityChartProps {
   data: any[];
   dataKey: string;
-  stroke?: string;
+  fill?: string;
   title?: string;
   height?: number;
 }
 
-export default function LineChart({
+export default function BarDensityChart({
   data,
   dataKey,
-  stroke = '#00ffff',
+  fill = '#ffb867',
   title,
   height = 300,
-}: LineChartProps) {
+}: BarDensityChartProps) {
   return (
     <div className="bg-[#13151d] border border-slate-800 rounded-lg p-6">
       {title && <h3 className="text-sm font-medium text-slate-400 mb-4">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartLineChart data={data}>
+        <RechartBarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis dataKey="timestamp" stroke="#94a3b8" style={{ fontSize: '12px' }} />
           <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
@@ -39,17 +39,10 @@ export default function LineChart({
               border: '1px solid #334155',
               borderRadius: '8px',
             }}
-            cursor={{ stroke: '#475569' }}
+            cursor={{ fill: '#334155', fillOpacity: 0.2 }}
           />
-          <Line
-            type="monotone"
-            dataKey={dataKey}
-            stroke={stroke}
-            dot={false}
-            strokeWidth={2}
-            isAnimationActive={false}
-          />
-        </RechartLineChart>
+          <Bar dataKey={dataKey} fill={fill} isAnimationActive={false} />
+        </RechartBarChart>
       </ResponsiveContainer>
     </div>
   );

@@ -1,6 +1,6 @@
 # GeoMarket Intelligence — Sovereign Intelligence Framework
 
-A production-ready market and geopolitical analysis platform built with **Streamlit** (primary UI) + **FastAPI** (backend) + **React/Next.js** (optional modern frontend). Real-time GTI scoring, AI-driven trading signals, and tactical intelligence dashboards.
+A production-ready market and geopolitical analysis platform built with **React 19 + Next.js 15** (unified frontend) + **FastAPI** (backend). Real-time GTI scoring, AI-driven trading signals, and tactical intelligence dashboards with WebSocket streaming.
 
 ## Quick Start
 
@@ -9,16 +9,12 @@ A production-ready market and geopolitical analysis platform built with **Stream
 # 1. Start the FastAPI backend (provides all data)
 uvicorn api.main:app --reload
 
-# 2. Start the Streamlit UI (primary dashboard)
-streamlit run app.py
-
-# 3. Optionally, start the React frontend
+# 2. Start the React/Next.js frontend
 cd frontend && npm run dev
 ```
 
-- **Streamlit UI:** http://localhost:8501
 - **API Backend:** http://localhost:8000
-- **React Frontend (optional):** http://localhost:3000
+- **Unified Frontend:** http://localhost:3000
 
 ## Features
 
@@ -41,20 +37,24 @@ cd frontend && npm run dev
 ## Project Structure
 
 ```
-├── app.py                     # Streamlit primary UI
-├── styles.css                 # Custom styling
-├── api/
-│   ├── main.py               # FastAPI backend (port 8000)
-│   └── client.py             # API client utilities
-├── ui/                        # Streamlit UI components
+├── api/                        # FastAPI backend (port 8000)
+│   ├── main.py                # WebSocket + REST endpoints
+│   └── client.py              # API client utilities
+├── frontend/                  # React 19 + Next.js 15 unified UI
+│   ├── src/
+│   │   ├── app/              # Next.js 15 App Router (earth-pulse, geo-map, market, ai-signals)
+│   │   ├── components/       # Dashboard components (EarthPulse, Market, GeoMap, AISignals)
+│   │   ├── hooks/            # Custom hooks (useGTI, useMarket, useSignals, useWebSocket)
+│   │   ├── store/            # Zustand state management (gtiStore, marketStore, signalsStore)
+│   │   ├── types/            # TypeScript interfaces for all API responses
+│   │   ├── lib/              # Utilities (api.ts for typed fetch wrapper)
+│   │   └── components/ui/    # Reusable UI components (StatusBadge, SignalCard, etc.)
+│   ├── .env.local             # NEXT_PUBLIC_API_URL=http://localhost:8000
+│   └── package.json           # Dependencies (recharts, zustand, tailwind)
 ├── ingestion/                 # Data pipelines (GDELT, news, market data)
 ├── prediction/                # ML models (LightGBM inference)
 ├── nlp/                       # NLP utilities (VADER, entity extraction)
 ├── gti/                       # GTI computation and aggregation
-├── frontend/                  # React 19 + Next.js 15 (optional modern UI)
-│   ├── src/components/        # Dashboard components
-│   ├── .env.local             # Points to API backend
-│   └── package.json           # Dependencies
 └── tests/                     # Test suites
 ```
 
@@ -76,13 +76,13 @@ WebSocket support for real-time streaming at `/ws/{topic}`.
 
 ## Architecture
 
-- **Backend:** FastAPI (async, CORS-enabled, WebSocket support)
-- **Primary UI:** Streamlit (reactive, stateful)
-- **Optional Frontend:** React 19 + Next.js 15 (modern, responsive, TypeScript)
+- **Backend:** FastAPI (async, CORS-enabled, WebSocket streaming on /ws/gti, /ws/market, /ws/signals)
+- **Frontend:** React 19 + Next.js 15 App Router (TypeScript, Tailwind CSS, Zustand state management)
 - **Data:** SQLite databases (GTI, news, market, predictions)
 - **ML:** LightGBM for trade signal generation
+- **Real-time:** WebSocket connections with exponential backoff reconnection for live data streaming
 
-Both UIs fetch from the same FastAPI backend. Run them simultaneously or independently.
+The unified React frontend replaces the previous Streamlit UI and provides a modern, responsive experience with URL-based routing and real-time WebSocket updates.
 
 ## Installation
 
@@ -90,29 +90,29 @@ Both UIs fetch from the same FastAPI backend. Run them simultaneously or indepen
 # Backend dependencies
 pip install -r requirements.txt
 
-# Frontend (optional)
+# Frontend
 cd frontend
 npm install
 ```
 
 ## Running
 
-**Start the backend first** (it must be running before UIs):
+**Start the backend first** (it must be running before the frontend):
 ```bash
 uvicorn api.main:app --reload
 ```
 
-**Then start your preferred UI:**
+**Then start the React/Next.js frontend:**
 
-Streamlit (primary, recommended):
-```bash
-streamlit run app.py
-```
-
-Or React (modern alternative):
 ```bash
 cd frontend && npm run dev
 ```
+
+Visit **http://localhost:3000** and navigate through the four dashboards:
+- **Earth Pulse:** GTI score, headlines, and active conflicts
+- **Geo Map:** Country bilateral relations and geopolitical events
+- **Market:** S&P 500 candlestick charts and sector performance
+- **AI Signals:** ML predictions with confidence metrics and signal history
 
 ## Data Sources
 

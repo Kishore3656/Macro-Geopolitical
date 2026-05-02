@@ -12,6 +12,12 @@ const config: Config = {
         slate: {
           950: '#0f172a',
         },
+        panel: '#0a0b0f',
+        surface: '#13151d',
+        amber: '#ffb867',
+        danger: '#ff2d2d',
+        success: '#6ecf8a',
+        cyan: '#00ffff',
       },
       animation: {
         spin: 'spin 1s linear infinite',

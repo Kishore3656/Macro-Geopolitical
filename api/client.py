@@ -12,6 +12,39 @@ from typing import Optional, Dict, Any
 API_BASE_URL = "http://localhost:8000"
 
 
+@st.cache_data(ttl=60)
+def _cached_get(endpoint: str) -> Dict[str, Any]:
+    """Cached GET request (no params)."""
+    try:
+        response = requests.get(f"{API_BASE_URL}{endpoint}", timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+
+@st.cache_data(ttl=300)
+def _cached_get_with_param(endpoint: str, param_name: str, param_value: Any) -> Dict[str, Any]:
+    """Cached GET request with single parameter."""
+    try:
+        response = requests.get(f"{API_BASE_URL}{endpoint}", params={param_name: param_value}, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+
+@st.cache_data(ttl=60)
+def _cached_get_events(event_type: str, limit: int) -> Dict[str, Any]:
+    """Cached GET request for events with event_type and limit."""
+    try:
+        response = requests.get(f"{API_BASE_URL}/api/events", params={"event_type": event_type, "limit": limit}, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+
 class APIClient:
     def __init__(self, base_url: str = API_BASE_URL):
         self.base_url = base_url
@@ -27,55 +60,45 @@ class APIClient:
         except requests.exceptions.RequestException as e:
             return {"error": str(e)}
 
-    @st.cache_data(ttl=60)
     def get_gti_current(self) -> Dict[str, Any]:
         """Get current GTI score and components."""
-        return self._get("/api/gti")
+        return _cached_get("/api/gti")
 
-    @st.cache_data(ttl=300)
     def get_gti_history(self, hours: int = 48) -> Dict[str, Any]:
         """Get GTI history for last N hours."""
-        return self._get("/api/gti/history", {"hours": hours})
+        return _cached_get_with_param("/api/gti/history", "hours", hours)
 
-    @st.cache_data(ttl=60)
     def get_signals_current(self) -> Dict[str, Any]:
         """Get latest ML predictions."""
-        return self._get("/api/signals")
+        return _cached_get("/api/signals")
 
-    @st.cache_data(ttl=300)
     def get_signals_history(self, limit: int = 100) -> Dict[str, Any]:
         """Get prediction history."""
-        return self._get("/api/signals/history", {"limit": limit})
+        return _cached_get_with_param("/api/signals/history", "limit", limit)
 
-    @st.cache_data(ttl=120)
     def get_headlines(self, limit: int = 20) -> Dict[str, Any]:
         """Get latest headlines with sentiment."""
-        return self._get("/api/headlines", {"limit": limit})
+        return _cached_get_with_param("/api/headlines", "limit", limit)
 
-    @st.cache_data(ttl=300)
     def get_market_spy(self, bars: int = 100) -> Dict[str, Any]:
         """Get S&P 500 market data."""
-        return self._get("/api/market/spy", {"bars": bars})
+        return _cached_get_with_param("/api/market/spy", "bars", bars)
 
-    @st.cache_data(ttl=300)
     def get_market_sectors(self) -> Dict[str, Any]:
         """Get sector performance data."""
-        return self._get("/api/market/sectors")
+        return _cached_get("/api/market/sectors")
 
-    @st.cache_data(ttl=60)
     def get_conflicts(self, limit: int = 15) -> Dict[str, Any]:
         """Get active conflicts from GDELT."""
-        return self._get("/api/conflicts", {"limit": limit})
+        return _cached_get_with_param("/api/conflicts", "limit", limit)
 
-    @st.cache_data(ttl=60)
     def get_bilateral_relations(self, limit: int = 10) -> Dict[str, Any]:
         """Get bilateral geopolitical relationships."""
-        return self._get("/api/bilateral", {"limit": limit})
+        return _cached_get_with_param("/api/bilateral", "limit", limit)
 
-    @st.cache_data(ttl=60)
     def get_recent_events(self, event_type: str = "all", limit: int = 20) -> Dict[str, Any]:
         """Get recent geopolitical events."""
-        return self._get("/api/events", {"event_type": event_type, "limit": limit})
+        return _cached_get_events(event_type, limit)
 
     def health_check(self) -> bool:
         """Check if API is healthy."""
@@ -101,3 +124,26 @@ def get_client() -> APIClient:
 def is_api_ready() -> bool:
     """Check if API is accessible."""
     return get_client().health_check()
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Module-level cached functions (for Streamlit @st.cache_data compatibility)
+# These wrap the client methods to avoid hashing self parameter
+# ────────────────────────────────────────────────────────────────────────────
+
+@st.cache_data(ttl=60)
+def _cached_get(endpoint: str) -> Dict[str, Any]:
+    """Module-level cached GET without self parameter."""
+    return get_client()._get(endpoint)
+
+
+@st.cache_data(ttl=300)
+def _cached_get_with_param(endpoint: str, param_name: str, param_value) -> Dict[str, Any]:
+    """Module-level cached GET with single parameter."""
+    return get_client()._get(endpoint, {param_name: param_value})
+
+
+@st.cache_data(ttl=60)
+def _cached_get_events(event_type: str, limit: int) -> Dict[str, Any]:
+    """Module-level cached GET for events with two parameters."""
+    return get_client()._get("/api/events", {"event_type": event_type, "limit": limit})

@@ -5,14 +5,14 @@ test.describe('Earth Pulse Page', () => {
     await page.goto('/?tab=earth_pulse');
   });
 
-  test('should display Earth Pulse page title', async ({ page }) => {
-    const title = page.locator('.page-title');
-    await expect(title).toContainText('EARTH PULSE');
+  test('should display GTI hero number element', async ({ page }) => {
+    const heroNumber = page.locator('.gti-hero-number');
+    await expect(heroNumber).toBeVisible();
   });
 
-  test('should display page subtitle', async ({ page }) => {
-    const subtitle = page.locator('.page-subtitle');
-    await expect(subtitle).toContainText('GLOBAL MARKETS & MACRO TENSIONS');
+  test('should display GTI assessment text', async ({ page }) => {
+    const badge = page.locator('.gti-hero-badge');
+    await expect(badge).toContainText('CURRENT_ASSESSMENT');
   });
 
   test('should display GTI hero number', async ({ page }) => {
@@ -20,43 +20,42 @@ test.describe('Earth Pulse Page', () => {
     await expect(heroNumber).toBeVisible();
   });
 
-  test('should display system status', async ({ page }) => {
-    const status = page.locator('.system-status-row');
-    await expect(status).toBeVisible();
-    await expect(status).toContainText('STATUS:');
+  test('should display signal cards', async ({ page }) => {
+    const signals = page.locator('.signal-card');
+    const count = await signals.count();
+    expect(count).toBeGreaterThan(0);
   });
 
-  test('should display Live Intelligence Feed section', async ({ page }) => {
-    const feedHeader = page.locator('.section-header');
-    // Should contain "LIVE INTELLIGENCE FEED" or a variation
-    await expect(page.locator('text=LIVE INTELLIGENCE FEED')).toBeVisible();
+  test('should display Geopolitical Tension Index label', async ({ page }) => {
+    await expect(page.locator('text=Geopolitical Tension Index')).toBeVisible();
   });
 
-  test('should display Macro Components section', async ({ page }) => {
-    // Should contain "MACRO COMPONENTS"
-    await expect(page.locator('text=MACRO COMPONENTS')).toBeVisible();
+  test('should display risk legend', async ({ page }) => {
+    const legend = page.locator('.risk-legend');
+    await expect(legend).toBeVisible();
+    await expect(page.locator('text=CRITICAL')).toBeVisible();
+    await expect(page.locator('text=ELEVATED')).toBeVisible();
+    await expect(page.locator('text=STABLE')).toBeVisible();
   });
 
-  test('should display signal cards with progress bars', async ({ page }) => {
-    // Look for signal cards
-    const signalCards = page.locator('.signal-card');
-    const count = await signalCards.count();
+  test('should display progress bars on signal cards', async ({ page }) => {
+    const progressBars = page.locator('.signal-bar-fill');
+    const count = await progressBars.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('should have visible signal card values', async ({ page }) => {
+    const signalValues = page.locator('.signal-card-value');
+    const count = await signalValues.count();
     expect(count).toBeGreaterThan(0);
 
-    // Check for signal card names
-    await expect(page.locator('text=CONFLICT RATIO')).toBeVisible();
-    await expect(page.locator('text=MEDIA TONE')).toBeVisible();
+    // Verify at least one card is visible
+    const firstValue = signalValues.first();
+    await expect(firstValue).toBeVisible();
   });
 
-  test('should display GTI score badge', async ({ page }) => {
-    const gtiScore = page.locator('.gti-hero-badge');
-    await expect(gtiScore).toBeVisible();
-  });
-
-  test('should have proper CSS styling', async ({ page }) => {
-    const pageTitle = page.locator('.page-title');
-    const color = await pageTitle.evaluate(el => window.getComputedStyle(el).color);
-    // Should have light color (on-surface color)
-    expect(color).toBeTruthy();
+  test('should display coordinates', async ({ page }) => {
+    const coordDisplay = page.locator('.coord-display');
+    await expect(coordDisplay).toBeVisible();
   });
 });

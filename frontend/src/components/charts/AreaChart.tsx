@@ -1,8 +1,8 @@
 'use client';
 
 import {
-  LineChart as RechartLineChart,
-  Line,
+  AreaChart as RechartAreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -10,26 +10,28 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-interface LineChartProps {
+interface AreaChartProps {
   data: any[];
   dataKey: string;
+  fill?: string;
   stroke?: string;
   title?: string;
   height?: number;
 }
 
-export default function LineChart({
+export default function AreaChart({
   data,
   dataKey,
-  stroke = '#00ffff',
+  fill = '#6ecf8a',
+  stroke = '#6ecf8a',
   title,
   height = 300,
-}: LineChartProps) {
+}: AreaChartProps) {
   return (
     <div className="bg-[#13151d] border border-slate-800 rounded-lg p-6">
       {title && <h3 className="text-sm font-medium text-slate-400 mb-4">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartLineChart data={data}>
+        <RechartAreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
           <XAxis dataKey="timestamp" stroke="#94a3b8" style={{ fontSize: '12px' }} />
           <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
@@ -41,15 +43,16 @@ export default function LineChart({
             }}
             cursor={{ stroke: '#475569' }}
           />
-          <Line
+          <Area
             type="monotone"
             dataKey={dataKey}
+            fill={fill}
+            fillOpacity={0.3}
             stroke={stroke}
-            dot={false}
             strokeWidth={2}
             isAnimationActive={false}
           />
-        </RechartLineChart>
+        </RechartAreaChart>
       </ResponsiveContainer>
     </div>
   );

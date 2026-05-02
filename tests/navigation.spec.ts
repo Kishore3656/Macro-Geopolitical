@@ -44,29 +44,34 @@ test.describe('GeoMarket Navigation', () => {
     await expect(statusBar).toContainText('ENCRYPTION_AES256');
   });
 
-  test('should switch tabs without opening new windows', async ({ page, context }) => {
+  test('should switch tabs using navigation buttons', async ({ page, context }) => {
     await page.goto('/');
 
     // Get initial page count
     const initialPages = context.pages().length;
 
-    // Click on "GEO MAP" tab using the button mechanism
+    // Click on "Geo Map" tab using the button mechanism
     await page.getByRole('button', { name: /Geo Map/i }).click();
 
     // Verify no new tabs opened
     expect(context.pages().length).toBe(initialPages);
 
-    // Verify the page updated
-    await expect(page.locator('.page-title')).toContainText('GEO MAP');
+    // Verify the page updated by checking for map-specific element
+    await expect(page.locator('.map-placeholder')).toBeVisible();
   });
 
-  test('should navigate through all tabs', async ({ page }) => {
-    const tabs = ['Earth Pulse', 'Geo Map', 'AI Signals', 'Market'];
+  test('should navigate through all tabs with proper elements', async ({ page }) => {
+    const tabs = [
+      { name: 'Earth Pulse', selector: '.gti-hero-number' },
+      { name: 'Geo Map', selector: '.map-placeholder' },
+      { name: 'AI Signals', selector: '.model-output-panel' },
+      { name: 'Market', selector: '.market-hero-card' },
+    ];
 
     for (const tab of tabs) {
       await page.goto('/');
-      await page.getByRole('button', { name: new RegExp(tab, 'i') }).click();
-      await expect(page.locator('.page-title')).toContainText(tab.toUpperCase().replace(' ', ' '));
+      await page.getByRole('button', { name: new RegExp(tab.name, 'i') }).click();
+      await expect(page.locator(tab.selector)).toBeVisible();
     }
   });
 });

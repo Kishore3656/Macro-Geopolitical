@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import AppShell from '@/components/layout/AppShell';
 
 export const metadata: Metadata = {
   title: 'GeoMarket Intelligence',
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-slate-950 text-slate-100">{children}</body>
+      <body className="bg-slate-950 text-slate-100">
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

@@ -30,7 +30,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'streamlit run app.py --logger.level=error',
+    command: 'python -m streamlit run app.py --logger.level=error',
     url: 'http://localhost:8501',
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

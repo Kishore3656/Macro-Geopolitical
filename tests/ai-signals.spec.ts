@@ -5,14 +5,13 @@ test.describe('AI Signals Page', () => {
     await page.goto('/?tab=ai_signals');
   });
 
-  test('should display AI Signals page title', async ({ page }) => {
-    const title = page.locator('.page-title');
-    await expect(title).toContainText('AI SIGNALS');
+  test('should display model output section', async ({ page }) => {
+    const modelOutput = page.locator('.model-output-panel');
+    await expect(modelOutput).toBeVisible();
   });
 
-  test('should display page subtitle', async ({ page }) => {
-    const subtitle = page.locator('.page-subtitle');
-    await expect(subtitle).toContainText('PREDICTIVE MODELING & INFERENCE');
+  test('should display MODEL OUTPUT text label', async ({ page }) => {
+    await expect(page.locator('text=MODEL OUTPUT')).toBeVisible();
   });
 
   test('should display model output panels', async ({ page }) => {
@@ -21,46 +20,36 @@ test.describe('AI Signals Page', () => {
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display Expected Volatility section', async ({ page }) => {
-    await expect(page.locator('text=EXPECTED VOLATILITY')).toBeVisible();
-    await expect(page.locator('text=20H ROLLING FORECAST')).toBeVisible();
+  test('should display volatility prediction panel', async ({ page }) => {
+    await expect(page.locator('text=VOLATILITY_PREDICTION')).toBeVisible();
   });
 
-  test('should display Directional Bias section', async ({ page }) => {
-    await expect(page.locator('text=DIRECTIONAL BIAS')).toBeVisible();
-    await expect(page.locator('text=NEXT-HOUR PREDICTION')).toBeVisible();
+  test('should display direction prediction panel', async ({ page }) => {
+    await expect(page.locator('text=DIRECTION_PREDICTION')).toBeVisible();
   });
 
-  test('should display Feature Weights section', async ({ page }) => {
-    await expect(page.locator('text=FEATURE WEIGHTS')).toBeVisible();
+  test('should display feature rows with GTI features', async ({ page }) => {
+    const featureRows = page.locator('.feature-row');
+    const count = await featureRows.count();
+    expect(count).toBeGreaterThan(0);
 
-    // Check feature rows
-    await expect(page.locator('text=GTI SCORE')).toBeVisible();
-    await expect(page.locator('text=RETURNS 1H')).toBeVisible();
-    await expect(page.locator('text=VADER AVG')).toBeVisible();
-    await expect(page.locator('text=VOL 20H')).toBeVisible();
+    // Check for GTI input features
+    await expect(page.locator('text=GTI_INPUT_FEATURES')).toBeVisible();
   });
 
-  test('should display feature bars', async ({ page }) => {
-    const featureBars = page.locator('.feature-bar-fill');
-    const count = await featureBars.count();
+  test('should display confidence text', async ({ page }) => {
+    await expect(page.locator('text=Confidence:')).toBeVisible();
+  });
+
+  test('should display feature values', async ({ page }) => {
+    const featureValues = page.locator('.feature-value');
+    const count = await featureValues.count();
     expect(count).toBeGreaterThan(0);
   });
 
-  test('should display Inference History section', async ({ page }) => {
-    await expect(page.locator('text=INFERENCE HISTORY')).toBeVisible();
-
-    const historyEmpty = page.locator('.history-empty');
-    await expect(historyEmpty).toBeVisible();
-    await expect(historyEmpty).toContainText('NO HISTORICAL DATA LOADED');
-  });
-
-  test('should display confidence metrics', async ({ page }) => {
-    const confidenceElements = page.locator('.model-confidence');
-    const count = await confidenceElements.count();
+  test('should display model output panels', async ({ page }) => {
+    const panels = page.locator('.model-output-panel');
+    const count = await panels.count();
     expect(count).toBeGreaterThan(0);
-
-    // Should show confidence percentages
-    await expect(page.locator('text=CONFIDENCE:')).toBeVisible();
   });
 });

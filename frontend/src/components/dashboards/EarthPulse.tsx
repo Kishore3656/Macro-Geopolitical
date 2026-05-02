@@ -1,100 +1,104 @@
 'use client';
 
+import { useGTI } from '@/hooks';
+import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
-import MetricCard from '../MetricCard';
-import LineChart from '../charts/LineChart';
-
-interface EarthPulseData {
-  gtiIndex: number;
-  marketSentiment: number;
-  volatility: number;
-  capitalFlow: number;
-  timestamp: string;
-}
+import { HeadlineData, ConflictData } from '@/types';
+import LineChart from '@/components/charts/LineChart';
+import SignalCard from '@/components/ui/SignalCard';
+import HeadlineItem from '@/components/ui/HeadlineItem';
+import StatusBadge from '@/components/ui/StatusBadge';
 
 export default function EarthPulse() {
-  const [data, setData] = useState<EarthPulseData | null>(null);
+  const { current: gti, history: gtiHistory, loading: gtiLoading } = useGTI();
+  const [headlines, setHeadlines] = useState<HeadlineData | null>(null);
+  const [conflicts, setConflicts] = useState<ConflictData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [gtiRes, marketRes] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gti`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/market/spy`)
-        ]);
-        const gtiData = await gtiRes.json();
-        const marketData = await marketRes.json();
+    const loadData = async () => {
+      setLoading(true);
+      const [headlineRes, conflictRes] = await Promise.all([
+        api.headlines(20),
+        api.conflicts(15),
+      ]);
 
-        setData({
-          gtiIndex: gtiData.gti_score || 0,
-          marketSentiment: gtiData.vader_sentiment || 0,
-          volatility: marketData.volatility || 0,
-          capitalFlow: marketData.volume || 0,
-          timestamp: new Date().toISOString()
-        });
-      } catch (error) {
-        console.error('Error fetching Earth Pulse data:', error);
-        setData({
-          gtiIndex: 0,
-          marketSentiment: 0,
-          volatility: 0,
-          capitalFlow: 0,
-          timestamp: new Date().toISOString()
-        });
-      } finally {
-        setLoading(false);
-      }
+      if (!('error' in headlineRes)) setHeadlines(headlineRes);
+      if (!('error' in conflictRes)) setConflicts(conflictRes);
+      setLoading(false);
     };
 
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
+    loadData();
   }, []);
 
-  if (loading) {
-    return <div className="text-slate-400">Loading Earth Pulse...</div>;
-  }
-
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-white">Earth Pulse</h2>
-        <p className="text-sm text-slate-400 mt-1">Global markets, capital flows & geopolitical indicators</p>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Geopolitical Tension Index"
-          value={data?.gtiIndex.toFixed(3) || '0.000'}
-          unit="(0.0 - 1.0)"
-          trend="neutral"
+    <div className="p-8 space-y-8">
+      <div className="grid grid-cols-4 gap-4">
+        <StatusBadge
+          label="GTI Score"
+          status={gti && gti.score > 0.6 ? 'danger' : gti && gti.score > 0.4 ? 'warning' : 'success'}
+          value={gti ? (gti.score * 100).toFixed(1) : '-'}
         />
-        <MetricCard
-          label="Market Sentiment"
-          value={data?.marketSentiment.toFixed(2) || '0.00'}
-          unit="%"
-          trend={data && data.marketSentiment > 0 ? 'up' : 'down'}
+        <StatusBadge
+          label="Sentiment"
+          status={gti && gti.sentiment < -10 ? 'danger' : 'neutral'}
+          value={gti ? gti.sentiment.toFixed(1) : '-'}
         />
-        <MetricCard
+        <StatusBadge
           label="Volatility"
-          value={data?.volatility.toFixed(2) || '0.00'}
-          unit="VIX"
-          trend="neutral"
+          status={gti && gti.volatility > 50 ? 'warning' : 'success'}
+          value={gti ? gti.volatility.toFixed(1) : '-'}
         />
-        <MetricCard
-          label="Capital Flow"
-          value={data?.capitalFlow.toFixed(2) || '0.00'}
-          unit="Billions"
-          trend={data && data.capitalFlow > 0 ? 'up' : 'down'}
+        <StatusBadge
+          label="Active Conflicts"
+          status={conflicts ? (conflicts.total_events > 100 ? 'danger' : 'warning') : 'neutral'}
+          value={conflicts?.total_events || '-'}
         />
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <LineChart title="GTI Trend (24h)" data={[]} />
-        <LineChart title="Capital Flows (24h)" data={[]} />
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-2">
+          <LineChart
+            data={gtiHistory}
+            dataKey="score"
+            stroke="#00ffff"
+            title="Geopolitical Tension Index (48h)"
+            height={400}
+          />
+        </div>
+        <SignalCard signal={null} loading={gtiLoading} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        <div>
+          <h3 className="text-lg font-semibold text-slate-200 mb-4">Top Headlines</h3>
+          <div className="space-y-3">
+            {headlines?.headlines.slice(0, 5).map((headline, i) => (
+              <HeadlineItem key={i} headline={headline} />
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold text-slate-200 mb-4">Active Conflicts</h3>
+          <div className="space-y-3">
+            {conflicts?.conflicts.slice(0, 5).map((conflict, i) => (
+              <div key={i} className="bg-[#13151d] border border-slate-800 rounded-lg p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <p className="font-semibold text-slate-200">{conflict.country}</p>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    conflict.severity === 'high' ? 'bg-danger bg-opacity-20 text-danger' :
+                    conflict.severity === 'medium' ? 'bg-amber bg-opacity-20 text-amber' :
+                    'bg-success bg-opacity-20 text-success'
+                  }`}>
+                    {conflict.severity}
+                  </span>
+                </div>
+                <p className="text-sm text-slate-400">{conflict.count} events</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
