@@ -121,6 +121,26 @@ Visit **http://localhost:3000** and navigate through the four dashboards:
 - **Market Data:** Yahoo Finance / Alpha Vantage APIs
 - **Local SQLite:** Cached GTI, news, market, prediction data
 
+## Migration from Streamlit to React Frontend
+
+### What Changed
+The project previously had **two separate UIs**:
+- **ui/** folder: Python Streamlit components (deprecated, now removed)
+- **frontend/** folder: React 19 + Next.js 15 (now the unified, single UI)
+
+### Why the Change
+1. **Real-time Performance:** WebSocket streaming (frontend) beats Streamlit polling
+2. **Type Safety:** TypeScript prevents runtime errors in complex dashboards
+3. **State Management:** Zustand stores are cleaner than Streamlit's session state
+4. **Modern Architecture:** Next.js 15 App Router + Tailwind CSS outperforms legacy Streamlit styling
+5. **Single Source of Truth:** One codebase instead of duplicated logic across two UIs
+
+### What Was Removed
+- `ui/` folder (earth_pulse.py, market.py, geo_map.py, ai_signals.py, tactical.py, trading_guide.py)
+- `app.py` (Streamlit entry point)
+
+Both are now replaced by the unified React frontend.
+
 ## Disclaimer
 
 **Analytical intelligence only—not financial advice.** Always conduct your own research, manage risk with stops, and understand market conditions before trading. Signals are probabilistic, not guaranteed.
