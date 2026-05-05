@@ -102,7 +102,7 @@ const regionOverlays: RegionOverlay[] = [
   },
   {
     id: 'eu',
-    fill: 'url(#zoneYellow)',
+    fill: 'url(#zoneYellowHatch)',
     geometry: geoBox(-12, 35, 32, 63),
   },
   {
@@ -122,7 +122,7 @@ const regionOverlays: RegionOverlay[] = [
   },
   {
     id: 'apac',
-    fill: 'url(#zoneGreen)',
+    fill: 'url(#zoneGreenHatch)',
     geometry: geoBox(98, 18, 148, 56),
   },
 ];
@@ -146,7 +146,7 @@ const regionCards: RegionCard[] = [
     tradeFlow: 'STABLE',
     statusLabel: 'STATUS',
     statusValue: 'STABLE',
-    tone: 'green',
+    tone: 'yellow',
     coordinate: [7, 47.5],
     popupPosition: { left: '43.5%', top: '59%' },
   },
@@ -259,6 +259,10 @@ export default function CommandCenterMap({
                 </pattern>
                 <pattern id="zoneYellow" width="12" height="12" patternUnits="userSpaceOnUse">
                   <rect width="12" height="12" fill="#f6e327" />
+                </pattern>
+                <pattern id="zoneYellowHatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(38)">
+                  <rect width="10" height="10" fill="#c4a024" fillOpacity="0.4" />
+                  <line x1="0" y1="0" x2="0" y2="10" stroke="#f6e327" strokeWidth="4" strokeOpacity="0.8" />
                 </pattern>
                 <pattern id="zoneGreen" width="12" height="12" patternUnits="userSpaceOnUse">
                   <rect width="12" height="12" fill="#92ef3e" />
