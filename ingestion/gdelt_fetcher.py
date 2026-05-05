@@ -133,7 +133,7 @@ def fetch_latest():
         df   = _parse_gdelt_csv(data)
         n    = _insert_df(df)
         print(f"GDELT latest: inserted {n} events  ({len(df)} parsed)")
-    except Exception as e:
+    except (requests.RequestException, zipfile.BadZipFile, pd.errors.ParserError, ValueError, sqlite3.Error) as e:
         print(f"GDELT latest: failed — {e}")
 
 
@@ -160,7 +160,7 @@ def backfill(days: int = 30):
                 print(f"  {date_str}: inserted {n} / {len(df)} events")
             else:
                 print(f"  {date_str}: HTTP {resp.status_code} — skipping")
-        except Exception as e:
+        except (requests.RequestException, zipfile.BadZipFile, pd.errors.ParserError, ValueError, sqlite3.Error) as e:
             print(f"  {date_str}: error — {e}")
         current += timedelta(days=1)
 

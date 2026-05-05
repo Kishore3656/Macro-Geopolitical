@@ -1,64 +1,79 @@
 @echo off
-REM GeoMarket Intelligence Framework - Windows Startup Script
+setlocal enabledelayedexpansion
+REM GeoMarket Intelligence Framework - Automatic Startup Script
+REM Starts both backend and frontend without any prompts
 
 echo.
 echo ================================
 echo GEOMARKET INTELLIGENCE FRAMEWORK
-echo Real-time GTI & Trading Signals
+echo Real-time GTI ^& Trading Signals
 echo ================================
+echo.
+echo Starting both services automatically...
 echo.
 
 cd /d "%~dp0"
 
 set "VENV_PY=%~dp0venv\Scripts\python.exe"
 set "VENV_PIP=%~dp0venv\Scripts\pip.exe"
+set "ROOT_DIR=%~dp0"
 
 REM Verify venv exists
 if not exist "%VENV_PY%" (
-    echo ERROR: venv not found. Run these commands first:
-    echo   python -m venv venv
-    echo   venv\Scripts\pip install -r requirements.txt
-    pause
-    exit /b 1
-)
-
-echo Python version:
-"%VENV_PY%" --version
-
-echo.
-echo Updating dependencies...
-"%VENV_PIP%" install -r requirements.txt -q
-
-echo.
-echo ================================
-echo STARTUP OPTIONS
-echo ================================
-echo 1. FastAPI Backend (port 8000)
-echo 2. Streamlit UI (port 8501)
-echo 3. React Frontend (port 3000)
-echo 4. All three (requires multiple terminals)
-echo.
-set /p choice="Select option (1-4): "
-
-if "%choice%"=="1" (
-    echo Starting FastAPI backend...
-    "%VENV_PY%" -m uvicorn api.main:app --reload
-) else if "%choice%"=="2" (
-    echo Starting Streamlit dashboard...
-    "%VENV_PY%" -m streamlit run app.py
-) else if "%choice%"=="3" (
-    echo Starting React frontend...
-    cd frontend
-    npm run dev
-    cd ..
-) else if "%choice%"=="4" (
-    echo Please start each in a separate terminal window:
-    echo   Terminal 1: python -m uvicorn api.main:app --reload
-    echo   Terminal 2: streamlit run app.py
-    echo   Terminal 3: cd frontend ^&^& npm run dev
+    echo ERROR: venv not found. Creating virtual environment...
+    python -m venv venv
+    echo Installing dependencies...
+    "%VENV_PIP%" install -r requirements.txt -q
 ) else (
-    echo Invalid option. Starting Streamlit by default...
-    "%VENV_PY%" -m streamlit run app.py
+    echo Python version:
+    "%VENV_PY%" --version
+    echo.
+    echo Updating dependencies...
+    "%VENV_PIP%" install -r requirements.txt -q
 )
 
+echo.
+echo ================================
+echo STARTING SERVICES
+echo ================================
+echo.
+
+REM Start FastAPI backend in new window
+echo Starting FastAPI Backend (port 8000)...
+start "GeoMarket API" /D "%ROOT_DIR%" cmd /k ""%VENV_PY%" -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000"
+
+REM Wait a moment for backend to initialize
+timeout /t 3 /nobreak >nul
+
+REM Install frontend dependencies if not present
+if not exist "%ROOT_DIR%\frontend\node_modules" (
+    echo Installing frontend dependencies...
+    cd /d "%ROOT_DIR%\frontend"
+    call npm install -q
+    cd /d "%ROOT_DIR%"
+)
+
+REM Start React frontend in new window
+echo Starting React Frontend (port 3000)...
+start "GeoMarket UI" /D "%ROOT_DIR%\frontend" cmd /k "npm run dev"
+
+echo.
+echo ================================
+echo SERVICES STARTING
+echo ================================
+echo.
+echo FastAPI Backend: http://localhost:8000
+echo FastAPI Docs:   http://localhost:8000/docs
+echo Frontend UI:    http://localhost:3000
+echo.
+echo Both windows will open in separate terminals.
+echo Close any window to stop that service.
+echo.
+
+REM Keep this window open for reference
+timeout /t 5 /nobreak >nul
+echo.
+echo Services are now running. Press any key to close this window.
+echo (The services will continue running in their own windows)
 pause
+exit /b 0

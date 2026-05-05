@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import UnifiedDashboard from '@/components/dashboards/UnifiedDashboard';
 
 export default function Home() {
-  redirect('/earth-pulse');
+  return <UnifiedDashboard />;
 }

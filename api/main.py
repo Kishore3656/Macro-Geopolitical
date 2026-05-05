@@ -25,16 +25,16 @@ from typing import List
 from config import GTI_DB, NEWS_DB, MARKET_DB, PREDICTIONS_DB
 from gti.aggregator import compute_gti
 from prediction.predict import run_inference
-from ingestion.db import get_conn
+from ingestion.db import get_conn, db_transaction
 
 app = FastAPI(title="GeoMarket Intelligence API", version="1.0.0")
 
-# Enable CORS for Streamlit frontend
+allowed_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -103,11 +103,10 @@ def get_gti_current():
     If no recent data, compute fresh.
     """
     try:
-        conn = get_conn(GTI_DB)
-        row = conn.execute(
-            "SELECT * FROM gti_scores ORDER BY timestamp DESC LIMIT 1"
-        ).fetchone()
-        conn.close()
+        with db_transaction(GTI_DB) as conn:
+            row = conn.execute(
+                "SELECT * FROM gti_scores ORDER BY timestamp DESC LIMIT 1"
+            ).fetchone()
 
         if row:
             gti_score = float(row["gti_score"])
@@ -116,7 +115,6 @@ def get_gti_current():
             result = compute_gti()
             gti_score = result["gti_score"]
 
-        # Determine risk level
         if gti_score < 0.3:
             risk_level = "LOW_CONFLICT"
         elif gti_score < 0.6:
@@ -126,11 +124,13 @@ def get_gti_current():
 
         return {
             "timestamp": datetime.utcnow().isoformat(),
-            "gti_score": round(gti_score, 4),
+            "score": round(gti_score, 4),
             "risk_level": risk_level,
+            "sentiment": float(row["vader_avg"]) if row else 0.0,
+            "volatility": float(row["avg_tone"]) if row else 0.0,
+            "conflict_count": int(row["conflict_ct"]) if row else 0,
+            "peaceful_count": 100 - (int(row["conflict_ct"]) if row else 0),
             "conflict_ratio": float(row["conflict_ct"]) / max(1, 100) if row else 0.5,
-            "tone_index": float(row["avg_tone"]) if row else 0.0,
-            "vader_sentiment": float(row["vader_avg"]) if row else 0.0,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -141,19 +141,18 @@ def get_gti_history(hours: int = 48):
     """Get GTI history for the last N hours."""
     try:
         cutoff = (datetime.utcnow() - timedelta(hours=hours)).strftime("%Y-%m-%d %H:%M:%S")
-        conn = get_conn(GTI_DB)
-        rows = conn.execute(
-            "SELECT timestamp, gti_score FROM gti_scores WHERE timestamp >= ? ORDER BY timestamp ASC",
-            (cutoff,),
-        ).fetchall()
-        conn.close()
+        with db_transaction(GTI_DB) as conn:
+            rows = conn.execute(
+                "SELECT timestamp, gti_score FROM gti_scores WHERE timestamp >= ? ORDER BY timestamp ASC",
+                (cutoff,),
+            ).fetchall()
 
         return {
-            "hours": hours,
-            "data": [
+            "history": [
                 {
                     "timestamp": r["timestamp"],
-                    "gti_score": float(r["gti_score"]),
+                    "score": float(r["gti_score"]),
+                    "risk_level": "LOW_CONFLICT" if float(r["gti_score"]) < 0.3 else "MODERATE_TENSION" if float(r["gti_score"]) < 0.6 else "HIGH_CONFLICT",
                 }
                 for r in rows
             ],
@@ -241,18 +240,17 @@ def get_headlines(limit: int = 20):
     """
     try:
         cutoff = (datetime.utcnow() - timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
-        conn = get_conn(NEWS_DB)
-        rows = conn.execute(
-            """
-            SELECT timestamp, title, source, vader_compound
-            FROM rss_articles
-            WHERE fetched_at >= ?
-            ORDER BY fetched_at DESC
-            LIMIT ?
-            """,
-            (cutoff, limit),
-        ).fetchall()
-        conn.close()
+        with db_transaction(NEWS_DB) as conn:
+            rows = conn.execute(
+                """
+                SELECT published_at, title, source, vader_compound
+                FROM rss_articles
+                WHERE fetched_at >= ?
+                ORDER BY fetched_at DESC
+                LIMIT ?
+                """,
+                (cutoff, limit),
+            ).fetchall()
 
         headlines = []
         for r in rows:
@@ -268,7 +266,7 @@ def get_headlines(limit: int = 20):
                 score_display = f"{compound:.2f}"
 
             headlines.append({
-                "timestamp": r["timestamp"],
+                "timestamp": r["published_at"],
                 "title": r["title"],
                 "source": r["source"],
                 "sentiment": sentiment,
@@ -277,8 +275,8 @@ def get_headlines(limit: int = 20):
             })
 
         return {
-            "total": len(headlines),
-            "data": headlines,
+            "headlines": headlines,
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -294,18 +292,17 @@ def get_market_spy(bars: int = 100):
     Get recent S&P 500 OHLCV bars.
     """
     try:
-        conn = get_conn(MARKET_DB)
-        rows = conn.execute(
-            """
-            SELECT timestamp, open, high, low, close, volume
-            FROM ohlcv
-            WHERE symbol='SPY'
-            ORDER BY timestamp DESC
-            LIMIT ?
-            """,
-            (bars,),
-        ).fetchall()
-        conn.close()
+        with db_transaction(MARKET_DB) as conn:
+            rows = conn.execute(
+                """
+                SELECT timestamp, open, high, low, close, volume
+                FROM ohlcv
+                WHERE symbol='SPY'
+                ORDER BY timestamp DESC
+                LIMIT ?
+                """,
+                (bars,),
+            ).fetchall()
 
         if not rows:
             return {"error": "No SPY data", "data": []}
@@ -326,13 +323,12 @@ def get_market_spy(bars: int = 100):
         prev = data[-2] if len(data) > 1 else latest
 
         return {
-            "symbol": "SPY",
+            "bars": data,
             "current_price": latest["close"],
-            "daily_change": round(
+            "daily_change_pct": round(
                 ((latest["close"] - prev["close"]) / prev["close"]) * 100, 2
             ),
-            "bars": len(data),
-            "data": data,
+            "timestamp": datetime.utcnow().isoformat(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -344,41 +340,47 @@ def get_market_sectors():
     Get sector performance from real market data.
     """
     try:
-        conn = get_conn(MARKET_DB)
         sector_symbols = ["XLK", "XLV", "XLF", "XLE", "XLI", "XLY", "XLB", "XLU", "XLRE", "XLC"]
         sectors = []
 
-        for symbol in sector_symbols:
-            row = conn.execute(
-                "SELECT close, timestamp FROM ohlcv WHERE symbol=? ORDER BY timestamp DESC LIMIT 2",
-                (symbol,),
-            ).fetchall()
+        with db_transaction(MARKET_DB) as conn:
+            for symbol in sector_symbols:
+                row = conn.execute(
+                    "SELECT close, timestamp FROM ohlcv WHERE symbol=? ORDER BY timestamp DESC LIMIT 2",
+                    (symbol,),
+                ).fetchall()
 
-            if row and len(row) >= 2:
-                current = float(row[0]["close"])
-                prev = float(row[1]["close"])
-                change = ((current - prev) / prev) * 100 if prev > 0 else 0
-            else:
-                current = 0
-                change = 0
+                if row and len(row) >= 2:
+                    current = float(row[0]["close"])
+                    prev = float(row[1]["close"])
+                    change = ((current - prev) / prev) * 100 if prev > 0 else 0
+                else:
+                    current = 0
+                    change = 0
 
-            sector_names = {
-                "XLK": "Technology", "XLV": "Healthcare", "XLF": "Financials",
-                "XLE": "Energy", "XLI": "Industrials", "XLY": "Consumer Disc.",
-                "XLB": "Materials", "XLU": "Utilities", "XLRE": "Real Estate", "XLC": "Comm. Services"
-            }
+                sector_names = {
+                    "XLK": "Technology", "XLV": "Healthcare", "XLF": "Financials",
+                    "XLE": "Energy", "XLI": "Industrials", "XLY": "Consumer Disc.",
+                    "XLB": "Materials", "XLU": "Utilities", "XLRE": "Real Estate", "XLC": "Comm. Services"
+                }
 
-            sectors.append({
-                "name": sector_names.get(symbol, symbol),
-                "symbol": symbol,
-                "change": round(change, 2),
-                "price": round(current, 2),
-            })
+                sectors.append({
+                    "name": sector_names.get(symbol, symbol),
+                    "symbol": symbol,
+                    "change": round(change, 2),
+                    "price": round(current, 2),
+                })
 
-        conn.close()
         return {
+            "sectors": [
+                {
+                    "name": s["name"],
+                    "performance": s["price"],
+                    "change_pct": s["change"],
+                }
+                for s in sectors
+            ],
             "timestamp": datetime.utcnow().isoformat(),
-            "sectors": sectors,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -395,17 +397,16 @@ def get_conflicts(limit: int = 15):
     Data sourced from GDELT events.
     """
     try:
-        conn = get_conn(GTI_DB)
-        rows = conn.execute(
-            """
-            SELECT country_code, conflict_count, avg_goldstein, latest_event_time
-            FROM conflict_summary
-            ORDER BY conflict_count DESC
-            LIMIT ?
-            """,
-            (limit,),
-        ).fetchall()
-        conn.close()
+        with db_transaction(GTI_DB) as conn:
+            rows = conn.execute(
+                """
+                SELECT country_code, conflict_count, avg_goldstein, latest_event_time
+                FROM conflict_summary
+                ORDER BY conflict_count DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
 
         if not rows:
             return {"total": 0, "data": []}
@@ -432,9 +433,24 @@ def get_conflicts(limit: int = 15):
                 "latest_event": r["latest_event_time"],
             })
 
-        return {"total": len(conflicts), "data": conflicts}
+        return {
+            "conflicts": [
+                {
+                    "country": c["country_code"],
+                    "count": c["event_count"],
+                    "severity": c["severity"].lower(),
+                }
+                for c in conflicts
+            ],
+            "total_events": sum(c["event_count"] for c in conflicts),
+            "timestamp": datetime.utcnow().isoformat(),
+        }
     except Exception as e:
-        return {"error": str(e), "data": []}
+        return {
+            "conflicts": [],
+            "total_events": 0,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
 
 
 @app.get("/api/bilateral")
@@ -443,17 +459,16 @@ def get_bilateral_relations(limit: int = 10):
     Get bilateral geopolitical relationships and their stress levels.
     """
     try:
-        conn = get_conn(GTI_DB)
-        rows = conn.execute(
-            """
-            SELECT actor1, actor2, relation_count, avg_goldstein, latest_time
-            FROM bilateral_summary
-            ORDER BY relation_count DESC
-            LIMIT ?
-            """,
-            (limit,),
-        ).fetchall()
-        conn.close()
+        with db_transaction(GTI_DB) as conn:
+            rows = conn.execute(
+                """
+                SELECT actor1, actor2, relation_count, avg_goldstein, latest_time
+                FROM bilateral_summary
+                ORDER BY relation_count DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
 
         if not rows:
             return {"total": 0, "data": []}
@@ -471,9 +486,24 @@ def get_bilateral_relations(limit: int = 10):
                 "latest_event": r["latest_time"],
             })
 
-        return {"total": len(relations), "data": relations}
+        return {
+            "relations": [
+                {
+                    "country1": r["pair"].split(" ↔ ")[0],
+                    "country2": r["pair"].split(" ↔ ")[1] if " ↔ " in r["pair"] else "",
+                    "stress_level": r["stress_level"],
+                    "stress_category": "critical" if r["stress_level"] > 70 else "tense" if r["stress_level"] > 40 else "stable",
+                    "recent_events": r["event_count"],
+                }
+                for r in relations
+            ],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
     except Exception as e:
-        return {"error": str(e), "data": []}
+        return {
+            "relations": [],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
 
 
 @app.get("/api/events")
@@ -483,8 +513,6 @@ def get_recent_events(event_type: str = "all", limit: int = 20):
     Supports filtering by event_type: conflict, diplomatic, economic, or all.
     """
     try:
-        conn = get_conn(GTI_DB)
-
         if event_type == "conflict":
             query = "SELECT * FROM gdelt_events WHERE goldstein_scale < -5.0 ORDER BY event_date DESC LIMIT ?"
         elif event_type == "diplomatic":
@@ -494,8 +522,8 @@ def get_recent_events(event_type: str = "all", limit: int = 20):
         else:
             query = "SELECT * FROM gdelt_events ORDER BY event_date DESC LIMIT ?"
 
-        rows = conn.execute(query, (limit,)).fetchall()
-        conn.close()
+        with db_transaction(GTI_DB) as conn:
+            rows = conn.execute(query, (limit,)).fetchall()
 
         events = []
         for r in rows:
@@ -511,9 +539,28 @@ def get_recent_events(event_type: str = "all", limit: int = 20):
                 "avg_tone": float(r["avg_tone"]) if r["avg_tone"] else 0.0,
             })
 
-        return {"total": len(events), "event_type": event_type, "data": events}
+        return {
+            "events": [
+                {
+                    "event_id": e["event_id"],
+                    "event_type": event_type,
+                    "country": e["actor1"],
+                    "location": "",
+                    "latitude": e["latitude"],
+                    "longitude": e["longitude"],
+                    "event_code": e["goldstein_scale"],
+                    "goldstein_scale": e["goldstein_scale"],
+                    "timestamp": e["date"],
+                }
+                for e in events
+            ],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
     except Exception as e:
-        return {"error": str(e), "data": []}
+        return {
+            "events": [],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
 
 
 # ────────────────────────────────────────────────────────────────────────────

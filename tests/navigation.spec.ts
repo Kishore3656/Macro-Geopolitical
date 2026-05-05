@@ -1,77 +1,35 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('GeoMarket Navigation', () => {
-  test('should load the home page', async ({ page }) => {
-    await page.goto('/');
+  test('should redirect home to Earth Pulse and load the home page', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(page).toHaveURL(/\/earth-pulse$/);
     await expect(page).toHaveTitle(/GeoMarket Intelligence/);
+    await expect(page.getByRole('heading', { name: /Earth Pulse/i })).toBeVisible({ timeout: 10000 });
   });
 
-  test('should display the navbar with all tabs', async ({ page }) => {
-    await page.goto('/');
-
-    // Check navbar exists
-    const navbar = page.locator('.topnav');
-    await expect(navbar).toBeVisible();
-
-    // Check all tab names are visible
-    await expect(page.locator('.topnav-tabs')).toContainText('EARTH PULSE');
-    await expect(page.locator('.topnav-tabs')).toContainText('GEO MAP');
-    await expect(page.locator('.topnav-tabs')).toContainText('AI SIGNALS');
-    await expect(page.locator('.topnav-tabs')).toContainText('MARKET');
+  test('should display the sidebar navigation links', async ({ page }) => {
+    await page.goto('/earth-pulse', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('link', { name: /Earth Pulse/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('link', { name: /Geo Map/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('link', { name: /Market/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('link', { name: /AI Signals/i })).toBeVisible({ timeout: 10000 });
   });
 
-  test('should display the sidebar', async ({ page }) => {
-    await page.goto('/');
-
-    const sidebar = page.locator('.left-sidebar');
-    await expect(sidebar).toBeVisible();
-
-    // Check sidebar items
-    await expect(page.locator('.sidebar-nav')).toContainText('INTELLIGENCE');
-    await expect(page.locator('.sidebar-nav')).toContainText('Archive');
-    await expect(page.locator('.sidebar-nav')).toContainText('Surveillance');
-    await expect(page.locator('.sidebar-nav')).toContainText('Tactical');
-  });
-
-  test('should display the footer status bar', async ({ page }) => {
-    await page.goto('/');
-
-    const statusBar = page.locator('.status-bar');
-    await expect(statusBar).toBeVisible();
-
-    // Check status bar content
-    await expect(statusBar).toContainText('SYSTEM_STABLE');
-    await expect(statusBar).toContainText('ENCRYPTION_AES256');
-  });
-
-  test('should switch tabs using navigation buttons', async ({ page, context }) => {
-    await page.goto('/');
-
-    // Get initial page count
-    const initialPages = context.pages().length;
-
-    // Click on "Geo Map" tab using the button mechanism
-    await page.getByRole('button', { name: /Geo Map/i }).click();
-
-    // Verify no new tabs opened
-    expect(context.pages().length).toBe(initialPages);
-
-    // Verify the page updated by checking for map-specific element
-    await expect(page.locator('.map-placeholder')).toBeVisible();
-  });
-
-  test('should navigate through all tabs with proper elements', async ({ page }) => {
-    const tabs = [
-      { name: 'Earth Pulse', selector: '.gti-hero-number' },
-      { name: 'Geo Map', selector: '.map-placeholder' },
-      { name: 'AI Signals', selector: '.model-output-panel' },
-      { name: 'Market', selector: '.market-hero-card' },
+  test('should navigate to each dashboard using sidebar links', async ({ page }) => {
+    const pages = [
+      { link: /Earth Pulse/i, heading: /Earth Pulse/i, url: /\/earth-pulse$/ },
+      { link: /Geo Map/i, heading: /Geopolitical Intelligence/i, url: /\/geo-map$/ },
+      { link: /Market/i, heading: /Market Intelligence/i, url: /\/market$/ },
+      { link: /AI Signals/i, heading: /AI Trading Signals/i, url: /\/ai-signals$/ },
     ];
 
-    for (const tab of tabs) {
-      await page.goto('/');
-      await page.getByRole('button', { name: new RegExp(tab.name, 'i') }).click();
-      await expect(page.locator(tab.selector)).toBeVisible();
+    await page.goto('/earth-pulse', { waitUntil: 'networkidle' });
+
+    for (const pageInfo of pages) {
+      await page.getByRole('link', { name: pageInfo.link }).click();
+      await expect(page).toHaveURL(pageInfo.url);
+      await expect(page.getByRole('heading', { name: pageInfo.heading })).toBeVisible({ timeout: 10000 });
     }
   });
 });

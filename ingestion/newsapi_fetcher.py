@@ -113,7 +113,7 @@ def fetch_headlines() -> int:
             )
             if cursor.rowcount:
                 inserted += 1
-        except Exception as e:
+        except sqlite3.Error as e:
             print(f"NewsAPI: insert error — {e}")
             continue
 

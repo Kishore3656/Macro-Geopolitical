@@ -58,7 +58,7 @@ def _yf_ticker_history(symbol: str, start: datetime, end: datetime) -> pd.DataFr
         # Ticker.history() returns a DatetimeIndex with tz — strip tz for consistency
         df.index = df.index.tz_localize(None) if df.index.tz is None else df.index.tz_convert(None)
         return df[["Open", "High", "Low", "Close", "Volume"]]
-    except Exception as exc:
+    except (ValueError, TypeError, KeyError, ImportError, RuntimeError, ConnectionError) as exc:
         print(f"Market [{symbol}] yfinance Ticker.history failed: {exc}")
         return pd.DataFrame()
 
@@ -81,7 +81,7 @@ def _stooq_history(symbol: str, start: datetime, end: datetime) -> pd.DataFrame:
         # Stooq column names are already Open/High/Low/Close/Volume
         df = df[["Open", "High", "Low", "Close", "Volume"]]
         return df
-    except Exception as exc:
+    except (ValueError, TypeError, KeyError, ImportError, RuntimeError, ConnectionError) as exc:
         print(f"Market [{symbol}] Stooq fallback failed: {exc}")
         return pd.DataFrame()
 
@@ -132,7 +132,7 @@ def _insert_ohlcv(symbol: str, df: pd.DataFrame) -> int:
             )
             if cursor.rowcount:
                 inserted += 1
-        except Exception as e:
+        except sqlite3.Error as e:
             print(f"Market [{symbol}] insert error at {timestamp}: {e}")
 
     conn.commit()

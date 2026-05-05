@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Globe, TrendingUp, Zap, Map } from 'lucide-react';
+import { Globe, TrendingUp, Zap, Map, LayoutDashboard } from 'lucide-react';
 
 const navItems = [
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Earth Pulse', href: '/earth-pulse', icon: Globe },
   { name: 'Geo Map', href: '/geo-map', icon: Map },
   { name: 'Market', href: '/market', icon: TrendingUp },

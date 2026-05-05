@@ -77,6 +77,37 @@ def _init_gti_db():
             avg_tone    REAL,
             vader_avg   REAL
         );
+        CREATE TABLE IF NOT EXISTS conflict_summary (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            country_code        TEXT UNIQUE,
+            conflict_count      INTEGER,
+            avg_goldstein       REAL,
+            latest_event_time   TEXT
+        );
+        CREATE TABLE IF NOT EXISTS bilateral_summary (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            actor1              TEXT,
+            actor2              TEXT,
+            relation_count      INTEGER,
+            avg_goldstein       REAL,
+            latest_time         TEXT,
+            UNIQUE(actor1, actor2)
+        );
+        CREATE TABLE IF NOT EXISTS gdelt_events (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id            TEXT UNIQUE,
+            event_date          TEXT,
+            actor1_country      TEXT,
+            actor2_country      TEXT,
+            event_code          TEXT,
+            cameo_code          TEXT,
+            goldstein_scale     REAL,
+            latitude            REAL,
+            longitude           REAL,
+            location            TEXT,
+            num_articles        INTEGER,
+            avg_tone            REAL
+        );
     """)
     conn.close()
 
@@ -101,3 +132,16 @@ def get_conn(db_path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+from contextlib import contextmanager
+
+
+@contextmanager
+def db_transaction(db_path: str):
+    """Context manager for safe database connections with automatic cleanup."""
+    conn = get_conn(db_path)
+    try:
+        yield conn
+    finally:
+        conn.close()

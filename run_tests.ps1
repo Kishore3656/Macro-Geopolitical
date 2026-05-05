@@ -27,10 +27,10 @@ Write-Host "Installing/updating Playwright..." -ForegroundColor Cyan
 Write-Host "Installing Playwright browsers..." -ForegroundColor Cyan
 & $venvPython -m playwright install chromium firefox webkit
 
-# Start Streamlit app in background
+# Start FastAPI backend in background
 Write-Host ""
-Write-Host "Starting Streamlit app..." -ForegroundColor Cyan
-$appProcess = Start-Process -FilePath $venvPython -ArgumentList "-m streamlit run app.py --logger.level=error" -PassThru -WindowStyle Hidden
+Write-Host "Starting FastAPI backend..." -ForegroundColor Cyan
+$appProcess = Start-Process -FilePath $venvPython -ArgumentList "-m uvicorn api.main:app --port 8000" -PassThru -WindowStyle Hidden
 
 # Wait for app to start
 Write-Host "Waiting for app to start (10 seconds)..." -ForegroundColor Yellow
@@ -43,9 +43,9 @@ Write-Host "Running tests..." -ForegroundColor Cyan
 
 $testResult = $LASTEXITCODE
 
-# Kill the Streamlit app
+# Kill the FastAPI app
 Write-Host ""
-Write-Host "Stopping Streamlit app..." -ForegroundColor Yellow
+Write-Host "Stopping FastAPI backend..." -ForegroundColor Yellow
 Stop-Process -Id $appProcess.Id -ErrorAction SilentlyContinue
 
 # Check test results

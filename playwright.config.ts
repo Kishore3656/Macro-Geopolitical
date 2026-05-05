@@ -2,16 +2,19 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  timeout: 30000,
+  expect: { timeout: 5000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:8501',
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    navigationTimeout: 30000,
   },
 
   projects: [
@@ -29,10 +32,19 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'python -m streamlit run app.py --logger.level=error',
-    url: 'http://localhost:8501',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: [
+    {
+      command: 'python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000',
+      url: 'http://localhost:8000/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+    {
+      command: 'npm run dev',
+      cwd: './frontend',
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+  ],
 });

@@ -13,8 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "resolveJsonModule": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "node",
     "noEmit": true,
     "jsx": "preserve",
     "baseUrl": ".",
@@ -26,6 +25,7 @@
     "allowJs": true,
     "incremental": true,
     "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
     "plugins": [
       {
         "name": "next"
@@ -36,12 +36,8 @@
     "src",
     ".next/types/**/*.ts"
   ],
-  "references": [
-    {
-      "path": "./tsconfig.node.json"
-    }
-  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    ".next"
   ]
 }

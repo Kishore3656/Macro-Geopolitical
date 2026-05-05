@@ -28,7 +28,7 @@ export default function SectorCard({ sector }: SectorCardProps) {
       <div className="space-y-2">
         <div>
           <p className="text-xs text-slate-500">Performance</p>
-          <p className="text-lg font-bold text-slate-200">{sector.performance.toFixed(2)}</p>
+          <p className="text-lg font-bold text-slate-200">{sector.performance !== undefined ? sector.performance.toFixed(2) : '-'}</p>
         </div>
         <div className="pt-2 border-t border-slate-800">
           <p className={`text-sm font-semibold ${color}`}>
