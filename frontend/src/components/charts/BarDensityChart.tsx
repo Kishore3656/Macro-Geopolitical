@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 interface BarDensityChartProps {
-  data: any[];
+  data: Array<Record<string, string | number>>;
   dataKey: string;
   fill?: string;
   title?: string;

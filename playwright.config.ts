@@ -34,7 +34,7 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000',
+      command: '"d:/trading bot/geo-market-ml/venv/Scripts/python.exe" -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000',
       url: 'http://localhost:8000/health',
       reuseExistingServer: !process.env.CI,
       timeout: 120000,

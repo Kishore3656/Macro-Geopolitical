@@ -10,7 +10,7 @@ export default function TopBar() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const response = await fetch('http://localhost:8000/health', { timeout: 5000 });
+        const response = await fetch('http://localhost:8000/health');
         setApiHealth(response.ok ? 'connected' : 'disconnected');
       } catch {
         setApiHealth('disconnected');

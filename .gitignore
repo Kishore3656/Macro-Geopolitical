@@ -51,3 +51,4 @@ data/
 *.h5
 *.joblib
 stitch_designs/
+.md

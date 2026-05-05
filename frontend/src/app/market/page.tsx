@@ -1,9 +1,9 @@
-import Market from '@/components/dashboards/Market';
+import NexusMarket from '@/components/dashboards/NexusMarket';
 
 export const metadata = {
   title: 'Market - GeoMarket Intelligence',
 };
 
 export default function MarketPage() {
-  return <Market />;
+  return <NexusMarket />;
 }

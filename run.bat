@@ -57,6 +57,11 @@ REM Start React frontend in new window
 echo Starting React Frontend (port 3000)...
 start "GeoMarket UI" /D "%ROOT_DIR%\frontend" cmd /k "npm run dev"
 
+REM Give frontend time to boot, then open browser automatically
+echo Opening dashboard in browser...
+timeout /t 8 /nobreak >nul
+start "" "http://localhost:3000"
+
 echo.
 echo ================================
 echo SERVICES STARTING

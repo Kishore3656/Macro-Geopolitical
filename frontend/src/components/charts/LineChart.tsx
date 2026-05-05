@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 interface LineChartProps {
-  data: any[];
+  data: Array<Record<string, string | number>>;
   dataKey: string;
   stroke?: string;
   title?: string;

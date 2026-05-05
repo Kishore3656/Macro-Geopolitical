@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Zap, TrendingUp } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { BilateralRelation } from '@/types';
 
 interface BilateralCardProps {

@@ -4,7 +4,7 @@ import { useSignals, useMarket, useGTI } from '@/hooks';
 import { api } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import { SignalHistoryPoint, BilateralData, GeoEventData } from '@/types';
-import { TrendingUp, TrendingDown, Brain, BarChart3, Globe, AlertTriangle, Zap, Activity, MapPin, Clock } from 'lucide-react';
+import { Brain, BarChart3, Globe, AlertTriangle, MapPin, Clock } from 'lucide-react';
 
 export default function UnifiedDashboard() {
   const { current: signal, history: signalHistory } = useSignals();

@@ -1,5 +1,5 @@
-import UnifiedDashboard from '@/components/dashboards/UnifiedDashboard';
+import NexusCommand from '@/components/dashboards/NexusCommand';
 
 export default function Home() {
-  return <UnifiedDashboard />;
+  return <NexusCommand />;
 }

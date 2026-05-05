@@ -2,27 +2,34 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Globe, TrendingUp, Zap, Map, LayoutDashboard } from 'lucide-react';
+import { BarChart3, Square, Triangle, ChevronDown } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Earth Pulse', href: '/earth-pulse', icon: Globe },
-  { name: 'Geo Map', href: '/geo-map', icon: Map },
-  { name: 'Market', href: '/market', icon: TrendingUp },
-  { name: 'AI Signals', href: '/ai-signals', icon: Zap },
+  { name: 'GEO-POLITICAL MARKET', href: '/', icon: Square },
+  { name: 'Geospatial Map', href: '/geo-map', icon: Triangle },
+  { name: 'Signal Analysis', href: '/ai-signals', icon: Square },
+  { name: 'Analytics', href: '/market', icon: BarChart3 },
+  { name: 'System Logs', href: '/earth-pulse', icon: ChevronDown },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-[#13151d] border-r border-slate-800 flex flex-col">
-      <div className="p-6 border-b border-slate-800">
-        <h1 className="text-xl font-bold text-cyan">GeoMarket</h1>
-        <p className="text-xs text-slate-400 mt-1">Intelligence Framework</p>
+    <aside className="flex w-full flex-col border-b border-white/10 bg-black lg:sticky lg:top-0 lg:h-screen lg:w-[240px] lg:border-b-0 lg:border-r lg:border-white/10">
+      <div className="border-b border-white/10 px-6 py-5">
+        <div className="text-[1.6rem] font-black uppercase leading-none tracking-[-0.08em] text-[#f4f1e8]">
+          GEOPOLITICAL
+        </div>
+        <div className="mt-1 text-[1.6rem] font-black uppercase leading-none tracking-[-0.08em] text-[#f4f1e8]">
+          MARKET
+        </div>
+        <div className="mt-1 text-xs uppercase tracking-[0.18em] text-[#72766c]">
+          WS_PORT:8000
+        </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 space-y-1 px-4 py-6">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -31,23 +38,18 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`flex items-center gap-3 border border-transparent px-3 py-3 text-sm font-semibold transition-colors ${
                 isActive
-                  ? 'bg-cyan bg-opacity-20 text-cyan'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  ? 'bg-white/[0.03] text-[#f4f1e8]'
+                  : 'text-[#b8b8ad] hover:bg-white/[0.02] hover:text-[#f4f1e8]'
               }`}
             >
-              <Icon size={20} />
-              <span className="text-sm font-medium">{item.name}</span>
+              <Icon size={14} strokeWidth={2.2} className={isActive ? 'text-[#f4f1e8]' : 'text-[#f4f1e8]'} />
+              <span>{item.name}</span>
             </Link>
           );
         })}
       </nav>
-
-      <div className="p-4 border-t border-slate-800 text-xs text-slate-500">
-        <p>API: localhost:8000</p>
-        <p className="mt-1">Real-time streaming active</p>
-      </div>
     </aside>
   );
 }

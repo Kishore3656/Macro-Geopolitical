@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 interface AreaChartProps {
-  data: any[];
+  data: Array<Record<string, string | number>>;
   dataKey: string;
   fill?: string;
   stroke?: string;

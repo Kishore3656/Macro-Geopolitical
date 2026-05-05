@@ -23,7 +23,7 @@ async function fetchAPI<T>(endpoint: string, params?: Record<string, string | nu
       });
     }
 
-    const response = await fetch(url.toString(), { timeout: 5000 });
+    const response = await fetch(url.toString());
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
@@ -76,7 +76,7 @@ export const api = {
 
   health: async (): Promise<boolean> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/health`, { timeout: 5000 });
+      const response = await fetch(`${API_BASE_URL}/health`);
       return response.ok;
     } catch {
       return false;

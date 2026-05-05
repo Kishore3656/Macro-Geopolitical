@@ -1,9 +1,9 @@
-import GeoMap from '@/components/dashboards/GeoMap';
+import NexusGeoMap from '@/components/dashboards/NexusGeoMap';
 
 export const metadata = {
   title: 'Geo Map - GeoMarket Intelligence',
 };
 
 export default function GeoMapPage() {
-  return <GeoMap />;
+  return <NexusGeoMap />;
 }
