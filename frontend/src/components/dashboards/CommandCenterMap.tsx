@@ -136,7 +136,7 @@ const regionCards: RegionCard[] = [
     statusLabel: 'STATUS',
     statusValue: 'STABLE',
     tone: 'yellow',
-    coordinate: [-74, 40.7],
+    coordinate: [-75, 37.5],
     popupPosition: { left: '24.5%', top: '48.5%' },
   },
   {
@@ -147,7 +147,7 @@ const regionCards: RegionCard[] = [
     statusLabel: 'STATUS',
     statusValue: 'STABLE',
     tone: 'yellow',
-    coordinate: [7, 47.5],
+    coordinate: [10, 49],
     popupPosition: { left: '43.5%', top: '59%' },
   },
   {
@@ -158,7 +158,7 @@ const regionCards: RegionCard[] = [
     statusLabel: 'HAZARD',
     statusValue: 'HIGH',
     tone: 'magenta',
-    coordinate: [35, 53],
+    coordinate: [34, 56.5],
     popupPosition: { left: '61.5%', top: '31.5%' },
   },
   {
@@ -169,7 +169,7 @@ const regionCards: RegionCard[] = [
     statusLabel: 'HAZARD',
     statusValue: 'HIGH',
     tone: 'magenta',
-    coordinate: [45, 25],
+    coordinate: [47.5, 26],
     popupPosition: { left: '54.5%', top: '64.5%' },
   },
   {
@@ -180,7 +180,7 @@ const regionCards: RegionCard[] = [
     statusLabel: 'HAZARD',
     statusValue: 'HIGH',
     tone: 'magenta',
-    coordinate: [75, 34],
+    coordinate: [78, 33],
     popupPosition: { left: '72.2%', top: '40.5%' },
   },
   {
@@ -191,7 +191,7 @@ const regionCards: RegionCard[] = [
     statusLabel: 'STATUS',
     statusValue: 'STABLE',
     tone: 'green',
-    coordinate: [120, 31],
+    coordinate: [123, 37],
     popupPosition: { left: '86.5%', top: '56.5%' },
   },
 ];
