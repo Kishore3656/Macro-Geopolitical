@@ -9,16 +9,16 @@ param(
 $Root = $PSScriptRoot
 
 function Show-Help {
-    Write-Host "`n╔═════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║   GeoMarket Trading Bot - Command Center               ║" -ForegroundColor Cyan
-    Write-Host "╚═════════════════════════════════════════════════════════╝`n" -ForegroundColor Cyan
+    Write-Host "`n========================================================" -ForegroundColor Cyan
+    Write-Host "   GeoMarket Trading Bot - Command Center" -ForegroundColor Cyan
+    Write-Host "========================================================`n" -ForegroundColor Cyan
 
     Write-Host "USAGE:" -ForegroundColor Yellow
     Write-Host "  .\RUN.ps1 <command> [options]`n" -ForegroundColor White
 
     Write-Host "COMMANDS:" -ForegroundColor Yellow
     Write-Host "  train        Train ML models (5-10 min)" -ForegroundColor Green
-    Write-Host "  start        Start all 3 services (scheduler, api, frontend)" -ForegroundColor Green
+    Write-Host "  start        Start all 3 services" -ForegroundColor Green
     Write-Host "  scheduler    Start background scheduler only" -ForegroundColor Green
     Write-Host "  api          Start API server only (port 8000)" -ForegroundColor Green
     Write-Host "  frontend     Start frontend only (port 3000)" -ForegroundColor Green
@@ -39,14 +39,14 @@ function Show-Help {
     Write-Host "  3. Open http://localhost:3000 in browser" -ForegroundColor White
 
     Write-Host "`nDIRECTORY STRUCTURE:" -ForegroundColor Yellow
-    Write-Host "  ├── backend/          Backend Python code & models" -ForegroundColor White
-    Write-Host "  │   └── prediction/models/  ← Trained models stored here" -ForegroundColor Green
-    Write-Host "  ├── frontend/         React/Next.js dashboard" -ForegroundColor White
-    Write-Host "  ├── scripts/          Startup and utility scripts" -ForegroundColor White
-    Write-Host "  ├── docs/             Documentation & guides" -ForegroundColor White
-    Write-Host "  ├── utils/            Training pipeline" -ForegroundColor White
-    Write-Host "  ├── data/             SQLite databases (created at runtime)" -ForegroundColor White
-    Write-Host "  └── RUN.ps1           This file (main entry point)" -ForegroundColor Cyan
+    Write-Host "  backend/              Backend Python code and models" -ForegroundColor White
+    Write-Host "    prediction/models/  <- Trained models stored here" -ForegroundColor Green
+    Write-Host "  frontend/             React/Next.js dashboard" -ForegroundColor White
+    Write-Host "  scripts/              Startup and utility scripts" -ForegroundColor White
+    Write-Host "  docs/                 Documentation and guides" -ForegroundColor White
+    Write-Host "  utils/                Training pipeline" -ForegroundColor White
+    Write-Host "  data/                 SQLite databases (runtime)" -ForegroundColor White
+    Write-Host "  RUN.ps1               This file (main entry point)" -ForegroundColor Cyan
 
     Write-Host "`nDEBUGGING:" -ForegroundColor Yellow
     Write-Host "  Check models exist:       ls backend/prediction/models/" -ForegroundColor White
@@ -57,24 +57,24 @@ function Show-Help {
 }
 
 function Train-Models {
-    Write-Host "`n╔═════════════════════════════════════════════════════════╗" -ForegroundColor Green
-    Write-Host "║         Training ML Models (Phase 7)                   ║" -ForegroundColor Green
-    Write-Host "╚═════════════════════════════════════════════════════════╝`n" -ForegroundColor Green
+    Write-Host "`n========================================================" -ForegroundColor Green
+    Write-Host "   Training ML Models (Phase 7)" -ForegroundColor Green
+    Write-Host "========================================================`n" -ForegroundColor Green
 
     & "$Root\scripts\train-models.ps1"
 }
 
 function Start-All {
-    Write-Host "`n╔═════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-    Write-Host "║         Starting GeoMarket System (3 Services)         ║" -ForegroundColor Cyan
-    Write-Host "╚═════════════════════════════════════════════════════════╝`n" -ForegroundColor Cyan
+    Write-Host "`n========================================================" -ForegroundColor Cyan
+    Write-Host "   Starting GeoMarket System (3 Services)" -ForegroundColor Cyan
+    Write-Host "========================================================`n" -ForegroundColor Cyan
 
     Write-Host "Opening 3 terminal windows..." -ForegroundColor Yellow
     Write-Host "Press Ctrl+C in any terminal to stop that service`n" -ForegroundColor Yellow
 
     # Check if models exist before starting
     if (!(Test-Path "$Root\backend\prediction\models\lgbm_direction.pkl")) {
-        Write-Host "⚠ Models not found! Running training first..." -ForegroundColor Yellow
+        Write-Host "[!] Models not found! Running training first..." -ForegroundColor Yellow
         & Train-Models
     }
 
@@ -85,11 +85,11 @@ function Start-All {
     Start-Sleep -Milliseconds 500
     Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$Root'; & '.\scripts\start-frontend.ps1'"
 
-    Write-Host "✓ Services started in 3 new windows" -ForegroundColor Green
+    Write-Host "[OK] Services started in 3 new windows" -ForegroundColor Green
     Write-Host "`nWaiting for services to start (30 seconds)..." -ForegroundColor Cyan
     Start-Sleep -Seconds 30
 
-    Write-Host "`n✓ Opening dashboard in browser..." -ForegroundColor Green
+    Write-Host "`n[OK] Opening dashboard in browser..." -ForegroundColor Green
     Start-Process "http://localhost:3000"
 
     Write-Host "`nServices running:" -ForegroundColor Green

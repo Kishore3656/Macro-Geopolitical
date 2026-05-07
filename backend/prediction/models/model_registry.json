@@ -1,0 +1,24 @@
+{
+  "volatility": [
+    {
+      "version": "20260507_121130",
+      "trained_at": "2026-05-07T12:11:30.609546Z",
+      "lookback_days": 60,
+      "train_accuracy": 0.9938,
+      "test_accuracy": 0.55,
+      "n_rows": 200,
+      "trigger": "setup_pipeline"
+    }
+  ],
+  "direction": [
+    {
+      "version": "20260507_121131",
+      "trained_at": "2026-05-07T12:11:31.238633Z",
+      "lookback_days": 60,
+      "train_accuracy": 0.5688,
+      "test_accuracy": 0.525,
+      "n_rows": 200,
+      "trigger": "setup_pipeline"
+    }
+  ]
+}

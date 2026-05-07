@@ -129,9 +129,10 @@ def _save_versioned(model: lgb.LGBMClassifier, live_path: str, model_type: str,
     print(f"Updated registry → {MODEL_REGISTRY_PATH}")
 
 
-def train(lookback_days: int = 30, trigger: str = "manual"):
-    print(f"Building feature matrix ({lookback_days} days)...")
-    df = build_feature_matrix(lookback_days=lookback_days)
+def train(lookback_days: int = 30, trigger: str = "manual", df=None):
+    if df is None:
+        print(f"Building feature matrix ({lookback_days} days)...")
+        df = build_feature_matrix(lookback_days=lookback_days)
 
     if df.empty:
         print("ERROR: No data. Run backfill first:")
@@ -140,8 +141,10 @@ def train(lookback_days: int = 30, trigger: str = "manual"):
         return
 
     if len(df) < 50:
-        print(f"ERROR: Only {len(df)} rows — need at least 50 to train.")
-        return
+        print(f"[!] Only {len(df)} rows — using minimum viable training set.")
+        if len(df) < 20:
+            print(f"ERROR: Only {len(df)} rows — need at least 20 to train.")
+            return
 
     print(f"Training on {len(df)} rows, {len(FEATURE_COLS)} features. Trigger: {trigger}")
 
