@@ -133,14 +133,15 @@ def save_gti(result: dict):
     conn = get_conn(GTI_DB)
     conn.execute(
         """INSERT OR REPLACE INTO gti_scores
-           (timestamp, gti_score, conflict_ct, avg_tone, vader_avg)
-           VALUES (?,?,?,?,?)""",
+           (timestamp, gti_score, conflict_ct, avg_tone, vader_avg, regime)
+           VALUES (?,?,?,?,?,?)""",
         (
             ts,
             result["gti_score"],
             result["conflict_ct"],
             result["avg_tone"],
             result["vader_avg"],
+            result.get("regime", "neutral"),
         ),
     )
     conn.commit()
@@ -151,17 +152,41 @@ def save_gti(result: dict):
         "MODERATE" if result["gti_score"] < 0.6 else
         "HIGH"
     )
+    regime = result.get("regime", "neutral")
     print(
         f"GTI [{ts}]  score={result['gti_score']:.4f}  level={level}"
         f"  conflicts={result['conflict_ct']}"
         f"  tone={result['avg_tone']:.2f}"
         f"  vader={result['vader_avg']:.3f}"
+        f"  regime={regime}"
     )
 
 
 def run() -> dict:
-    """Compute GTI and save it. Called by scheduler every 15 minutes."""
+    """Compute GTI, analyze sentiment via LLM, and save. Called by scheduler every 15 minutes."""
     result = compute_gti()
+
+    # Optional: Get LLM sentiment analysis for regime (Phase 3)
+    try:
+        from nlp.llm_sentiment import get_llm_analysis
+        conn = get_conn(NEWS_DB)
+        headlines = conn.execute(
+            """SELECT title FROM rss_articles
+               WHERE fetched_at >= datetime('now', '-1 hour')
+               ORDER BY fetched_at DESC LIMIT 10"""
+        ).fetchall()
+        conn.close()
+
+        if headlines:
+            headline_texts = [h["title"] for h in headlines]
+            llm_analysis = get_llm_analysis(headline_texts)
+            result["regime"] = llm_analysis.regime
+        else:
+            result["regime"] = "neutral"
+    except Exception as e:
+        # LLM analysis optional; fallback to neutral
+        result["regime"] = "neutral"
+
     save_gti(result)
     return result
 

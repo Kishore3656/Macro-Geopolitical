@@ -322,8 +322,8 @@ export default function CommandCenterMap({
                   hoveredRegionId === region.id ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
                 style={{
-                  left: `${region.point[0]}px`,
-                  top: `${region.point[1]}px`,
+                  left: region.popupPosition.left,
+                  top: region.popupPosition.top,
                   transform: 'translate(-50%, -50%)',
                 }}
                 onMouseEnter={() => setHoveredRegionId(region.id)}

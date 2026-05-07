@@ -47,6 +47,13 @@ FEATURE_COLS = [
     "returns_1h",
     "returns_4h",
     "vol_20h",
+    "vix_close",
+    "vix_change_1h",
+    "gld_returns_1h",
+    "hour_of_day",
+    "day_of_week",
+    "gti_lag_1",
+    "gti_lag_4",
 ]
 
 
@@ -83,12 +90,12 @@ def build_feature_matrix(
     ).fetchall()
     conn.close()
 
-    # ── Load OHLCV ────────────────────────────────────────────────────────
+    # ── Load OHLCV for primary symbol + VIX + GLD ─────────────────────────
     conn     = get_conn(MARKET_DB)
     mkt_rows = conn.execute(
-        f"""SELECT timestamp, open, high, low, close, volume
+        f"""SELECT timestamp, symbol, open, high, low, close, volume
             FROM ohlcv
-            WHERE symbol = ? AND timestamp >= ?
+            WHERE (symbol IN (?, 'VIX', 'GLD')) AND timestamp >= ?
             ORDER BY timestamp
             LIMIT {MAX_ROWS}""",
         (symbol, cutoff),
@@ -115,23 +122,71 @@ def build_feature_matrix(
         .drop_duplicates("hour", keep="last")
     )
 
-    # Merge on hour
+    # Pivot market data so each symbol becomes its own column set
+    mkt_df = (
+        mkt_df.sort_values("timestamp")
+        .drop_duplicates(["hour", "symbol"], keep="last")
+    )
+
+    spy_df = mkt_df[mkt_df["symbol"] == symbol][["hour", "open", "high", "low", "close", "volume"]].copy()
+    spy_df.rename(columns={
+        "open": "spy_open",
+        "high": "spy_high",
+        "low": "spy_low",
+        "close": "spy_close",
+        "volume": "spy_volume"
+    }, inplace=True)
+
+    vix_df = mkt_df[mkt_df["symbol"] == "VIX"][["hour", "close"]].copy()
+    vix_df.rename(columns={"close": "vix_close"}, inplace=True)
+
+    gld_df = mkt_df[mkt_df["symbol"] == "GLD"][["hour", "close"]].copy()
+    gld_df.rename(columns={"close": "gld_close"}, inplace=True)
+
+    # Merge on hour: GTI + SPY + VIX + GLD
     df = pd.merge(
-        mkt_df,
+        spy_df,
         gti_df[["hour", "gti_score", "conflict_ct", "avg_tone", "vader_avg"]],
         on="hour",
         how="inner",
     )
+    df = pd.merge(df, vix_df, on="hour", how="left")
+    df = pd.merge(df, gld_df, on="hour", how="left")
+
     df = df.sort_values("hour").reset_index(drop=True)
 
     if df.empty:
         print("Features: GTI and market data don't overlap — check timestamps")
         return pd.DataFrame()
 
+    # Rename SPY columns back to original names for compatibility
+    df.rename(columns={
+        "spy_open": "open",
+        "spy_high": "high",
+        "spy_low": "low",
+        "spy_close": "close",
+        "spy_volume": "volume"
+    }, inplace=True)
+
     # ── Engineered market features ────────────────────────────────────────
     df["returns_1h"] = df["close"].pct_change(1)
     df["returns_4h"] = df["close"].pct_change(4)
     df["vol_20h"]    = df["returns_1h"].rolling(20, min_periods=20).std()
+
+    # VIX and GLD features (forward-fill gaps if they don't trade all hours)
+    df["vix_close"] = df["vix_close"].ffill().bfill()
+    df["vix_change_1h"] = df["vix_close"].pct_change(1)
+
+    df["gld_close"] = df["gld_close"].ffill().bfill()
+    df["gld_returns_1h"] = df["gld_close"].pct_change(1)
+
+    # Time-of-day features
+    df["hour_of_day"] = df["hour"].dt.hour
+    df["day_of_week"] = df["hour"].dt.dayofweek
+
+    # Lagged GTI features
+    df["gti_lag_1"] = df["gti_score"].shift(1)
+    df["gti_lag_4"] = df["gti_score"].shift(4)
 
     # ── Targets (next-hour prediction) ────────────────────────────────────
     next_close       = df["close"].shift(-1)

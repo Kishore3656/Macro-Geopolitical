@@ -75,7 +75,8 @@ def _init_gti_db():
             gti_score   REAL,
             conflict_ct INTEGER,
             avg_tone    REAL,
-            vader_avg   REAL
+            vader_avg   REAL,
+            regime      TEXT
         );
         CREATE TABLE IF NOT EXISTS conflict_summary (
             id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,13 +117,19 @@ def _init_predictions_db():
     conn = sqlite3.connect(PREDICTIONS_DB)
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS predictions (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp       TEXT UNIQUE,
-            gti_score       REAL,
-            vol_prediction  TEXT,
-            dir_prediction  TEXT,
-            vol_prob        REAL,
-            dir_prob        REAL
+            id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp               TEXT UNIQUE,
+            gti_score               REAL,
+            vol_prediction          TEXT,
+            dir_prediction          TEXT,
+            vol_prob                REAL,
+            dir_prob                REAL,
+            model_version           TEXT,
+            close                   REAL,
+            outcome_resolved        INTEGER DEFAULT 0,
+            actual_dir_outcome      INTEGER,
+            actual_vol_outcome      INTEGER,
+            actual_close_next       REAL
         );
     """)
     conn.close()

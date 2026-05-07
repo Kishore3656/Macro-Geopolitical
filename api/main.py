@@ -110,10 +110,12 @@ def get_gti_current():
 
         if row:
             gti_score = float(row["gti_score"])
+            regime = row["regime"] if row["regime"] else "neutral"
         else:
             # Compute fresh if none in DB
             result = compute_gti()
             gti_score = result["gti_score"]
+            regime = result.get("regime", "neutral")
 
         if gti_score < 0.3:
             risk_level = "LOW_CONFLICT"
@@ -126,6 +128,7 @@ def get_gti_current():
             "timestamp": datetime.utcnow().isoformat(),
             "score": round(gti_score, 4),
             "risk_level": risk_level,
+            "regime": regime,
             "sentiment": float(row["vader_avg"]) if row else 0.0,
             "volatility": float(row["avg_tone"]) if row else 0.0,
             "conflict_count": int(row["conflict_ct"]) if row else 0,
@@ -168,7 +171,7 @@ def get_gti_history(hours: int = 48):
 @app.get("/api/signals")
 def get_signals_current():
     """
-    Get the latest ML predictions for volatility and direction.
+    Get the latest ML predictions for volatility and direction, plus LLM narrative.
     If models not trained, return mock predictions.
     """
     try:
@@ -181,8 +184,28 @@ def get_signals_current():
                 "vol_prob": 0.5,
                 "dir_prediction": "BULLISH",
                 "dir_prob": 0.3,
+                "narrative": "Awaiting model training and real data.",
+                "regime": "neutral",
                 "message": "Models not trained yet",
             }
+
+        # Get latest GTI + regime for narrative context
+        regime = "neutral"
+        try:
+            with db_transaction(GTI_DB) as conn:
+                gti_row = conn.execute(
+                    "SELECT regime FROM gti_scores ORDER BY timestamp DESC LIMIT 1"
+                ).fetchone()
+            if gti_row and gti_row["regime"]:
+                regime = gti_row["regime"]
+        except Exception:
+            pass
+
+        # Build narrative from prediction + regime
+        narrative = f"Direction: {result['dir_prediction']} ({result['dir_prob']:.1%}). "
+        narrative += f"Volatility: {result['vol_prediction']} ({result['vol_prob']:.1%}). "
+        narrative += f"Regime: {regime}."
+
         return {
             "timestamp": result.get("timestamp", datetime.utcnow().isoformat()),
             "status": "LIVE",
@@ -191,6 +214,9 @@ def get_signals_current():
             "vol_prob": result["vol_prob"],
             "dir_prediction": result["dir_prediction"],
             "dir_prob": result["dir_prob"],
+            "model_version": result.get("model_version", "unknown"),
+            "narrative": narrative,
+            "regime": regime,
         }
     except Exception as e:
         return {

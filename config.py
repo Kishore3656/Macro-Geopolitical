@@ -15,6 +15,15 @@ MARKET_POLL_MINS  = 15
 # NLP
 VADER_COMPOUND_THRESHOLD = -0.05  # below this = negative sentiment
 
+# LLM Sentiment Analysis (Phase 3)
+USE_LLM_SENTIMENT = os.getenv("USE_LLM_SENTIMENT", "false").lower() == "true"
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "none")  # "ollama" | "huggingface" | "none"
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "")
+LLM_CACHE_TTL_MINS = int(os.getenv("LLM_CACHE_TTL_MINS", "15"))
+LLM_RATE_LIMIT_RPM = int(os.getenv("LLM_RATE_LIMIT_RPM", "60"))
+
 # GTI
 GTI_WINDOW_HOURS       = 6
 GTI_CONFLICT_THRESHOLD = -5.0    # GoldsteinScale below this = conflict

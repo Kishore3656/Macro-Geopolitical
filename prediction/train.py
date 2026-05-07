@@ -21,13 +21,20 @@ Train/test split:
   Last 20% of rows used as held-out test (time-ordered, no shuffle).
   This prevents future data leaking into training — crucial for time series.
 
+Model versioning:
+  Each trained model is saved with a timestamp (YYYYMMDD_HHMMSS) to an archive folder.
+  The latest model is also saved as the live .pkl file.
+  model_registry.json tracks all versions with accuracy scores.
+
 Usage:
   python prediction/train.py
   python prediction/train.py --days 60   # use more history
 """
 
 import argparse
+import json
 import os
+from datetime import datetime
 
 import joblib
 import lightgbm as lgb
@@ -48,8 +55,11 @@ LGBM_PARAMS = {
     "n_jobs":        -1,
 }
 
+MODEL_ARCHIVE_DIR = os.path.join(os.path.dirname(LGBM_VOL_PATH), "archive")
+MODEL_REGISTRY_PATH = os.path.join(os.path.dirname(LGBM_VOL_PATH), "model_registry.json")
 
-def _train_one(X_tr, y_tr, X_te, y_te, label: str) -> lgb.LGBMClassifier:
+
+def _train_one(X_tr, y_tr, X_te, y_te, label: str) -> tuple[lgb.LGBMClassifier, float, float]:
     model = lgb.LGBMClassifier(**LGBM_PARAMS)
     model.fit(
         X_tr, y_tr,
@@ -57,14 +67,57 @@ def _train_one(X_tr, y_tr, X_te, y_te, label: str) -> lgb.LGBMClassifier:
         callbacks=[lgb.early_stopping(50, verbose=False),
                    lgb.log_evaluation(period=-1)],
     )
-    preds = model.predict(X_te)
-    acc   = accuracy_score(y_te, preds)
-    print(f"\n{label} — accuracy: {acc:.3f}  ({model.best_iteration_} trees)")
-    print(classification_report(y_te, preds))
-    return model
+    preds_te = model.predict(X_te)
+    preds_tr = model.predict(X_tr)
+    acc_te = accuracy_score(y_te, preds_te)
+    acc_tr = accuracy_score(y_tr, preds_tr)
+    print(f"\n{label} — train: {acc_tr:.3f}  test: {acc_te:.3f}  ({model.best_iteration_} trees)")
+    print(classification_report(y_te, preds_te))
+    return model, acc_tr, acc_te
 
 
-def train(lookback_days: int = 30):
+def _save_versioned(model: lgb.LGBMClassifier, live_path: str, model_type: str,
+                    train_acc: float, test_acc: float, lookback_days: int,
+                    trigger: str = "manual", n_rows: int = 0):
+    """Save model to both live path and archive with timestamp."""
+    os.makedirs(MODEL_ARCHIVE_DIR, exist_ok=True)
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    archive_name = f"{os.path.splitext(os.path.basename(live_path))[0]}_{timestamp}.pkl"
+    archive_path = os.path.join(MODEL_ARCHIVE_DIR, archive_name)
+
+    joblib.dump(model, live_path)
+    joblib.dump(model, archive_path)
+    print(f"Saved → {live_path}")
+    print(f"Archived → {archive_path}")
+
+    # Update registry
+    registry = {"volatility": [], "direction": []} if model_type == "volatility" else {"volatility": [], "direction": []}
+    if os.path.exists(MODEL_REGISTRY_PATH):
+        with open(MODEL_REGISTRY_PATH, "r") as f:
+            registry = json.load(f)
+
+    entry = {
+        "version": timestamp,
+        "trained_at": datetime.utcnow().isoformat() + "Z",
+        "lookback_days": lookback_days,
+        "train_accuracy": round(train_acc, 4),
+        "test_accuracy": round(test_acc, 4),
+        "n_rows": n_rows,
+        "trigger": trigger,
+    }
+
+    key = "volatility" if "vol" in live_path.lower() else "direction"
+    registry[key].insert(0, entry)
+    # Keep only last 10 versions per model
+    registry[key] = registry[key][:10]
+
+    with open(MODEL_REGISTRY_PATH, "w") as f:
+        json.dump(registry, f, indent=2)
+    print(f"Updated registry → {MODEL_REGISTRY_PATH}")
+
+
+def train(lookback_days: int = 30, trigger: str = "manual"):
     print(f"Building feature matrix ({lookback_days} days)...")
     df = build_feature_matrix(lookback_days=lookback_days)
 
@@ -78,7 +131,7 @@ def train(lookback_days: int = 30):
         print(f"ERROR: Only {len(df)} rows — need at least 50 to train.")
         return
 
-    print(f"Training on {len(df)} rows, {len(FEATURE_COLS)} features.")
+    print(f"Training on {len(df)} rows, {len(FEATURE_COLS)} features. Trigger: {trigger}")
 
     X     = df[FEATURE_COLS]
     y_vol = df["target_vol"]
@@ -95,14 +148,14 @@ def train(lookback_days: int = 30):
     os.makedirs(os.path.dirname(LGBM_VOL_PATH), exist_ok=True)
 
     print("\n── Volatility Model ─────────────────────────────")
-    vol_model = _train_one(X_tr, yv_tr, X_te, yv_te, "Volatility")
-    joblib.dump(vol_model, LGBM_VOL_PATH)
-    print(f"Saved → {LGBM_VOL_PATH}")
+    vol_model, vol_acc_tr, vol_acc_te = _train_one(X_tr, yv_tr, X_te, yv_te, "Volatility")
+    _save_versioned(vol_model, LGBM_VOL_PATH, "volatility",
+                    vol_acc_tr, vol_acc_te, lookback_days, trigger, len(df))
 
     print("\n── Direction Model ──────────────────────────────")
-    dir_model = _train_one(X_tr, yd_tr, X_te, yd_te, "Direction")
-    joblib.dump(dir_model, LGBM_DIR_PATH)
-    print(f"Saved → {LGBM_DIR_PATH}")
+    dir_model, dir_acc_tr, dir_acc_te = _train_one(X_tr, yd_tr, X_te, yd_te, "Direction")
+    _save_versioned(dir_model, LGBM_DIR_PATH, "direction",
+                    dir_acc_tr, dir_acc_te, lookback_days, trigger, len(df))
 
     print("\nTraining complete.")
 
@@ -111,5 +164,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train LightGBM models")
     parser.add_argument("--days", type=int, default=30,
                         help="Days of history to use (default: 30)")
+    parser.add_argument("--trigger", type=str, default="manual",
+                        help="Trigger reason (manual, weekly, drift, startup)")
     args = parser.parse_args()
-    train(args.days)
+    train(args.days, args.trigger)
