@@ -1,0 +1,155 @@
+
+> geomarket-frontend@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.15:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1858ms
+ ○ Compiling / ...
+ ✓ Compiled / in 3.1s (941 modules)
+ GET / 200 in 3524ms
+ ✓ Compiled in 105ms (406 modules)
+ ○ Compiling /geo-map ...
+ ✓ Compiled /geo-map in 648ms (935 modules)
+ GET /geo-map 200 in 896ms
+ ✓ Compiled /market in 218ms (943 modules)
+ GET /market 200 in 366ms
+ ✓ Compiled /earth-pulse in 233ms (951 modules)
+ GET /earth-pulse 200 in 342ms
+ ✓ Compiled /ai-signals in 266ms (959 modules)
+ GET /ai-signals 200 in 395ms
+ GET / 200 in 104ms
+ GET /geo-map 200 in 67ms
+ GET /market 200 in 53ms
+ GET /earth-pulse 200 in 55ms
+ GET /ai-signals 200 in 49ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.3s (954 modules)
+ GET / 404 in 4378ms
+ ✓ Compiled in 3s (414 modules)
+ ✓ Compiled in 671ms (414 modules)
+ ✓ Compiled in 578ms (414 modules)
+ ✓ Compiled in 417ms (414 modules)
+ ✓ Compiled in 484ms (414 modules)
+ ✓ Compiled in 575ms (414 modules)
+ ✓ Compiled in 461ms (414 modules)
+ ✓ Compiled in 566ms (414 modules)
+ ✓ Compiled in 628ms (414 modules)
+ ✓ Compiled in 488ms (414 modules)
+ ✓ Compiled in 786ms (414 modules)
+ ✓ Compiled in 548ms (414 modules)
+ ✓ Compiled in 486ms (414 modules)
+ ✓ Compiled in 472ms (414 modules)
+ ✓ Compiled in 444ms (414 modules)
+ ✓ Compiled in 452ms (414 modules)
+ ✓ Compiled in 448ms (414 modules)
+ ✓ Compiled in 514ms (414 modules)
+ ✓ Compiled in 410ms (414 modules)
+ ✓ Compiled in 380ms (414 modules)
+ ✓ Compiled in 344ms (414 modules)
+ ✓ Compiled in 376ms (414 modules)
+ ✓ Compiled in 418ms (414 modules)
+ ✓ Compiled in 370ms (414 modules)
+ ✓ Compiled in 716ms (414 modules)
+ ✓ Compiled in 514ms (414 modules)
+ ✓ Compiled in 370ms (414 modules)
+ ✓ Compiled in 484ms (414 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 2.1s (535 modules)
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 6.4s (1287 modules)
+ GET / 500 in 14131ms
+ ○ Compiling /geo-map ...
+ ✓ Compiled /geo-map in 1275ms (729 modules)
+ GET /geo-map 500 in 7505ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1493ms (1306 modules)
+ GET /geo-map 404 in 2799ms
+ ○ Compiling / ...
+ ✓ Compiled / in 608ms (736 modules)
+ GET / 200 in 1729ms
+ ✓ Compiled in 1993ms (1312 modules)
+ GET / 200 in 926ms
+ GET / 200 in 485ms
+ ✓ Compiled in 2.3s (1301 modules)
+ GET / 200 in 1300ms
+ GET / 200 in 438ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1682ms (1306 modules)
+ GET / 404 in 2480ms
+ ✓ Compiled in 378ms (775 modules)
+ ✓ Compiled in 100ms (572 modules)
+ ✓ Compiled in 112ms (572 modules)
+ ✓ Compiled in 98ms (572 modules)
+ ✓ Compiled in 135ms (572 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 787ms (729 modules)
+ GET / 500 in 2988ms
+ GET / 500 in 2348ms
+ GET / 500 in 1877ms
+ GET / 500 in 2272ms
+ GET / 500 in 7ms
+ GET / 500 in 2672ms
+ GET / 500 in 6ms
+ GET / 500 in 2522ms
+ GET / 500 in 6ms
+ GET / 500 in 2389ms
+ GET / 500 in 5ms
+ GET / 500 in 2308ms
+ GET / 500 in 5ms
+ GET / 500 in 2305ms
+ GET / 500 in 6ms
+ GET / 500 in 2339ms
+ GET / 500 in 5ms
+ GET / 500 in 2204ms
+ GET / 500 in 4ms
+ GET / 500 in 2130ms
+ GET / 500 in 3ms
+ GET / 500 in 1635ms
+ GET / 500 in 56ms
+ GET / 500 in 1974ms
+ GET / 500 in 83ms
+ GET / 500 in 2031ms
+ GET / 500 in 67ms
+ GET / 500 in 2021ms
+ GET / 500 in 117ms
+ GET / 500 in 2211ms
+ GET / 500 in 4ms
+ GET / 500 in 2170ms
+ GET / 500 in 5ms
+ GET / 500 in 2200ms
+ GET / 500 in 5ms
+ GET / 500 in 2260ms
+ GET / 500 in 13ms
+ GET / 500 in 2664ms
+ GET / 500 in 5ms
+ GET / 500 in 2290ms
+ GET / 500 in 43ms
+ GET / 500 in 2214ms
+ GET / 500 in 5ms
+ GET / 500 in 2291ms
+ GET / 500 in 4ms
+ GET / 500 in 2258ms
+ GET / 500 in 9ms
+ GET / 500 in 2237ms
+ GET / 500 in 5ms
+ GET / 500 in 2227ms
+ GET / 500 in 4ms
+ GET / 500 in 2243ms
+ GET / 500 in 5ms
+ GET / 500 in 2188ms
+ GET / 500 in 5ms
+ GET / 500 in 2160ms
+ GET / 500 in 2ms
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.15:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+[?25h

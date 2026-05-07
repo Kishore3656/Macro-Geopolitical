@@ -1,0 +1,13 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img "Running..." [ref=e7]
+        - generic [ref=e8]: Running...
+        - button "Stop" [ref=e10] [cursor=pointer]
+      - button [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+  - generic [ref=e20]:
+    - text: Made with
+    - link "Streamlit" [ref=e21] [cursor=pointer]:
+      - /url: //streamlit.io

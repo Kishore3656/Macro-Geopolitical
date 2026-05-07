@@ -1,0 +1,184 @@
+- generic:
+  - generic [ref=e7]:
+    - generic [ref=e11]:
+      - generic [ref=e12]: GEOMARKET INTELLIGENCE
+      - generic [ref=e13]:
+        - generic [ref=e14] [cursor=pointer]: EARTH PULSE
+        - generic [ref=e15] [cursor=pointer]: GEO MAP
+        - generic [ref=e16] [cursor=pointer]: AI SIGNALS
+        - generic [ref=e17] [cursor=pointer]: MARKET
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - text: "⚡ GTI SCORE: 26"
+          - generic [ref=e20]: NOMINAL_STABLE
+        - generic [ref=e21]: LIVE
+        - generic [ref=e24]: 10:28:58 UTC
+    - generic [ref=e26]:
+      - tablist [ref=e28]:
+        - tab "EARTH PULSE" [ref=e29] [cursor=pointer]:
+          - paragraph [ref=e31]: EARTH PULSE
+        - tab "GEO MAP" [ref=e32] [cursor=pointer]:
+          - paragraph [ref=e34]: GEO MAP
+        - tab "AI SIGNALS" [active] [selected] [ref=e35] [cursor=pointer]:
+          - paragraph [ref=e37]: AI SIGNALS
+        - tab "MARKET" [ref=e38] [cursor=pointer]:
+          - paragraph [ref=e40]: MARKET
+      - tabpanel "AI SIGNALS" [ref=e497]:
+        - generic [ref=e501]:
+          - generic [ref=e509]:
+            - generic [ref=e510]:
+              - text: ARCHIVE_01
+              - text: OPERATOR_SESSION_ACTIVE
+            - generic [ref=e511]: PRIMARY MODULES
+            - generic [ref=e512] [cursor=pointer]: ■ INTELLIGENCE
+            - generic [ref=e513] [cursor=pointer]: ■ ARCHIVE
+            - generic [ref=e514] [cursor=pointer]: ■ SURVEILLANCE
+            - generic [ref=e515] [cursor=pointer]: ■ TACTICAL
+            - generic [ref=e516] [cursor=pointer]: ■ SETTINGS
+            - generic [ref=e517]: MODEL OUTPUT
+            - generic [ref=e518]:
+              - generic [ref=e519]: PROJECTED VOLATILITY
+              - generic [ref=e520]: 0.00%
+              - generic [ref=e521]: → —
+            - generic [ref=e522]:
+              - generic [ref=e523]: MARKET DIRECTION
+              - generic [ref=e524]: ▼ —
+              - generic [ref=e525]: 0% CONF.
+            - generic [ref=e526]: GTI INPUT FEATURES
+            - generic [ref=e529]:
+              - code [ref=e532]: <div class="feat-row"> <div class="feat-lbl"><span>MACRO_STABILITY</span><span class="feat-pct">42%</span></div> <div class="feat-track"><div class="feat-fill" style="width:33%"></div></div> </div> <div class="feat-row"> <div class="feat-lbl"><span>GEOPOLITICAL_RISK</span><span class="feat-pct">28%</span></div> <div class="feat-track"><div class="feat-fill" style="width:21%"></div></div> </div> <div class="feat-row"> <div class="feat-lbl"><span>SENTIMENT_AGGREGATE</span><span class="feat-pct">15%</span></div> <div class="feat-track"><div class="feat-fill" style="width:15%"></div></div> </div> <div class="feat-row"> <div class="feat-lbl"><span>LIQUIDITY_DEPTH</span><span class="feat-pct">10%</span></div> <div class="feat-track"><div class="feat-fill" style="width:50%"></div></div> </div> <div class="feat-row"> <div class="feat-lbl"><span>SOCIAL_VOLUME</span><span class="feat-pct">5%</span></div> <div class="feat-track"><div class="feat-fill" style="width:40%"></div></div> </div>
+              - generic:
+                - button "Copy to clipboard":
+                  - img
+            - generic [ref=e534]: "LAST_UPDATE: 10:28:58 UTC"
+            - generic [ref=e536] [cursor=pointer]: INITIATE SCAN ▶
+          - generic [ref=e540]:
+            - generic [ref=e547]:
+              - generic [ref=e548]: GTI Component Breakdown
+              - generic [ref=e549]: TIME-SERIES ATTRIBUTION ANALYSIS [24H]
+            - generic [ref=e551]:
+              - button "View fullscreen"
+              - generic [ref=e554]:
+                - img:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 06:00Apr 21, 2026
+                        - generic:
+                          - generic: 07:00
+                        - generic:
+                          - generic: 08:00
+                        - generic:
+                          - generic: 09:00
+                        - generic:
+                          - generic: 10:00
+                      - generic:
+                        - generic:
+                          - generic: "0"
+                        - generic:
+                          - generic: "20"
+                        - generic:
+                          - generic: "40"
+                        - generic:
+                          - generic: "60"
+                        - generic:
+                          - generic: "80"
+                        - generic:
+                          - generic: "100"
+                - img:
+                  - generic [ref=e571]:
+                    - generic [ref=e573]: MACRO
+                    - generic [ref=e576]: QUANT
+                    - generic [ref=e579]: CONFLICT
+                - img
+            - generic [ref=e584]: PREDICTION HISTORY [SIMULATION MODE]
+            - generic [ref=e588]:
+              - generic [ref=e589]: ☂
+              - generic [ref=e590]:
+                - text: HISTORY LOG EMPTY.
+                - text: INITIATE TACTICAL SCAN TO POPULATE
+                - text: PREDICTION DATASET.
+            - generic [ref=e594]:
+              - generic [ref=e595]: SENTIMENT MOMENTUM
+              - generic [ref=e596]: 8% POSITIVE / 18 NEUTRAL / 54% NEGATIVE
+            - generic [ref=e598]:
+              - button "View fullscreen"
+              - generic [ref=e601]:
+                - img
+                - img
+                - img
+          - generic [ref=e618]:
+            - generic [ref=e626]:
+              - text: FULL IMPACT
+              - text: ANALYSIS
+            - generic [ref=e630]:
+              - generic [ref=e631]: "ASSET CATEGORY: BULLISH"
+              - generic [ref=e632]: SIG_HIGH
+            - generic [ref=e636]:
+              - generic [ref=e637]:
+                - generic [ref=e638]: XAU/USD
+                - generic [ref=e639]: COMMODITY
+              - generic [ref=e640]: ↗
+            - generic [ref=e644]:
+              - generic [ref=e645]:
+                - generic [ref=e646]: OIL/USD
+                - generic [ref=e647]: COMMODITY
+              - generic [ref=e648]: ↗
+            - generic [ref=e652]:
+              - generic [ref=e653]:
+                - generic [ref=e654]: VIX
+                - generic [ref=e655]: EQUITY
+              - generic [ref=e656]: ↗
+            - generic [ref=e660]:
+              - generic [ref=e661]: "ASSET CATEGORY: NEUTRAL"
+              - generic [ref=e662]: SIG_WATCH
+            - generic [ref=e666]:
+              - generic [ref=e667]:
+                - generic [ref=e668]: NAS_100
+                - generic [ref=e669]: EQUITY
+              - generic [ref=e670]: —
+            - generic [ref=e674]:
+              - generic [ref=e675]:
+                - generic [ref=e676]: USD/JPY
+                - generic [ref=e677]: FX
+              - generic [ref=e678]: —
+            - generic [ref=e682]:
+              - generic [ref=e683]:
+                - generic [ref=e684]: EUR/USD
+                - generic [ref=e685]: FX
+              - generic [ref=e686]: —
+            - generic [ref=e690]:
+              - generic [ref=e691]:
+                - generic [ref=e692]: USD/CNH
+                - generic [ref=e693]: FX
+              - generic [ref=e694]: —
+            - generic [ref=e698]:
+              - generic [ref=e699]:
+                - generic [ref=e700]: GBP/USD
+                - generic [ref=e701]: FX
+              - generic [ref=e702]: —
+            - generic [ref=e706]:
+              - generic [ref=e707]:
+                - generic [ref=e708]: BTC/CORE
+                - generic [ref=e709]: CRYPTO
+              - generic [ref=e710]: —
+            - generic [ref=e714]:
+              - generic [ref=e715]:
+                - generic [ref=e716]: SPX_500
+                - generic [ref=e717]: EQUITY
+              - generic [ref=e718]: —
+            - generic [ref=e722]:
+              - generic [ref=e723]:
+                - generic [ref=e724]: XAG/USD
+                - generic [ref=e725]: COMMODITY
+              - generic [ref=e726]: —
+    - generic [ref=e348]:
+      - generic [ref=e349]: ■ SYSTEM_STABLE
+      - generic [ref=e350]: FRAMEWORK SOVEREIGN INTELLIGENCE V4.0.2
+      - generic [ref=e351]: ENCRYPTION AES256
+      - generic [ref=e352]: GTI 26.5
+      - generic [ref=e353]: COUNTRIES 0
+      - generic [ref=e354]: ARTICLES 80
+      - generic [ref=e355]: LATENCY 12MS REFRESH 10:29:58 UTC
+  - img [ref=e356]

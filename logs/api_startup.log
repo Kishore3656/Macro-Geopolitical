@@ -1,0 +1,23 @@
+INFO:     127.0.0.1:64238 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64244 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64249 - "GET /api/gti HTTP/1.1" 200 OK
+Predict: Models not found: ['prediction/models/lgbm_volatility.pkl', 'prediction/models/lgbm_direction.pkl']
+Run: python prediction/train.py
+INFO:     127.0.0.1:56455 - "GET /api/signals HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56459 - "GET /api/market/spy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49813 - "GET /api/gti HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49813 - "GET /api/gti/history?hours=48 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49813 - "GET /api/headlines?limit=4 HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:49813 - "GET /api/events?event_type=conflict&limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/gti HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/market/spy?bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/market/sectors HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/conflicts?limit=15 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/bilateral?limit=5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/gti/history?hours=48 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49498 - "GET /api/headlines?limit=4 HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:49498 - "GET /api/events?event_type=conflict&limit=8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56481 - "GET /api/gti HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56481 - "GET /api/gti/history?hours=48 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56481 - "GET /api/headlines?limit=4 HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:56481 - "GET /api/events?event_type=conflict&limit=8 HTTP/1.1" 200 OK

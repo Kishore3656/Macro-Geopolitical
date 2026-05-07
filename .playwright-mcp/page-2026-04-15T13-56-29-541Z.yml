@@ -1,0 +1,139 @@
+- generic:
+  - generic [ref=e7]:
+    - generic [ref=e11]:
+      - generic [ref=e12]: GEOMARKET
+      - generic [ref=e13]:
+        - generic [ref=e14] [cursor=pointer]: ◆ EARTH PULSE
+        - generic [ref=e15] [cursor=pointer]: ◆ GEO MAP
+        - generic [ref=e16] [cursor=pointer]: ◆ AI SIGNALS
+        - generic [ref=e17] [cursor=pointer]: ◆ MARKET
+      - generic [ref=e18]:
+        - generic [ref=e19]: 26.5 LOW
+        - generic [ref=e20]: LIVE
+        - generic [ref=e22]: 13:54:21 UTC
+    - generic [ref=e24]:
+      - tablist [ref=e26]:
+        - tab "🌍 EARTH PULSE" [ref=e27] [cursor=pointer]:
+          - paragraph [ref=e29]: 🌍 EARTH PULSE
+        - tab "🗺 GEO MAP" [active] [selected] [ref=e30] [cursor=pointer]:
+          - paragraph [ref=e32]: 🗺 GEO MAP
+        - tab "🤖 AI SIGNALS" [ref=e33] [cursor=pointer]:
+          - paragraph [ref=e35]: 🤖 AI SIGNALS
+        - tab "📈 MARKET" [ref=e36] [cursor=pointer]:
+          - paragraph [ref=e38]: 📈 MARKET
+      - tabpanel "🗺 GEO MAP" [ref=e666]:
+        - generic [ref=e670]:
+          - generic [ref=e674]:
+            - generic [ref=e681]:
+              - generic [ref=e682]: Risk Level
+              - generic [ref=e683]:
+                - generic [ref=e684]: CRITICAL ≥80
+                - generic [ref=e686]: HIGH ≥60
+                - generic [ref=e688]: ELEVATED ≥35
+                - generic [ref=e690]: LOW <35
+            - generic [ref=e693]:
+              - paragraph [ref=e696]: ARC TYPES
+              - generic [ref=e699]:
+                - generic [ref=e700]:
+                  - button "Military, close by backspace" [ref=e701] [cursor=pointer]:
+                    - generic "Military" [ref=e702]
+                    - img [ref=e704]
+                  - button "Sanctions, close by backspace" [ref=e706] [cursor=pointer]:
+                    - generic "Sanctions" [ref=e707]
+                    - img [ref=e709]
+                  - button "Trade, close by backspace" [ref=e711] [cursor=pointer]:
+                    - generic "Trade" [ref=e712]
+                    - img [ref=e714]
+                  - button "Diplomatic, close by backspace" [ref=e716] [cursor=pointer]:
+                    - generic "Diplomatic" [ref=e717]
+                    - img [ref=e719]
+                  - combobox "Selected Military, Sanctions, Trade, Diplomatic. ARC TYPES" [ref=e722]
+                - generic [ref=e723]:
+                  - button "Clear all" [ref=e724] [cursor=pointer]
+                  - img "open" [ref=e726]
+            - generic [ref=e730]:
+              - generic [ref=e731]: Total Headlines
+              - generic [ref=e732]:
+                - generic [ref=e733]: "80"
+                - generic [ref=e734]: Last 80 articles
+              - generic [ref=e735]: Sentiment Split
+              - generic [ref=e736]:
+                - generic [ref=e737]:
+                  - generic [ref=e738]: POS
+                  - generic [ref=e739]: "5"
+                - generic [ref=e740]:
+                  - generic [ref=e741]: NEG
+                  - generic [ref=e742]: "55"
+                - generic [ref=e743]:
+                  - generic [ref=e744]: NEU
+                  - generic [ref=e745]: "20"
+              - generic [ref=e746]: Active Conflicts
+              - generic [ref=e747]:
+                - generic [ref=e748]: "0"
+                - generic [ref=e749]: GDELT events · 6h window
+          - generic [ref=e753]:
+            - generic [ref=e761]: GLOBAL TENSION MAP — country choropleth by arc type
+            - iframe [ref=e763]:
+              - generic [active] [ref=f10e1]:
+                - generic [ref=f10e5]:
+                  - img
+                  - img
+                  - generic [ref=f10e7]:
+                    - img [ref=f10e10] [cursor=pointer]
+                    - generic [ref=f10e12]:
+                      - img [ref=f10e14] [cursor=pointer]
+                      - img [ref=f10e17] [cursor=pointer]
+                      - img [ref=f10e20] [cursor=pointer]
+                    - generic [ref=f10e22]:
+                      - img [ref=f10e24] [cursor=pointer]
+                      - img [ref=f10e27] [cursor=pointer]
+                      - img [ref=f10e30] [cursor=pointer]
+                    - img [ref=f10e34] [cursor=pointer]
+                    - link "plotly-logomark" [ref=f10e37] [cursor=pointer]:
+                      - /url: https://plotly.com/
+                      - img "plotly-logomark" [ref=f10e38]
+                  - img
+                - img [ref=f10e51]
+            - generic [ref=e767]: "0 countries shown · Filter: Military, Sanctions, Trade, Diplomatic"
+            - generic [ref=e771]: HEADLINES BY SOURCE CITY
+            - generic [ref=e773]:
+              - button "View fullscreen"
+              - generic [ref=e776]:
+                - img:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic:
+                                - generic: "-0.32"
+                              - generic:
+                                - generic: "-0.42"
+                              - generic:
+                                - generic: "-0.47"
+                      - generic:
+                        - generic:
+                          - generic: New York
+                        - generic:
+                          - generic: Doha
+                        - generic:
+                          - generic: London
+                      - generic:
+                        - generic:
+                          - generic: "0"
+                        - generic:
+                          - generic: "20"
+                        - generic:
+                          - generic: "40"
+                - img
+                - img
+    - generic [ref=e356]:
+      - generic [ref=e357]: SOURCES GDELT · Reuters · BBC · AP · Al Jazeera
+      - generic [ref=e358]: MODEL LightGBM · VADER NLP · APScheduler
+      - generic [ref=e359]: STORAGE SQLite Local
+      - generic [ref=e360]: GTI 26.5
+      - generic [ref=e361]: COUNTRIES 0
+      - generic [ref=e362]: ARTICLES 80
+      - generic [ref=e363]: NEXT REFRESH 13:55:21 UTC
+  - img [ref=e364]

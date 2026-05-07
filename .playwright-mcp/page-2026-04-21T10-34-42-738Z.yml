@@ -1,0 +1,198 @@
+- generic:
+  - generic [ref=e7]:
+    - generic [ref=e11]:
+      - generic [ref=e12]: GEOMARKET INTELLIGENCE
+      - generic [ref=e13]:
+        - generic [ref=e14] [cursor=pointer]: EARTH PULSE
+        - generic [ref=e15] [cursor=pointer]: GEO MAP
+        - generic [ref=e16] [cursor=pointer]: AI SIGNALS
+        - generic [ref=e17] [cursor=pointer]: MARKET
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - text: "⚡ GTI SCORE: 26"
+          - generic [ref=e20]: NOMINAL_STABLE
+        - generic [ref=e21]: LIVE
+        - generic [ref=e24]: 10:28:58 UTC
+    - generic [ref=e26]:
+      - tablist [ref=e28]:
+        - tab "EARTH PULSE" [ref=e29] [cursor=pointer]:
+          - paragraph [ref=e31]: EARTH PULSE
+        - tab "GEO MAP" [ref=e32] [cursor=pointer]:
+          - paragraph [ref=e34]: GEO MAP
+        - tab "AI SIGNALS" [ref=e35] [cursor=pointer]:
+          - paragraph [ref=e37]: AI SIGNALS
+        - tab "MARKET" [active] [selected] [ref=e38] [cursor=pointer]:
+          - paragraph [ref=e40]: MARKET
+      - tabpanel "MARKET" [ref=e727]:
+        - generic [ref=e730]:
+          - generic [ref=e731]:
+            - generic [ref=e739]:
+              - generic [ref=e741]:
+                - generic [ref=e742]: S&P 500
+                - generic [ref=e743]: US EQUITIES · TACTICAL SURVEILLANCE
+              - generic [ref=e744]: "708.69"
+              - generic [ref=e745]: ▼ 0.04% 48H
+            - generic [ref=e753]:
+              - generic [ref=e755]:
+                - generic [ref=e756]: VOLATILITY · VIX
+                - generic [ref=e757]: CBOE FEAR GAUGE
+              - generic [ref=e758]: "18.88"
+              - generic [ref=e759]: ▼ 3.28% 48H
+            - generic [ref=e767]:
+              - generic [ref=e769]:
+                - generic [ref=e770]: COMMODITY · GLD
+                - generic [ref=e771]: GOLD TRUST ETF
+              - generic [ref=e772]: "442.17"
+              - generic [ref=e773]: ▼ 0.19% 48H
+          - generic [ref=e777]: SPY — S&P 500 ETF · TACTICAL SURVEILLANCE
+          - generic [ref=e779]:
+            - button "View fullscreen"
+            - generic [ref=e782]:
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: 13:00Apr 20, 2026
+                      - generic:
+                        - generic: 14:00
+                      - generic:
+                        - generic: 15:00
+                      - generic:
+                        - generic: 16:00
+                      - generic:
+                        - generic: 17:00
+                      - generic:
+                        - generic: 18:00
+                      - generic:
+                        - generic: 19:00
+                      - generic:
+                        - generic: 20:00
+                    - generic:
+                      - generic:
+                        - generic: "706"
+                      - generic:
+                        - generic: "707"
+                      - generic:
+                        - generic: "708"
+                      - generic:
+                        - generic: "709"
+                      - generic:
+                        - generic: "710"
+              - img:
+                - generic [ref=e803]:
+                  - generic [ref=e805]: trace 0
+                  - generic [ref=e813]: Volume
+              - img
+          - generic [ref=e819]:
+            - generic [ref=e823]:
+              - generic [ref=e827]: VIX — VOLATILITY INDEX · 48H
+              - generic [ref=e829]:
+                - button "View fullscreen"
+                - generic [ref=e832]:
+                  - img:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: 10:00Apr 20, 2026
+                          - generic:
+                            - generic: 12:00
+                          - generic:
+                            - generic: 14:00
+                          - generic:
+                            - generic: 16:00
+                          - generic:
+                            - generic: 18:00
+                          - generic:
+                            - generic: 20:00
+                        - generic:
+                          - generic:
+                            - generic: "0"
+                          - generic:
+                            - generic: "50"
+                          - generic:
+                            - generic: "100"
+                  - img
+                  - img
+            - generic [ref=e849]:
+              - generic [ref=e853]: GLD — GOLD ETF · 48H
+              - generic [ref=e855]:
+                - button "View fullscreen"
+                - generic [ref=e858]:
+                  - img:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic: 14:00Apr 20, 2026
+                          - generic:
+                            - generic: 15:00
+                          - generic:
+                            - generic: 16:00
+                          - generic:
+                            - generic: 17:00
+                          - generic:
+                            - generic: 18:00
+                          - generic:
+                            - generic: 19:00
+                        - generic:
+                          - generic:
+                            - generic: "0"
+                          - generic:
+                            - generic: "100"
+                          - generic:
+                            - generic: "200"
+                          - generic:
+                            - generic: "300"
+                          - generic:
+                            - generic: "400"
+                  - img
+                  - img
+          - generic [ref=e875]: GTI SCORE vs SPY RETURNS — CORRELATION VIEW
+          - generic [ref=e877]:
+            - button "View fullscreen"
+            - generic [ref=e880]:
+              - img:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: "0"
+                      - generic:
+                        - generic: "20"
+                      - generic:
+                        - generic: "40"
+                      - generic:
+                        - generic: "60"
+                      - generic:
+                        - generic: "80"
+                      - generic:
+                        - generic: "100"
+                    - generic:
+                      - generic:
+                        - generic: −0.1
+                      - generic:
+                        - generic: −0.05
+                      - generic:
+                        - generic: "0"
+                      - generic:
+                        - generic: "0.05"
+                      - generic:
+                        - generic: "0.1"
+              - img:
+                - generic:
+                  - generic:
+                    - generic: GTI Score (0–100)
+                  - generic:
+                    - generic: SPY Return %
+              - img
+    - generic [ref=e348]:
+      - generic [ref=e349]: ■ SYSTEM_STABLE
+      - generic [ref=e350]: FRAMEWORK SOVEREIGN INTELLIGENCE V4.0.2
+      - generic [ref=e351]: ENCRYPTION AES256
+      - generic [ref=e352]: GTI 26.5
+      - generic [ref=e353]: COUNTRIES 0
+      - generic [ref=e354]: ARTICLES 80
+      - generic [ref=e355]: LATENCY 12MS REFRESH 10:29:58 UTC
+  - img [ref=e356]

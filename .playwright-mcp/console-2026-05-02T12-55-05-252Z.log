@@ -1,0 +1,4 @@
+[     784ms] [LOG] Gather usage stats:  false @ http://localhost:8501/static/js/main.d090770a.js:1
+[    6497ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ http://localhost:8501/static/js/7386.538112c7.chunk.js:1
+[ 3940159ms] [LOG] Gather usage stats:  false @ http://localhost:8501/static/js/main.d090770a.js:1
+[ 3945199ms] [WARNING] Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently @ http://localhost:8501/static/js/7386.538112c7.chunk.js:1

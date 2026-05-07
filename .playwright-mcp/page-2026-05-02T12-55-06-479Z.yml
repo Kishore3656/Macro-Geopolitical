@@ -1,0 +1,64 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - img "Running..." [ref=e7]
+        - generic [ref=e8]: Running...
+        - button "Stop" [ref=e10] [cursor=pointer]
+      - button [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+  - generic [ref=e17]:
+    - generic [ref=e20]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - text: GEOMARKET INTELLIGENCE
+          - generic [ref=e26]: Earth PulseGeo MapAI SignalsMarket
+        - generic [ref=e27]: "⌕ search... 🔔 ⚙ GTI Score: 0"
+      - generic [ref=e28]:
+        - alert [ref=e34]:
+          - paragraph [ref=e39]: Loading...
+        - alert [ref=e45]:
+          - paragraph [ref=e50]: Loading...
+        - alert [ref=e56]:
+          - paragraph [ref=e61]: Loading...
+        - alert [ref=e67]:
+          - paragraph [ref=e72]: Loading...
+      - generic [ref=e73]:
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - generic [ref=e82]: ARCHIVE_01
+            - generic [ref=e83]: OPERATOR_SESSION_ACTIVE
+          - navigation [ref=e84]:
+            - generic [ref=e85]: ◈ INTELLIGENCE
+            - generic [ref=e86]: ◉ Archive
+            - generic [ref=e87]: ◎ Surveillance
+            - generic [ref=e88]: ◆ Tactical
+          - generic [ref=e89]:
+            - generic [ref=e90]: ⚙ Settings
+            - button "INITIATE SCAN" [ref=e91] [cursor=pointer]
+        - generic [ref=e98]:
+          - generic [ref=e102]:
+            - generic [ref=e103]: "26.8"
+            - generic [ref=e104]:
+              - generic [ref=e105]: CURRENT_ASSESSMENT
+              - generic [ref=e106]: Geopolitical Tension Index
+          - generic [ref=e110]:
+            - generic [ref=e111]: CONFLICT
+            - generic [ref=e112]: "0.0"
+            - generic [ref=e113]: GDELT event conflict ratio from live event stream.
+          - generic [ref=e117]:
+            - generic [ref=e118]: TONE_INDEX
+            - generic [ref=e119]: "0.0"
+            - generic [ref=e120]: GDELT media sentiment from global news analysis.
+          - generic [ref=e124]:
+            - generic [ref=e125]: VADER_SENTIMENT
+            - generic [ref=e126]: "-17.6"
+            - generic [ref=e127]: RSS headline sentiment score from aggregated news feeds.
+          - generic [ref=e131]:
+            - generic [ref=e132]: VOLATILITY
+            - generic [ref=e133]: "53.5"
+            - generic [ref=e134]: Market volatility estimate based on GTI.
+    - generic [ref=e137]:
+      - text: Made with
+      - link "Streamlit" [ref=e138] [cursor=pointer]:
+        - /url: //streamlit.io

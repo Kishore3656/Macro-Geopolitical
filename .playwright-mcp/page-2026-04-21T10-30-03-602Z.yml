@@ -1,0 +1,275 @@
+- generic [active]:
+  - generic [ref=e7]:
+    - generic [ref=e11]:
+      - generic [ref=e12]: GEOMARKET INTELLIGENCE
+      - generic [ref=e13]:
+        - generic [ref=e14] [cursor=pointer]: EARTH PULSE
+        - generic [ref=e15] [cursor=pointer]: GEO MAP
+        - generic [ref=e16] [cursor=pointer]: AI SIGNALS
+        - generic [ref=e17] [cursor=pointer]: MARKET
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - text: "⚡ GTI SCORE: 26"
+          - generic [ref=e20]: NOMINAL_STABLE
+        - generic [ref=e21]: LIVE
+        - generic [ref=e24]: 10:28:58 UTC
+    - generic [ref=e26]:
+      - tablist [ref=e28]:
+        - tab "EARTH PULSE" [selected] [ref=e29] [cursor=pointer]:
+          - paragraph [ref=e31]: EARTH PULSE
+        - tab "GEO MAP" [ref=e32] [cursor=pointer]:
+          - paragraph [ref=e34]: GEO MAP
+        - tab "AI SIGNALS" [ref=e35] [cursor=pointer]:
+          - paragraph [ref=e37]: AI SIGNALS
+        - tab "MARKET" [ref=e38] [cursor=pointer]:
+          - paragraph [ref=e40]: MARKET
+      - tabpanel "EARTH PULSE" [ref=e43]:
+        - generic [ref=e47]:
+          - generic [ref=e51]:
+            - generic [ref=e55]:
+              - generic [ref=e56]:
+                - text: ARCHIVE_01
+                - text: OPERATOR_SESSION_ACTIVE
+              - generic [ref=e57] [cursor=pointer]: ■ INTELLIGENCE
+              - generic [ref=e58] [cursor=pointer]: ■ ARCHIVE
+              - generic [ref=e59] [cursor=pointer]: ■ SURVEILLANCE
+              - generic [ref=e60] [cursor=pointer]: ■ TACTICAL
+              - generic [ref=e61] [cursor=pointer]: ■ SETTINGS
+              - generic [ref=e62]:
+                - generic [ref=e64]: "SYSTEM_STATUS: GTI_INDEX"
+                - generic [ref=e65]: "26.5"
+                - generic [ref=e66]: NOMINAL_STABLE
+                - generic [ref=e67]: +0.0% (24H)
+              - generic [ref=e68]: SIGNAL_COMPONENTS
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - generic [ref=e74]:
+                  - code [ref=e77]: <div class="sig-block"> <div style="display:flex;justify-content:space-between;align-items:flex-start"> <div class="sig-name">CONFLICT</div> <div class="sig-val">0</div> </div> <div class="sig-bar-track"> <div class="sig-bar-fill" style="width:0%;background:#ffb4ab"></div> </div> <div class="sig-desc">Conflict events within normal range.</div> </div> <div class="sig-block"> <div style="display:flex;justify-content:space-between;align-items:flex-start"> <div class="sig-name">TONE_INDEX</div> <div class="sig-val">50.0</div> </div> <div class="sig-bar-track"> <div class="sig-bar-fill" style="width:50%;background:#ffb867"></div> </div> <div class="sig-desc">Neutral/defensive posture observed.</div> </div> <div class="sig-block"> <div style="display:flex;justify-content:space-between;align-items:flex-start"> <div class="sig-name">VADER_SENTIMENT</div> <div class="sig-val">-0.15</div> </div> <div class="sig-bar-track"> <div class="sig-bar-fill" style="width:57%;background:#d4840a"></div> </div> <div class="sig-desc">Social clusters showing negative recovery trends.</div> </div>
+                  - generic:
+                    - button "Copy to clipboard":
+                      - img
+                - generic [ref=e79]:
+                  - generic [ref=e80]: VOLATILITY
+                  - generic [ref=e81]: —
+              - generic [ref=e88]:
+                - generic [ref=e89]: RISK LEGEND
+                - generic [ref=e90]: CRITICAL_THREAT (75-100)
+                - generic [ref=e92]: ELEVATED_WATCH (40-74)
+                - generic [ref=e94]: NOMINAL_STABLE (0-39)
+              - generic [ref=e97] [cursor=pointer]: INITIATE_SCAN
+          - generic [ref=e101]:
+            - generic [ref=e108]:
+              - generic [ref=e109]: EARTH PULSE
+              - generic [ref=e110]: REAL-TIME_GEOPOLITICAL_FEED
+            - iframe [ref=e112]:
+              - generic [active] [ref=f1e1]:
+                - generic [ref=f1e5]:
+                  - img
+                  - img
+                  - generic [ref=f1e7]:
+                    - img [ref=f1e10] [cursor=pointer]
+                    - generic [ref=f1e12]:
+                      - img [ref=f1e14] [cursor=pointer]
+                      - img [ref=f1e17] [cursor=pointer]
+                      - img [ref=f1e20] [cursor=pointer]
+                    - generic [ref=f1e22]:
+                      - img [ref=f1e24] [cursor=pointer]
+                      - img [ref=f1e27] [cursor=pointer]
+                      - img [ref=f1e30] [cursor=pointer]
+                    - img [ref=f1e34] [cursor=pointer]
+                    - link "plotly-logomark" [ref=f1e37] [cursor=pointer]:
+                      - /url: https://plotly.com/
+                      - img "plotly-logomark" [ref=f1e38]
+                  - img
+                - img [ref=f1e51]
+            - generic [ref=e116]: COORDINATE_GRID_ACTIVE_V4 · 0 COUNTRIES · GDELT 48H
+            - generic [ref=e120]: LATEST HEADLINES
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - generic [ref=e127]:
+                  - generic [ref=e128]: Abkhazian fighters plant flag inside Georgia
+                  - generic [ref=e129]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e130]: "-0.05"
+              - generic [ref=e131]:
+                - generic [ref=e133]:
+                  - generic [ref=e134]: "Officials: 3 Western women killed in Afghan attack"
+                  - generic [ref=e135]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e136]: "-0.82"
+              - generic [ref=e137]:
+                - generic [ref=e139]:
+                  - generic [ref=e140]: "Officials: Missile strike kills 9 in Pakistan"
+                  - generic [ref=e141]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e142]: "-0.61"
+              - generic [ref=e143]:
+                - generic [ref=e145]:
+                  - generic [ref=e146]: Bomb in northern Lebanese city kills 18
+                  - generic [ref=e147]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e148]: "-0.77"
+              - generic [ref=e149]:
+                - generic [ref=e151]:
+                  - generic [ref=e152]: Sharp 6.2 quake shakes sea floor near Vanuatu
+                  - generic [ref=e153]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e154]: "0.00"
+              - generic [ref=e155]:
+                - generic [ref=e157]:
+                  - generic [ref=e158]: Georgian president accepts EU cease-fire plan
+                  - generic [ref=e159]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e160]: "+0.32"
+              - generic [ref=e161]:
+                - generic [ref=e163]:
+                  - generic [ref=e164]: Georgian village bombed as fighting neared an end
+                  - generic [ref=e165]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e166]: "-0.36"
+              - generic [ref=e167]:
+                - generic [ref=e169]:
+                  - generic [ref=e170]: Russians move toward gorge despite cease-fire
+                  - generic [ref=e171]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e172]: "0.00"
+              - generic [ref=e173]:
+                - generic [ref=e175]:
+                  - generic [ref=e176]: Myanmar gem merchants dismiss US embargo threat
+                  - generic [ref=e177]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e178]: "-0.53"
+              - generic [ref=e179]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]: India yearns for Pakistan's Musharraf amid turmoil
+                  - generic [ref=e183]: 2026-04-21 10:27 UTC • Associated Press
+                - generic [ref=e184]: "-0.36"
+              - generic [ref=e185]:
+                - generic [ref=e187]:
+                  - generic [ref=e188]: Abkhazian fighters plant flag inside Georgia
+                  - generic [ref=e189]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e190]: "-0.05"
+              - generic [ref=e191]:
+                - generic [ref=e193]:
+                  - generic [ref=e194]: "Officials: 3 Western women killed in Afghan attack"
+                  - generic [ref=e195]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e196]: "-0.82"
+              - generic [ref=e197]:
+                - generic [ref=e199]:
+                  - generic [ref=e200]: "Officials: Missile strike kills 9 in Pakistan"
+                  - generic [ref=e201]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e202]: "-0.61"
+              - generic [ref=e203]:
+                - generic [ref=e205]:
+                  - generic [ref=e206]: Bomb in northern Lebanese city kills 18
+                  - generic [ref=e207]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e208]: "-0.77"
+              - generic [ref=e209]:
+                - generic [ref=e211]:
+                  - generic [ref=e212]: Sharp 6.2 quake shakes sea floor near Vanuatu
+                  - generic [ref=e213]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e214]: "0.00"
+              - generic [ref=e215]:
+                - generic [ref=e217]:
+                  - generic [ref=e218]: Georgian president accepts EU cease-fire plan
+                  - generic [ref=e219]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e220]: "+0.32"
+              - generic [ref=e221]:
+                - generic [ref=e223]:
+                  - generic [ref=e224]: Georgian village bombed as fighting neared an end
+                  - generic [ref=e225]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e226]: "-0.36"
+              - generic [ref=e227]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]: Russians move toward gorge despite cease-fire
+                  - generic [ref=e231]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e232]: "0.00"
+              - generic [ref=e233]:
+                - generic [ref=e235]:
+                  - generic [ref=e236]: Myanmar gem merchants dismiss US embargo threat
+                  - generic [ref=e237]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e238]: "-0.53"
+              - generic [ref=e239]:
+                - generic [ref=e241]:
+                  - generic [ref=e242]: India yearns for Pakistan's Musharraf amid turmoil
+                  - generic [ref=e243]: 2026-04-21 10:22 UTC • Associated Press
+                - generic [ref=e244]: "-0.36"
+              - generic [ref=e245]:
+                - generic [ref=e247]:
+                  - generic [ref=e248]: Abkhazian fighters plant flag inside Georgia
+                  - generic [ref=e249]: 2026-04-21 10:17 UTC • Associated Press
+                - generic [ref=e250]: "-0.05"
+              - generic [ref=e251]:
+                - generic [ref=e253]:
+                  - generic [ref=e254]: "Officials: 3 Western women killed in Afghan attack"
+                  - generic [ref=e255]: 2026-04-21 10:17 UTC • Associated Press
+                - generic [ref=e256]: "-0.82"
+              - generic [ref=e257]:
+                - generic [ref=e259]:
+                  - generic [ref=e260]: "Officials: Missile strike kills 9 in Pakistan"
+                  - generic [ref=e261]: 2026-04-21 10:17 UTC • Associated Press
+                - generic [ref=e262]: "-0.61"
+              - generic [ref=e263]:
+                - generic [ref=e265]:
+                  - generic [ref=e266]: Bomb in northern Lebanese city kills 18
+                  - generic [ref=e267]: 2026-04-21 10:17 UTC • Associated Press
+                - generic [ref=e268]: "-0.77"
+          - generic [ref=e272]:
+            - generic [ref=e280]: 48H GTI HISTORY
+            - generic [ref=e282]:
+              - button "View fullscreen"
+              - generic [ref=e285]:
+                - img:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic: 06:00Apr 21, 2026
+                        - generic:
+                          - generic: 07:00
+                        - generic:
+                          - generic: 08:00
+                        - generic:
+                          - generic: 09:00
+                        - generic:
+                          - generic: 10:00
+                      - generic:
+                        - generic:
+                          - generic: "0"
+                        - generic:
+                          - generic: "50"
+                        - generic:
+                          - generic: "100"
+                - img
+                - img
+            - generic [ref=e302]: LATEST HEADLINES
+            - generic [ref=e306]:
+              - generic [ref=e307]:
+                - generic [ref=e308]: XAU/USD
+                - generic [ref=e309]: COMMODITY · Gold
+                - generic [ref=e310]: "officials: 3 western women killed in afghan attack"
+              - generic [ref=e311]: ↑
+            - generic [ref=e315]:
+              - generic [ref=e316]:
+                - generic [ref=e317]: OIL/USD
+                - generic [ref=e318]: COMMODITY · Crude Oil
+                - generic [ref=e319]: india yearns for pakistan's musharraf amid turmoil
+              - generic [ref=e320]: ↑
+            - generic [ref=e324]:
+              - generic [ref=e325]:
+                - generic [ref=e326]: VIX
+                - generic [ref=e327]: EQUITY · Volatility
+                - generic [ref=e328]: india yearns for pakistan's musharraf amid turmoil
+              - generic [ref=e329]: ↑
+            - generic [ref=e333]:
+              - generic [ref=e334]:
+                - generic [ref=e335]: NAS_100
+                - generic [ref=e336]: EQUITY · NASDAQ 100
+                - generic [ref=e337]: spain, slovenia, ireland push eu to debate israel pa
+              - generic [ref=e338]: ⚡
+            - generic [ref=e342]:
+              - generic [ref=e343]:
+                - generic [ref=e344]: USD/JPY
+                - generic [ref=e345]: FX · Dollar / Yen
+                - generic [ref=e346]: No recent triggers
+              - generic [ref=e347]: —
+    - generic [ref=e348]:
+      - generic [ref=e349]: ■ SYSTEM_STABLE
+      - generic [ref=e350]: FRAMEWORK SOVEREIGN INTELLIGENCE V4.0.2
+      - generic [ref=e351]: ENCRYPTION AES256
+      - generic [ref=e352]: GTI 26.5
+      - generic [ref=e353]: COUNTRIES 0
+      - generic [ref=e354]: ARTICLES 80
+      - generic [ref=e355]: LATENCY 12MS REFRESH 10:29:58 UTC
+  - img [ref=e356]

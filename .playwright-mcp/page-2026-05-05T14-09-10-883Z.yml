@@ -1,0 +1,161 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: GEOPOLITICAL
+      - generic [ref=e7]: MARKET
+      - generic [ref=e8]: WS_PORT:8000
+    - navigation [ref=e9]:
+      - link "GEO-POLITICAL MARKET" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - img [ref=e11]
+        - text: GEO-POLITICAL MARKET
+      - link "Geospatial Map" [ref=e13] [cursor=pointer]:
+        - /url: /geo-map
+        - img [ref=e14]
+        - text: Geospatial Map
+      - link "Signal Analysis" [ref=e16] [cursor=pointer]:
+        - /url: /ai-signals
+        - img [ref=e17]
+        - text: Signal Analysis
+      - link "Analytics" [ref=e19] [cursor=pointer]:
+        - /url: /market
+        - img [ref=e20]
+        - text: Analytics
+      - link "System Logs" [ref=e22] [cursor=pointer]:
+        - /url: /earth-pulse
+        - img [ref=e23]
+        - text: System Logs
+  - generic [ref=e25]:
+    - generic [ref=e26]:
+      - banner [ref=e27]:
+        - generic [ref=e28]: NEXUS Command
+        - generic [ref=e29]:
+          - generic [ref=e30]: The Command Hub
+          - text: Global command-state overlay active
+      - main [ref=e31]:
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e34]: The Command Hub
+            - generic [ref=e36]:
+              - generic [ref=e37]:
+                - img [ref=e38]
+                - generic [ref=e55]: World conflict overview
+                - generic [ref=e59]:
+                  - generic [ref=e60]: "US East Coast:"
+                  - generic [ref=e61]: "TENSION_INDEX: 6.5"
+                  - generic [ref=e62]: "TRADE_FLOW: STABLE"
+                  - generic [ref=e63]: "STATUS: STABLE"
+                - generic [ref=e67]:
+                  - generic [ref=e68]: "EU:"
+                  - generic [ref=e69]: "TENSION_INDEX: 5.0"
+                  - generic [ref=e70]: "TRADE_FLOW: STABLE"
+                  - generic [ref=e71]: "STATUS: STABLE"
+                - generic [ref=e75]:
+                  - generic [ref=e76]: "Eastern Europe:"
+                  - generic [ref=e77]: "TENSION_INDEX: 8.5"
+                  - generic [ref=e78]: "TRADE_FLOW: UNSTABLE"
+                  - generic [ref=e79]: "HAZARD: HIGH"
+                - generic [ref=e83]:
+                  - generic [ref=e84]: "Middle East:"
+                  - generic [ref=e85]: "TENSION_INDEX: 8.5"
+                  - generic [ref=e86]: "TRADE_FLOW: UNSTABLE"
+                  - generic [ref=e87]: "HAZARD: HIGH"
+                - generic [ref=e91]:
+                  - generic [ref=e92]: "Kashmir Region:"
+                  - generic [ref=e93]: "TENSION_INDEX: 8.3"
+                  - generic [ref=e94]: "TRADE_FLOW: UNSTABLE"
+                  - generic [ref=e95]: "HAZARD: HIGH"
+                - generic [ref=e99]:
+                  - generic [ref=e100]: "APAC:"
+                  - generic [ref=e101]: "TENSION_INDEX: 4.5"
+                  - generic [ref=e102]: "TRADE_FLOW: STABLE"
+                  - generic [ref=e103]: "STATUS: STABLE"
+              - generic [ref=e104]:
+                - generic [ref=e105]: Primary geopolitical map stack
+                - generic [ref=e106]:
+                  - generic [ref=e107]:
+                    - generic [ref=e108]: US East Coast
+                    - generic [ref=e109]: "Tension Index: 6.5"
+                    - generic [ref=e110]: "Trade Flow: STABLE"
+                    - generic [ref=e111]: "STATUS: STABLE"
+                  - generic [ref=e112]:
+                    - generic [ref=e113]: EU
+                    - generic [ref=e114]: "Tension Index: 5.0"
+                    - generic [ref=e115]: "Trade Flow: STABLE"
+                    - generic [ref=e116]: "STATUS: STABLE"
+                  - generic [ref=e117]:
+                    - generic [ref=e118]: Eastern Europe
+                    - generic [ref=e119]: "Tension Index: 8.5"
+                    - generic [ref=e120]: "Trade Flow: UNSTABLE"
+                    - generic [ref=e121]: "HAZARD: HIGH"
+                  - generic [ref=e122]:
+                    - generic [ref=e123]: Middle East
+                    - generic [ref=e124]: "Tension Index: 8.5"
+                    - generic [ref=e125]: "Trade Flow: UNSTABLE"
+                    - generic [ref=e126]: "HAZARD: HIGH"
+                  - generic [ref=e127]:
+                    - generic [ref=e128]: Kashmir Region
+                    - generic [ref=e129]: "Tension Index: 8.3"
+                    - generic [ref=e130]: "Trade Flow: UNSTABLE"
+                    - generic [ref=e131]: "HAZARD: HIGH"
+                  - generic [ref=e132]:
+                    - generic [ref=e133]: APAC
+                    - generic [ref=e134]: "Tension Index: 4.5"
+                    - generic [ref=e135]: "Trade Flow: STABLE"
+                    - generic [ref=e136]: "STATUS: STABLE"
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - generic [ref=e139]: Global Zone Readout
+              - generic [ref=e140]:
+                - generic [ref=e141]:
+                  - generic [ref=e142]: Tension Index
+                  - generic [ref=e143]: "8.5"
+                  - generic [ref=e144]: Escalation concentrated across Eastern Europe and the Middle East.
+                - generic [ref=e145]:
+                  - generic [ref=e146]: Trade Flow
+                  - generic [ref=e147]: UNSTABLE
+                  - generic [ref=e148]: Maritime and energy corridors remain sensitive to conflict events.
+                - generic [ref=e149]:
+                  - generic [ref=e150]: Hazard
+                  - generic [ref=e151]: HIGH
+                  - generic [ref=e152]: Headline volatility and commodity shock risk remain elevated.
+            - generic [ref=e153]:
+              - generic [ref=e154]:
+                - generic [ref=e155]: GTI Score
+                - generic [ref=e156]: "0.0"
+                - generic [ref=e157]: elevated
+              - generic [ref=e158]:
+                - generic [ref=e159]: Signal Bias
+                - generic [ref=e160]: UP
+                - generic [ref=e161]: Confidence 0.00
+              - generic [ref=e162]:
+                - generic [ref=e163]: SPY Daily Drift
+                - generic [ref=e164]: +0.00%
+                - generic [ref=e165]: Current Price 0.00
+    - complementary [ref=e166]:
+      - generic [ref=e168]: Live News Ticker
+    - complementary [ref=e169]:
+      - generic [ref=e170]: Asset Impact
+      - generic [ref=e171]:
+        - generic [ref=e172]:
+          - generic [ref=e173]: "Asset: OIL_FUTURES"
+          - generic [ref=e174]:
+            - text: "Impact:"
+            - generic [ref=e175]: "[MEDIUM]"
+          - generic [ref=e176]: "Change: -2.7%"
+        - generic [ref=e177]:
+          - generic [ref=e178]: "Asset: EUR/USD"
+          - generic [ref=e179]:
+            - text: "Impact:"
+            - generic [ref=e180]: "[LOW]"
+          - generic [ref=e181]: "Change: +0.0%"
+        - generic [ref=e182]:
+          - generic [ref=e183]: "Asset: GOLD"
+          - generic [ref=e184]:
+            - text: "Impact:"
+            - generic [ref=e185]: "[MEDIUM]"
+          - generic [ref=e186]: "Change: +1.3%"
+      - generic [ref=e187]:
+        - generic [ref=e188]: "Global Risk: ELEVATED"
+        - generic [ref=e189]: "Market Stability: STABLE"
+        - generic [ref=e190]: "Cyber Threat: LOW"
