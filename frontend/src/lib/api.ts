@@ -10,6 +10,7 @@ import {
   BilateralData,
   HeadlineData,
   GeoEventData,
+  RegionsData,
 } from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -72,6 +73,10 @@ export const api = {
 
   events: async (limit: number = 50): Promise<APIResponse<GeoEventData>> => {
     return fetchAPI<GeoEventData>('/api/events', { limit });
+  },
+
+  regions: async (): Promise<APIResponse<RegionsData>> => {
+    return fetchAPI<RegionsData>('/api/regions');
   },
 
   health: async (): Promise<boolean> => {

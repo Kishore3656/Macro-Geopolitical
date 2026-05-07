@@ -12,11 +12,14 @@ Columns we extract:
   col 0  → GLOBALEVENTID   (unique event ID)
   col 1  → SQLDATE          (YYYYMMDD)
   col 7  → Actor1CountryCode
-  col 17 → Actor2CountryCode
+  col 8  → Actor2CountryCode
   col 26 → EventCode        (CAMEO code, e.g. 190 = use of military force)
   col 30 → GoldsteinScale   (-10 to +10, negative = conflict)
   col 33 → NumArticles      (how widely reported)
   col 34 → AvgTone          (-100 to +100, negative = negative tone)
+  col 55 → ActionGeo_FullName (location)
+  col 56 → ActionGeo_Lat    (latitude)
+  col 57 → ActionGeo_Long   (longitude)
 
 Usage:
   python -m ingestion.gdelt_fetcher            # fetch latest 15-min update
@@ -32,8 +35,8 @@ from datetime import datetime, timedelta
 import requests
 import pandas as pd
 
-from config import NEWS_DB
-from ingestion.db import get_conn
+from config import NEWS_DB, GTI_DB
+from ingestion.db import get_conn, db_transaction
 
 GDELT_LASTUPDATE = "http://data.gdeltproject.org/gdeltv2/lastupdate.txt"
 GDELT_BASE       = "http://data.gdeltproject.org/gdeltv2/"
@@ -43,11 +46,14 @@ COLS = {
     0:  "event_id",
     1:  "timestamp",
     7:  "actor1_country",
-    17: "actor2_country",
+    8:  "actor2_country",
     26: "event_code",
     30: "goldstein_scale",
     33: "num_articles",
     34: "avg_tone",
+    55: "location",
+    56: "latitude",
+    57: "longitude",
 }
 
 
@@ -65,6 +71,8 @@ def _parse_gdelt_csv(raw_bytes: bytes) -> pd.DataFrame:
                     30: "float32",  # GoldsteinScale
                     33: "int32",    # NumArticles
                     34: "float32",  # AvgTone
+                    56: "float32",  # Latitude
+                    57: "float32",  # Longitude
                 },
                 low_memory=False,
             )
@@ -79,12 +87,14 @@ def _parse_gdelt_csv(raw_bytes: bytes) -> pd.DataFrame:
 
 
 def _insert_df(df: pd.DataFrame) -> int:
-    """Insert rows into gdelt_events, skip duplicates. Returns count inserted."""
-    conn = get_conn(NEWS_DB)
+    """Insert rows into gdelt_events in both NEWS_DB and GTI_DB, skip duplicates. Returns count inserted."""
+    news_conn = get_conn(NEWS_DB)
     inserted = 0
+
+    # Insert into news.db (simpler schema)
     for _, row in df.iterrows():
         try:
-            conn.execute(
+            news_conn.execute(
                 """INSERT OR IGNORE INTO gdelt_events
                    (event_id, timestamp, actor1_country, actor2_country,
                     event_code, goldstein_scale, num_articles, avg_tone)
@@ -103,8 +113,53 @@ def _insert_df(df: pd.DataFrame) -> int:
             inserted += 1
         except sqlite3.Error:
             pass
-    conn.commit()
-    conn.close()
+    news_conn.commit()
+    news_conn.close()
+
+    # Insert into gti.db (richer schema with lat/lon)
+    with db_transaction(GTI_DB) as gti_conn:
+        for _, row in df.iterrows():
+            try:
+                gti_conn.execute(
+                    """INSERT OR IGNORE INTO gdelt_events
+                       (event_id, event_date, actor1_country, actor2_country,
+                        event_code, cameo_code, goldstein_scale, latitude, longitude,
+                        location, num_articles, avg_tone)
+                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (
+                        row["event_id"],
+                        row["timestamp"],
+                        row.get("actor1_country"),
+                        row.get("actor2_country"),
+                        row.get("event_code"),
+                        row.get("event_code"),  # cameo_code = event_code (same CAMEO classification)
+                        float(row["goldstein_scale"]) if pd.notna(row.get("goldstein_scale")) else None,
+                        float(row["latitude"]) if pd.notna(row.get("latitude")) else None,
+                        float(row["longitude"]) if pd.notna(row.get("longitude")) else None,
+                        row.get("location"),
+                        int(row["num_articles"]) if pd.notna(row.get("num_articles")) else None,
+                        float(row["avg_tone"]) if pd.notna(row.get("avg_tone")) else None,
+                    ),
+                )
+            except sqlite3.Error:
+                pass
+
+        # Refresh conflict_summary with aggregated country-level conflict data
+        try:
+            gti_conn.execute("""
+                INSERT INTO conflict_summary (country_code, conflict_count, avg_goldstein, latest_event_time)
+                SELECT actor1_country, COUNT(*), AVG(goldstein_scale), MAX(event_date)
+                FROM gdelt_events
+                WHERE actor1_country IS NOT NULL AND actor1_country != ''
+                GROUP BY actor1_country
+                ON CONFLICT(country_code) DO UPDATE SET
+                  conflict_count = excluded.conflict_count,
+                  avg_goldstein = excluded.avg_goldstein,
+                  latest_event_time = excluded.latest_event_time
+            """)
+        except sqlite3.Error:
+            pass
+
     return inserted
 
 

@@ -22,7 +22,7 @@ A production-grade system combining geopolitical data, sentiment analysis, and m
 - **Health Monitoring**: System status endpoints for all components
 
 ### Cost
-**Zero API Costs** ó Uses free tier or local services:
+**Zero API Costs** - Uses free tier or local services:
 - GDELT: Free event data
 - Ollama: Local LLM (free)
 - HuggingFace: Free tier (30k req/month)
@@ -37,7 +37,7 @@ A production-grade system combining geopolitical data, sentiment analysis, and m
 - 4GB RAM, 2GB disk
 
 ### 1. Clone & Setup
-\\\ash
+```bash
 git clone https://github.com/kishore3656/trading-bot-geo-market-ml.git
 cd trading-bot-geo-market-ml
 
@@ -47,57 +47,67 @@ python -m spacy download en_core_web_sm
 
 # Frontend dependencies
 cd frontend && npm install && cd ..
-\\\
+```
 
 ### 2. Initialize Databases
-\\\ash
+```bash
 python -c "from ingestion.db import init_all; init_all()"
-\\\
+```
 
 ### 3. Start Scheduler
-\\\ash
+```bash
 python scheduler.py
 # Runs every 15 min: fetches news, computes GTI, runs ML inference
-\\\
+```
 
 ### 4. Start API Server
-\\\ash
+```bash
 python api/main.py
 # Server on http://localhost:8000
-\\\
+```
 
 ### 5. Start Frontend (Optional)
-\\\ash
+```bash
 cd frontend && npm run dev
 # Frontend on http://localhost:3000
-\\\
+```
 
 ## Status
 
-**Phase 6 Complete** ? Production-ready system with:
-- Phases 1-5 fully implemented
+**Phase 7 Complete** - Production-ready system with:
+- Phases 1-6 fully implemented
+- **Phase 7: ML accuracy +5-10pp** (27 technical indicators)
+- Live geopolitical data integration from GDELT
 - Error handling + logging
-- Health checks
+- Health checks + real-time monitoring
 - Database backups
-- Documentation
-- Tests
-- CI/CD pipeline
-- Docker support
+- Complete documentation
+- Full training pipeline
 
-See [PHASE_1_COMPLETION.md](PHASE_1_COMPLETION.md) through [PHASE_6_COMPLETION.md](PHASE_6_COMPLETION.md) for detailed phase reports.
+## Quick Start
+
+**See [docs/00_MASTER_SETUP.md](docs/00_MASTER_SETUP.md)** ‚Üê Start here!
+
+Or run one command:
+```bash
+.\run.bat
+# Then open http://localhost:3000
+```
 
 ## Documentation
 
-- [README.md](README.md) ó This file
-- [DEPLOYMENT.md](DEPLOYMENT.md) ó Production deployment guide
-- [ARCHITECTURE.md](ARCHITECTURE.md) ó System architecture and data flow
-- [PHASE_6_BRIEF.md](PHASE_6_BRIEF.md) ó Phase 6 overview
+- **[docs/00_MASTER_SETUP.md](docs/00_MASTER_SETUP.md)** ‚Üê Start here
+- [docs/LIVE_REGIONS_DATA.md](docs/LIVE_REGIONS_DATA.md) - Real geopolitical data wiring
+- [docs/ML_IMPROVEMENTS.md](docs/ML_IMPROVEMENTS.md) - Phase 7 ML improvements
+- [docs/PHASE_7_SUMMARY.md](docs/PHASE_7_SUMMARY.md) - What's new in Phase 7
+- [docs/NEXUS_IMPLEMENTATION.md](docs/NEXUS_IMPLEMENTATION.md) - Full technical details
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Production deployment
 
 ## Support
 
 For issues, questions, or suggestions:
-1. Check logs: \	ail -f logs/trading_bot.log\
-2. Run health check: \curl http://localhost:8000/api/status\
+1. Check logs: `tail -f logs/trading_bot.log`
+2. Run health check: `curl http://localhost:8000/api/status`
 3. Review troubleshooting in [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ---

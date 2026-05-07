@@ -9,7 +9,7 @@ interface GeopoliticalEvent {
   country?: string;
   location?: string;
   event_type?: string;
-  intensity?: number;
+  goldstein_scale?: number;
   timestamp?: string;
 }
 
@@ -23,7 +23,7 @@ export default function NexusGeoMap() {
       if (!('error' in bilateralRes)) setBilateral(bilateralRes);
       
       const eventsRes = await api.events(10);
-      if (!('error' in eventsRes)) setEvents(Array.isArray(eventsRes) ? eventsRes : eventsRes?.data || []);
+      if (!('error' in eventsRes)) setEvents(eventsRes.events || []);
     };
 
     loadData();
@@ -155,9 +155,9 @@ export default function NexusGeoMap() {
                     <div className="font-bold uppercase text-[#f4f1e8]">{event.country || 'Unknown'}</div>
                     <div className="text-[#c5c5bc] mt-0.5">{event.location || event.event_type || 'Event'}</div>
                   </div>
-                  {event.intensity && (
-                    <span className={event.intensity >= 7 ? 'text-[#ff7557]' : event.intensity >= 4 ? 'text-[#f6e327]' : 'text-[#9eff4f]'}>
-                      [{event.intensity.toFixed(1)}]
+                  {event.goldstein_scale !== undefined && (
+                    <span className={event.goldstein_scale < -5 ? 'text-[#ff7557]' : event.goldstein_scale < 0 ? 'text-[#f6e327]' : 'text-[#9eff4f]'}>
+                      [{event.goldstein_scale.toFixed(1)}]
                     </span>
                   )}
                 </div>

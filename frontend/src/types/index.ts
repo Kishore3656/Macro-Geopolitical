@@ -125,3 +125,21 @@ export interface APIError {
 }
 
 export type APIResponse<T> = T | APIError;
+
+// ─── Regions ─────────────────────────────────────────────────────────────────
+
+export type RegionTone = 'yellow' | 'green' | 'magenta';
+
+export interface RegionLiveData {
+  id: string;
+  tension: number;
+  tradeFlow: string;
+  statusLabel: 'STATUS' | 'HAZARD';
+  statusValue: string;
+  tone: RegionTone;
+}
+
+export interface RegionsData {
+  regions: RegionLiveData[];
+  timestamp: string;
+}

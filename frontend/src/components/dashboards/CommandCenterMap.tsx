@@ -6,6 +6,8 @@ import { feature, mesh } from 'topojson-client';
 import landAtlas from 'world-atlas/land-110m.json';
 import countriesAtlas from 'world-atlas/countries-110m.json';
 import type { Feature, GeometryCollection, MultiLineString, MultiPolygon, Polygon } from 'geojson';
+import { useRegions } from '@/hooks';
+import type { RegionLiveData } from '@/types';
 
 const VIEWBOX_WIDTH = 1100;
 const VIEWBOX_HEIGHT = 650;
@@ -44,6 +46,7 @@ interface RegionOverlay {
 interface CommandCenterMapProps {
   accentTitle?: string;
   contextLabel?: string;
+  liveRegions?: RegionLiveData[];
 }
 
 const landData = landAtlas as unknown as AtlasTopology;
@@ -225,14 +228,29 @@ function RegionPopup({ region }: { region: RegionCard }) {
 export default function CommandCenterMap({
   accentTitle = 'The Command Hub',
   contextLabel = 'Global geospatial conflict lattice',
+  liveRegions,
 }: CommandCenterMapProps) {
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null);
+  const { regions: fetchedRegions } = useRegions();
+  const activeRegions = liveRegions ?? fetchedRegions;
 
-  const projectedCards = regionCards.map((region) => {
-    const overlay = regionOverlays.find((o) => o.id === region.id);
-    const point = projection(region.coordinate) ?? [0, 0];
+  const projectedCards = regionCards.map((staticRegion) => {
+    const live = activeRegions.find((r) => r.id === staticRegion.id);
+    const merged: RegionCard = live
+      ? {
+          ...staticRegion,
+          tension: live.tension,
+          tradeFlow: live.tradeFlow,
+          statusLabel: live.statusLabel,
+          statusValue: live.statusValue,
+          tone: live.tone,
+        }
+      : staticRegion;
+
+    const overlay = regionOverlays.find((o) => o.id === staticRegion.id);
+    const point = projection(staticRegion.coordinate) ?? [0, 0];
     return {
-      ...region,
+      ...merged,
       point,
       overlay,
     };

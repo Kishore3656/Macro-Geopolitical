@@ -3,31 +3,47 @@
 import { useGTI, useMarket, useSignals } from '@/hooks';
 import CommandCenterMap from './CommandCenterMap';
 
-const summaryBoxes = [
-  {
-    label: 'Tension Index',
-    value: '8.5',
-    tone: 'text-[#f43de2]',
-    detail: 'Escalation concentrated across Eastern Europe and the Middle East.',
-  },
-  {
-    label: 'Trade Flow',
-    value: 'UNSTABLE',
-    tone: 'text-[#f6e327]',
-    detail: 'Maritime and energy corridors remain sensitive to conflict events.',
-  },
-  {
-    label: 'Hazard',
-    value: 'HIGH',
-    tone: 'text-[#ff7557]',
-    detail: 'Headline volatility and commodity shock risk remain elevated.',
-  },
-];
-
 export default function NexusCommand() {
   const { current: gti } = useGTI();
   const { spy } = useMarket();
   const { current: signal } = useSignals();
+
+  // Derived from live GTI data — gti.score is 0–1, display as 0–10
+  const tensionIndex = gti ? (gti.score * 10).toFixed(1) : '—';
+
+  const tradeFlowValue =
+    gti?.risk_level === 'HIGH_CONFLICT'    ? 'UNSTABLE'  :
+    gti?.risk_level === 'MODERATE_TENSION' ? 'DISRUPTED' :
+    gti                                     ? 'STABLE'    : '—';
+
+  const hazardValue =
+    gti?.risk_level === 'HIGH_CONFLICT'    ? 'HIGH'     :
+    gti?.risk_level === 'MODERATE_TENSION' ? 'ELEVATED' :
+    gti                                     ? 'LOW'      : '—';
+
+  const summaryBoxes = [
+    {
+      label: 'Tension Index',
+      value: tensionIndex,
+      tone: gti?.risk_level === 'HIGH_CONFLICT'    ? 'text-[#f43de2]' :
+            gti?.risk_level === 'MODERATE_TENSION' ? 'text-[#f6e327]' : 'text-[#9eff4f]',
+      detail: 'Escalation concentrated across Eastern Europe and the Middle East.',
+    },
+    {
+      label: 'Trade Flow',
+      value: tradeFlowValue,
+      tone: tradeFlowValue === 'UNSTABLE'  ? 'text-[#f43de2]' :
+            tradeFlowValue === 'DISRUPTED' ? 'text-[#f6e327]' : 'text-[#9eff4f]',
+      detail: 'Maritime and energy corridors remain sensitive to conflict events.',
+    },
+    {
+      label: 'Hazard',
+      value: hazardValue,
+      tone: hazardValue === 'HIGH'     ? 'text-[#ff7557]' :
+            hazardValue === 'ELEVATED' ? 'text-[#f6e327]' : 'text-[#9eff4f]',
+      detail: 'Headline volatility and commodity shock risk remain elevated.',
+    },
+  ];
 
   return (
     <div className="space-y-4">

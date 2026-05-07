@@ -538,6 +538,93 @@ def get_conflicts(limit: int = 15):
         }
 
 
+@app.get("/api/regions")
+def get_regions():
+    """
+    Aggregate conflict data by geographic region for the Command Hub map.
+    Returns tension scores, trade flow status, and tone for 6 fixed regions.
+    """
+    REGION_COUNTRIES = {
+        "eastern-europe": ["RU", "UA", "PL", "BY", "RS", "BA"],
+        "middle-east":    ["IR", "IQ", "SY", "IL", "YE", "SA", "LB"],
+        "kashmir":        ["PK", "IN"],
+        "us-east":        ["US"],
+        "eu":             ["DE", "FR", "GB", "ES", "IT", "NL", "BE"],
+        "apac":           ["CN", "JP", "KR", "TW"],
+    }
+
+    try:
+        with db_transaction(GTI_DB) as conn:
+            rows = conn.execute(
+                "SELECT country_code, conflict_count, avg_goldstein FROM conflict_summary"
+            ).fetchall()
+
+        country_data: dict[str, dict] = {}
+        for r in rows:
+            country_data[r["country_code"].upper()] = {
+                "conflict_count": int(r["conflict_count"] or 0),
+                "avg_goldstein": float(r["avg_goldstein"] or 0.0),
+            }
+
+        results = []
+        for region_id, countries in REGION_COUNTRIES.items():
+            matched = [country_data[c] for c in countries if c in country_data]
+
+            if not matched:
+                results.append({
+                    "id": region_id,
+                    "tension": 0.0,
+                    "tradeFlow": "STABLE",
+                    "statusLabel": "STATUS",
+                    "statusValue": "STABLE",
+                    "tone": "green",
+                })
+                continue
+
+            total_weight = sum(m["conflict_count"] for m in matched)
+            if total_weight > 0:
+                weighted_goldstein = sum(
+                    m["avg_goldstein"] * m["conflict_count"] for m in matched
+                ) / total_weight
+            else:
+                weighted_goldstein = sum(m["avg_goldstein"] for m in matched) / len(matched)
+
+            tension = round(max(0.0, min(10.0, (-weighted_goldstein + 10.0) / 2.0)), 1)
+            trade_flow = "UNSTABLE" if any(m["avg_goldstein"] < -5.0 for m in matched) else "STABLE"
+            status_value = "HIGH" if tension >= 7.0 else "STABLE"
+            status_label = "HAZARD" if status_value == "HIGH" else "STATUS"
+            tone = "magenta" if tension >= 7.0 else "yellow" if tension >= 4.5 else "green"
+
+            results.append({
+                "id": region_id,
+                "tension": tension,
+                "tradeFlow": trade_flow,
+                "statusLabel": status_label,
+                "statusValue": status_value,
+                "tone": tone,
+            })
+
+        return {
+            "regions": results,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception:
+        return {
+            "regions": [
+                {
+                    "id": r,
+                    "tension": 0.0,
+                    "tradeFlow": "STABLE",
+                    "statusLabel": "STATUS",
+                    "statusValue": "STABLE",
+                    "tone": "green",
+                }
+                for r in REGION_COUNTRIES
+            ],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+
 @app.get("/api/bilateral")
 def get_bilateral_relations(limit: int = 10):
     """
@@ -615,13 +702,15 @@ def get_recent_events(event_type: str = "all", limit: int = 20):
             events.append({
                 "event_id": r["event_id"],
                 "date": r["event_date"],
-                "actor1": r["actor1_countrycode"],
-                "actor2": r["actor2_countrycode"],
+                "actor1": r["actor1_country"],
+                "actor2": r["actor2_country"],
+                "event_code": r["event_code"],
                 "latitude": float(r["latitude"]) if r["latitude"] else None,
                 "longitude": float(r["longitude"]) if r["longitude"] else None,
                 "goldstein_scale": float(r["goldstein_scale"]),
-                "article_count": int(r["num_articles"]),
+                "article_count": int(r["num_articles"]) if r["num_articles"] else 0,
                 "avg_tone": float(r["avg_tone"]) if r["avg_tone"] else 0.0,
+                "location": r["location"] or "",
             })
 
         return {
@@ -630,10 +719,10 @@ def get_recent_events(event_type: str = "all", limit: int = 20):
                     "event_id": e["event_id"],
                     "event_type": event_type,
                     "country": e["actor1"],
-                    "location": "",
+                    "location": e["location"],
                     "latitude": e["latitude"],
                     "longitude": e["longitude"],
-                    "event_code": e["goldstein_scale"],
+                    "event_code": e["event_code"],
                     "goldstein_scale": e["goldstein_scale"],
                     "timestamp": e["date"],
                 }

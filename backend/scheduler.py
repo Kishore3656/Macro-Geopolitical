@@ -58,6 +58,16 @@ def job_gdelt():
         log.error(f"GDELT job failed: {e}")
 
 
+def job_rapidapi():
+    try:
+        from ingestion.rapidapi_fetcher import fetch_rapidapi_events
+        count = fetch_rapidapi_events(days_back=7)
+        if count > 0:
+            log.info(f"RapidAPI: inserted {count} events")
+    except Exception as e:
+        log.error(f"RapidAPI job failed: {e}")
+
+
 def job_newsapi():
     try:
         from ingestion.newsapi_fetcher import fetch_headlines
@@ -196,6 +206,13 @@ def main():
         job_gdelt, IntervalTrigger(minutes=GDELT_POLL_MINS), id="gdelt",
         name="GDELT Fetcher", misfire_grace_time=60,
     )
+
+    # RapidAPI fetcher runs every 6 hours (4 calls/day = ~120 req/month, within free tier of 100)
+    scheduler.add_job(
+        job_rapidapi, IntervalTrigger(hours=6), id="rapidapi",
+        name="RapidAPI Geopolitical Events", misfire_grace_time=60,
+    )
+
     if NEWSAPI_KEY:
         scheduler.add_job(
             job_newsapi, IntervalTrigger(minutes=NEWSAPI_POLL_MINS), id="newsapi",
@@ -242,6 +259,7 @@ def main():
     log.info("  Geo-Market Scheduler started")
     log.info(f"  RSS:     every {RSS_POLL_MINS} min")
     log.info(f"  GDELT:   every {GDELT_POLL_MINS} min")
+    log.info(f"  RapidAPI: every 6 hours")
     log.info(f"  NewsAPI: every {NEWSAPI_POLL_MINS} min")
     log.info(f"  Market:  every {MARKET_POLL_MINS} min")
     log.info(f"  GTI:     every {GDELT_POLL_MINS} min (+2 min offset)")

@@ -22,6 +22,10 @@ pip install -q -r requirements.txt
 
 echo [3/3] Starting services (Scheduler, API, Frontend)...
 
+REM Optional: Set RAPIDAPI_KEY to enable RapidAPI geopolitical events (free tier: 100 req/month)
+REM Signup at: https://rapidapi.com/nmk3/api/geopolitical-events-database1
+REM set RAPIDAPI_KEY=your_key_here
+
 REM Start scheduler (background data fetching)
 start "Scheduler" cmd /k "cd backend && python scheduler.py"
 timeout /t 2 /nobreak
