@@ -31,14 +31,14 @@ if (Test-Path "venv\Scripts\Activate.ps1") {
 Write-Host "Starting training pipeline..." -ForegroundColor Cyan
 Write-Host "Press Ctrl+C to stop`n" -ForegroundColor Yellow
 
-python setup_and_train.py --days 60
+python utils/setup_and_train.py --days 60
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "`n✓ Training complete!" -ForegroundColor Green
     Write-Host "`nNext steps:" -ForegroundColor Cyan
-    Write-Host "  1. Start scheduler:    .\start-scheduler.ps1" -ForegroundColor Yellow
-    Write-Host "  2. Start API server:   .\start-api.ps1" -ForegroundColor Yellow
-    Write-Host "  3. Start frontend:     .\start-frontend.ps1" -ForegroundColor Yellow
+    Write-Host "  1. Start scheduler:    .\scripts\start-scheduler.ps1" -ForegroundColor Yellow
+    Write-Host "  2. Start API server:   .\scripts\start-api.ps1" -ForegroundColor Yellow
+    Write-Host "  3. Start frontend:     .\scripts\start-frontend.ps1" -ForegroundColor Yellow
     Write-Host "  4. Open browser:       http://localhost:3000`n" -ForegroundColor Yellow
 } else {
     Write-Host "`n❌ Training failed. Check output above for errors." -ForegroundColor Red
