@@ -19,7 +19,7 @@ import hashlib
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from collections import deque
+from collections import deque, Counter
 import requests
 
 from config import (
@@ -31,6 +31,18 @@ from config import (
     LLM_CACHE_TTL_MINS,
 )
 
+try:
+    from nlp.ner import EntityExtractor
+    NER_AVAILABLE = True
+except ImportError:
+    NER_AVAILABLE = False
+
+try:
+    from nlp.language import LanguageProcessor
+    LANGUAGE_PROCESSOR_AVAILABLE = True
+except ImportError:
+    LANGUAGE_PROCESSOR_AVAILABLE = False
+
 
 @dataclass
 class LLMAnalysis:
@@ -40,6 +52,7 @@ class LLMAnalysis:
     entities: list[str]  # ["Ukraine", "Oil", "Fed"]
     narrative: str  # English explanation
     provider_used: str  # "ollama", "huggingface", "vader"
+    confidence: float = 0.5  # 0.0-1.0 consensus confidence on regime
     cached: bool = False
 
 
@@ -264,6 +277,9 @@ class RateLimiter:
 # Global instances
 _cache = AnalysisCache()
 _rate_limiter = RateLimiter(rpm=60)
+_regime_history = deque(maxlen=10)  # Track last 10 regimes for confidence scoring
+_entity_extractor = EntityExtractor() if NER_AVAILABLE else None
+_language_processor = LanguageProcessor() if LANGUAGE_PROCESSOR_AVAILABLE else None
 
 
 def _get_provider() -> LLMProvider:
@@ -280,11 +296,57 @@ def _get_provider() -> LLMProvider:
         return NullProvider()
 
 
+def _calculate_regime_confidence(regime: str) -> float:
+    """
+    Calculate confidence in regime prediction based on recent regime history.
+    If 8/10 recent regimes match current → confidence = 0.8
+    """
+    _regime_history.append(regime)
+
+    if len(_regime_history) < 2:
+        return 0.5
+
+    regime_counts = Counter(_regime_history)
+    consensus_count = regime_counts[regime]
+    confidence = consensus_count / len(_regime_history)
+
+    return confidence
+
+
+def _extract_entities_from_headlines(headlines: list[str]) -> list[str]:
+    """Extract top entities from headlines using NER if available."""
+    if not _entity_extractor or not NER_AVAILABLE:
+        return []
+
+    try:
+        return _entity_extractor.extract_top_entities(headlines, limit=5)
+    except Exception as e:
+        print(f"Entity extraction error: {e}")
+        return []
+
+
+def _process_multilingual_headlines(headlines: list[str]) -> list[str]:
+    """Detect language and translate non-English headlines if processor available."""
+    if not _language_processor or not LANGUAGE_PROCESSOR_AVAILABLE:
+        return headlines
+
+    processed = []
+    for headline in headlines:
+        try:
+            _, english_text, _ = _language_processor.process_headline(headline)
+            processed.append(english_text)
+        except Exception as e:
+            print(f"Language processing error: {e}")
+            processed.append(headline)
+
+    return processed
+
+
 def get_llm_analysis(headlines: list[str]) -> LLMAnalysis:
     """
     Analyze headlines for sentiment, regime, and narrative.
 
-    Returns LLMAnalysis with sentiment_score, regime, entities, narrative.
+    Returns LLMAnalysis with sentiment_score, regime, entities, narrative, confidence.
     Falls back gracefully: LLM → cache → VADER → error handling.
 
     Parameters
@@ -295,7 +357,7 @@ def get_llm_analysis(headlines: list[str]) -> LLMAnalysis:
     Returns
     -------
     LLMAnalysis
-        Structured analysis with regime and narrative
+        Structured analysis with regime, confidence, entities, and narrative
     """
     if not headlines:
         return LLMAnalysis(
@@ -304,10 +366,14 @@ def get_llm_analysis(headlines: list[str]) -> LLMAnalysis:
             entities=[],
             narrative="No headlines provided.",
             provider_used="null",
+            confidence=0.5,
         )
 
+    # Process multi-language headlines
+    headlines_processed = _process_multilingual_headlines(headlines)
+
     # Hash headlines for cache key
-    headlines_key = hashlib.md5("|".join(headlines[:10]).encode()).hexdigest()
+    headlines_key = hashlib.md5("|".join(headlines_processed[:10]).encode()).hexdigest()
 
     # Check cache
     cached = _cache.get(headlines_key)
@@ -320,8 +386,12 @@ def get_llm_analysis(headlines: list[str]) -> LLMAnalysis:
         # If rate-limited, fall back to VADER
         null_provider = NullProvider()
         try:
-            analysis = null_provider.analyze(headlines)
+            analysis = null_provider.analyze(headlines_processed)
             analysis.narrative += " (RATE LIMITED — VADER fallback)"
+            analysis.confidence = _calculate_regime_confidence(analysis.regime)
+            # Extract entities from headlines
+            if not analysis.entities:
+                analysis.entities = _extract_entities_from_headlines(headlines_processed)
             _cache.set(headlines_key, analysis)
             return analysis
         except Exception:
@@ -331,20 +401,28 @@ def get_llm_analysis(headlines: list[str]) -> LLMAnalysis:
                 entities=[],
                 narrative="Analysis unavailable (rate limit).",
                 provider_used="error",
+                confidence=0.5,
             )
 
     # Try primary provider
     provider = _get_provider()
     try:
-        analysis = provider.analyze(headlines)
+        analysis = provider.analyze(headlines_processed)
+        analysis.confidence = _calculate_regime_confidence(analysis.regime)
+        # Extract entities if not already populated
+        if not analysis.entities:
+            analysis.entities = _extract_entities_from_headlines(headlines_processed)
         _cache.set(headlines_key, analysis)
         return analysis
     except Exception as e:
         # Fallback to VADER on any LLM error
         try:
             null_provider = NullProvider()
-            analysis = null_provider.analyze(headlines)
+            analysis = null_provider.analyze(headlines_processed)
             analysis.narrative += f" (LLM unavailable: {provider.__class__.__name__} — VADER fallback)"
+            analysis.confidence = _calculate_regime_confidence(analysis.regime)
+            if not analysis.entities:
+                analysis.entities = _extract_entities_from_headlines(headlines_processed)
             _cache.set(headlines_key, analysis)
             return analysis
         except Exception as fallback_err:
@@ -355,6 +433,7 @@ def get_llm_analysis(headlines: list[str]) -> LLMAnalysis:
                 entities=[],
                 narrative=f"Analysis unavailable ({str(e)}). Using neutral regime.",
                 provider_used="error",
+                confidence=0.5,
             )
 
 

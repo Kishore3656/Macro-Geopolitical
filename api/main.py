@@ -206,10 +206,44 @@ def get_signals_current():
         except Exception:
             pass
 
+        # Get regime + confidence + entities for narrative context
+        regime_confidence = 0.5
+        entities = []
+        try:
+            with db_transaction(GTI_DB) as conn:
+                gti_row = conn.execute(
+                    "SELECT regime FROM gti_scores ORDER BY timestamp DESC LIMIT 1"
+                ).fetchone()
+            if gti_row and gti_row["regime"]:
+                regime = gti_row["regime"]
+        except Exception:
+            pass
+
+        # Try to get LLM analysis for confidence and entities
+        try:
+            from nlp.llm_sentiment import get_llm_analysis
+            conn = get_conn(NEWS_DB)
+            headlines = conn.execute(
+                """SELECT title FROM rss_articles
+                   WHERE fetched_at >= datetime('now', '-1 hour')
+                   ORDER BY fetched_at DESC LIMIT 10"""
+            ).fetchall()
+            conn.close()
+
+            if headlines:
+                headline_texts = [h["title"] for h in headlines]
+                llm_analysis = get_llm_analysis(headline_texts)
+                regime_confidence = llm_analysis.confidence
+                entities = llm_analysis.entities or []
+        except Exception:
+            pass
+
         # Build narrative from prediction + regime
         narrative = f"Direction: {result['dir_prediction']} ({result['dir_prob']:.1%}). "
         narrative += f"Volatility: {result['vol_prediction']} ({result['vol_prob']:.1%}). "
-        narrative += f"Regime: {regime}."
+        narrative += f"Regime: {regime} ({regime_confidence:.0%} confidence)."
+        if entities:
+            narrative += f" Key entities: {', '.join(entities[:3])}."
 
         return {
             "timestamp": result.get("timestamp", datetime.utcnow().isoformat()),
@@ -222,6 +256,8 @@ def get_signals_current():
             "model_version": result.get("model_version", "unknown"),
             "narrative": narrative,
             "regime": regime,
+            "regime_confidence": regime_confidence,
+            "entities": entities,
         }
     except Exception as e:
         return {

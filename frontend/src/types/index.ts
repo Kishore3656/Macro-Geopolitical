@@ -23,6 +23,8 @@ export interface SignalsData {
   confidence: number;
   timestamp: string;
   regime?: "risk-on" | "risk-off" | "crisis" | "neutral";
+  regime_confidence?: number;
+  entities?: string[];
   narrative?: string;
   model_version?: string;
 }

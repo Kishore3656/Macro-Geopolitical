@@ -90,12 +90,26 @@ export default function NexusAISignals() {
                 'bg-[#8d8f86]/20 text-[#8d8f86] border border-[#8d8f86]'
               }`}>
                 {signal.regime}
+                {signal.regime_confidence && ` (${(signal.regime_confidence * 100).toFixed(0)}%)`}
               </div>
             ) : (
               <div className="text-[#8d8f86] text-sm">Awaiting analysis...</div>
             )}
           </div>
         </div>
+
+        {signal?.entities && signal.entities.length > 0 && (
+          <div className="nexus-panel p-4">
+            <div className="text-xs uppercase tracking-[0.2em] text-[#8d8f86]">Key Entities</div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {signal.entities.map((entity) => (
+                <span key={entity} className="inline-block bg-white/10 text-[#f4f1e8] border border-white/10 rounded px-3 py-1 text-xs uppercase tracking-[0.1em]">
+                  {entity}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="nexus-panel p-4">
           <div className="text-xs uppercase tracking-[0.2em] text-[#8d8f86]">Signal Narrative</div>
