@@ -121,6 +121,73 @@ def _build_live_features() -> tuple[pd.DataFrame, dict]:
     gti_lag_1 = float(gti["gti_score"]) * 0.98  # Slight decay approximation
     gti_lag_4 = float(gti["gti_score"]) * 0.96
 
+    # Compute technical indicators for live prediction
+    spy_closes = spy_rows["close"].values
+
+    # RSI (14-period simplified)
+    if len(spy_closes) >= 14:
+        delta = pd.Series(spy_closes).diff()
+        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+        rs = gain / loss
+        rsi_14 = (100 - (100 / (1 + rs))).iloc[-1]
+    else:
+        rsi_14 = 50.0
+
+    # MACD (simplified for live)
+    if len(spy_closes) >= 26:
+        exp1 = pd.Series(spy_closes).ewm(span=12).mean()
+        exp2 = pd.Series(spy_closes).ewm(span=26).mean()
+        macd_diff = (exp1 - exp2).iloc[-1]
+    else:
+        macd_diff = 0.0
+
+    # Bollinger Bands
+    if len(spy_closes) >= 20:
+        sma20 = pd.Series(spy_closes).rolling(20).mean().iloc[-1]
+        std20 = pd.Series(spy_closes).rolling(20).std().iloc[-1]
+        bb_upper = sma20 + (std20 * 2)
+        bb_lower = sma20 - (std20 * 2)
+    else:
+        bb_upper = spy_latest["high"]
+        bb_lower = spy_latest["low"]
+
+    # ATR (14-period simplified)
+    if len(spy_rows) >= 14:
+        rows_data = spy_rows.tail(14)[["high", "low", "close"]].values
+        true_ranges = []
+        for i in range(len(rows_data)):
+            hl = rows_data[i][0] - rows_data[i][1]
+            hc = abs(rows_data[i][0] - (rows_data[i-1][2] if i > 0 else rows_data[i][2]))
+            lc = abs(rows_data[i][1] - (rows_data[i-1][2] if i > 0 else rows_data[i][2]))
+            true_ranges.append(max(hl, hc, lc))
+        atr_14 = sum(true_ranges) / len(true_ranges) / spy_latest["close"]
+    else:
+        atr_14 = 0.01
+
+    # Volume features
+    spy_vol = spy_rows["volume"].values
+    if len(spy_vol) >= 20:
+        vol_sma = spy_vol[-20:].mean()
+        volume_sma_20 = vol_sma / (spy_latest["volume"] + 1)
+    else:
+        volume_sma_20 = 1.0
+
+    # Momentum
+    if len(spy_closes) >= 20:
+        price_momentum = (spy_closes[-1] - spy_closes[-20]) / spy_closes[-20]
+    else:
+        price_momentum = returns_1h
+
+    # VIX percentile
+    vix_closes_list = vix_rows["close"].values if len(vix_rows) > 0 else [vix_close]
+    if len(vix_closes_list) >= 20:
+        vix_min = min(vix_closes_list[-20:])
+        vix_max = max(vix_closes_list[-20:])
+        vix_percentile = (vix_close - vix_min) / (vix_max - vix_min + 0.01)
+    else:
+        vix_percentile = 0.5
+
     row = {
         "gti_score":     float(gti["gti_score"]),
         "conflict_ct":   int(gti["conflict_ct"]),
@@ -141,6 +208,14 @@ def _build_live_features() -> tuple[pd.DataFrame, dict]:
         "day_of_week":   int(day_of_week),
         "gti_lag_1":     float(gti_lag_1),
         "gti_lag_4":     float(gti_lag_4),
+        "rsi_14":        float(rsi_14),
+        "macd_diff":     float(macd_diff),
+        "bb_upper":      float(bb_upper),
+        "bb_lower":      float(bb_lower),
+        "atr_14":        float(atr_14),
+        "volume_sma_20": float(volume_sma_20),
+        "price_momentum": float(price_momentum),
+        "vix_percentile": float(vix_percentile),
     }
 
     metadata = {

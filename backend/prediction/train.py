@@ -38,8 +38,8 @@ from datetime import datetime
 
 import joblib
 import lightgbm as lgb
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score
+from sklearn.model_selection import train_test_split, cross_val_score
 
 from config import LGBM_VOL_PATH, LGBM_DIR_PATH
 from prediction.features import build_feature_matrix, FEATURE_COLS
@@ -47,10 +47,15 @@ from prediction.features import build_feature_matrix, FEATURE_COLS
 LGBM_PARAMS = {
     "objective":     "binary",
     "metric":        "binary_logloss",
-    "num_leaves":    31,
-    "learning_rate": 0.05,
-    "n_estimators":  300,
-    "min_child_samples": 10,
+    "num_leaves":    63,
+    "learning_rate": 0.03,
+    "n_estimators":  500,
+    "min_child_samples": 5,
+    "subsample":     0.8,
+    "colsample_bytree": 0.8,
+    "max_depth":     8,
+    "lambda_l1":     1.0,
+    "lambda_l2":     1.0,
     "verbose":       -1,
     "n_jobs":        -1,
 }
@@ -71,8 +76,15 @@ def _train_one(X_tr, y_tr, X_te, y_te, label: str) -> tuple[lgb.LGBMClassifier, 
     preds_tr = model.predict(X_tr)
     acc_te = accuracy_score(y_te, preds_te)
     acc_tr = accuracy_score(y_tr, preds_tr)
+
+    # Additional metrics
+    prec_te = precision_score(y_te, preds_te, zero_division=0)
+    rec_te = recall_score(y_te, preds_te, zero_division=0)
+    f1_te = f1_score(y_te, preds_te, zero_division=0)
+
     print(f"\n{label} — train: {acc_tr:.3f}  test: {acc_te:.3f}  ({model.best_iteration_} trees)")
-    print(classification_report(y_te, preds_te))
+    print(f"Test metrics — Precision: {prec_te:.3f}, Recall: {rec_te:.3f}, F1: {f1_te:.3f}")
+    print(classification_report(y_te, preds_te, zero_division=0))
     return model, acc_tr, acc_te
 
 

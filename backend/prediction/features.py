@@ -54,6 +54,14 @@ FEATURE_COLS = [
     "day_of_week",
     "gti_lag_1",
     "gti_lag_4",
+    "rsi_14",
+    "macd_diff",
+    "bb_upper",
+    "bb_lower",
+    "atr_14",
+    "volume_sma_20",
+    "price_momentum",
+    "vix_percentile",
 ]
 
 
@@ -187,6 +195,44 @@ def build_feature_matrix(
     # Lagged GTI features
     df["gti_lag_1"] = df["gti_score"].shift(1)
     df["gti_lag_4"] = df["gti_score"].shift(4)
+
+    # ── Technical Indicators ──────────────────────────────────────────────
+    # RSI (14-period)
+    delta = df["close"].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+    rs = gain / loss
+    df["rsi_14"] = 100 - (100 / (1 + rs))
+
+    # MACD
+    exp1 = df["close"].ewm(span=12).mean()
+    exp2 = df["close"].ewm(span=26).mean()
+    df["macd_diff"] = exp1 - exp2
+
+    # Bollinger Bands (20-period, 2 std)
+    sma20 = df["close"].rolling(20).mean()
+    std20 = df["close"].rolling(20).std()
+    df["bb_upper"] = sma20 + (std20 * 2)
+    df["bb_lower"] = sma20 - (std20 * 2)
+
+    # ATR (14-period) — normalized by close
+    high_low = df["high"] - df["low"]
+    high_close = abs(df["high"] - df["close"].shift(1))
+    low_close = abs(df["low"] - df["close"].shift(1))
+    ranges = pd.concat([high_low, high_close, low_close], axis=1)
+    true_range = ranges.max(axis=1)
+    df["atr_14"] = true_range.rolling(14).mean() / df["close"]
+
+    # Volume-based features
+    df["volume_sma_20"] = df["volume"].rolling(20).mean() / (df["volume"] + 1)
+
+    # Momentum
+    df["price_momentum"] = (df["close"] - df["close"].shift(20)) / df["close"].shift(20)
+
+    # VIX percentile rank (normalized against recent range)
+    vix_min = df["vix_close"].rolling(20).min()
+    vix_max = df["vix_close"].rolling(20).max()
+    df["vix_percentile"] = (df["vix_close"] - vix_min) / (vix_max - vix_min + 0.01)
 
     # ── Targets (next-hour prediction) ────────────────────────────────────
     next_close       = df["close"].shift(-1)
