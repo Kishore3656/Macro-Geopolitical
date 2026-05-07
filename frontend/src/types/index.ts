@@ -22,6 +22,9 @@ export interface SignalsData {
   volatility_prob: number;
   confidence: number;
   timestamp: string;
+  regime?: "risk-on" | "risk-off" | "crisis" | "neutral";
+  narrative?: string;
+  model_version?: string;
 }
 
 export interface SignalHistoryPoint {

@@ -2,9 +2,11 @@
 
 import { useMemo } from 'react';
 import { useSignals } from '@/hooks';
+import { useSettingsStore } from '@/store/settingsStore';
 
 export default function NexusAISignals() {
   const { current: signal, history } = useSignals();
+  const settings = useSettingsStore();
 
   const stats = useMemo(() => {
     const total = history?.length ?? 0;
@@ -69,11 +71,40 @@ export default function NexusAISignals() {
         </div>
 
         <div className="nexus-panel p-4">
-          <div className="text-xs uppercase tracking-[0.2em] text-[#8d8f86]">Operator Notes</div>
-          <div className="mt-4 space-y-3 text-sm text-[#d7d7cf]">
-            <div className="border border-[#9eff4f]/40 px-3 py-3">Green states indicate positive direction probability with manageable volatility.</div>
-            <div className="border border-[#f6e327]/40 px-3 py-3">Yellow states reflect lower confidence and degraded signal separation.</div>
-            <div className="border border-[#f43de2]/40 px-3 py-3">Magenta states call out unstable inputs, elevated volatility, and higher false-break risk.</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-[#8d8f86]">Model Status</div>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="border border-white/10 px-3 py-3">Version: <span className="text-[#f4f1e8]">{signal?.model_version ?? 'N/A'}</span></div>
+            <div className="border border-white/10 px-3 py-3">LLM: <span className={settings.llm_enabled ? 'text-[#9eff4f]' : 'text-[#8d8f86]'}>{settings.llm_enabled ? `${settings.llm_provider} (ON)` : 'Disabled'}</span></div>
+            <div className="border border-white/10 px-3 py-3">Timestamp: <span className="text-[#8d8f86] text-xs">{signal?.timestamp ? new Date(signal.timestamp).toLocaleString() : 'N/A'}</span></div>
+          </div>
+        </div>
+
+        <div className="nexus-panel p-4">
+          <div className="text-xs uppercase tracking-[0.2em] text-[#8d8f86]">Regime Indicator</div>
+          <div className="mt-4">
+            {signal?.regime ? (
+              <div className={`inline-block rounded px-4 py-2 font-bold uppercase text-sm tracking-[0.15em] ${
+                signal.regime === 'risk-on' ? 'bg-[#9eff4f]/20 text-[#9eff4f] border border-[#9eff4f]' :
+                signal.regime === 'risk-off' ? 'bg-[#ff7557]/20 text-[#ff7557] border border-[#ff7557]' :
+                signal.regime === 'crisis' ? 'bg-black text-white border border-white/30' :
+                'bg-[#8d8f86]/20 text-[#8d8f86] border border-[#8d8f86]'
+              }`}>
+                {signal.regime}
+              </div>
+            ) : (
+              <div className="text-[#8d8f86] text-sm">Awaiting analysis...</div>
+            )}
+          </div>
+        </div>
+
+        <div className="nexus-panel p-4">
+          <div className="text-xs uppercase tracking-[0.2em] text-[#8d8f86]">Signal Narrative</div>
+          <div className="mt-4 text-sm text-[#d7d7cf] border border-white/10 px-3 py-3 rounded">
+            {signal?.narrative ? (
+              <p>{signal.narrative}</p>
+            ) : (
+              <p className="text-[#8d8f86]">Generating market narrative...</p>
+            )}
           </div>
         </div>
       </section>

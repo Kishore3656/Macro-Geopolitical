@@ -27,6 +27,11 @@ from gti.aggregator import compute_gti
 from prediction.predict import run_inference
 from ingestion.db import get_conn, db_transaction
 
+llm_settings = {
+    "llm_enabled": os.getenv("USE_LLM_SENTIMENT", "false").lower() == "true",
+    "llm_provider": os.getenv("LLM_PROVIDER", "none"),
+}
+
 app = FastAPI(title="GeoMarket Intelligence API", version="1.0.0")
 
 allowed_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
@@ -587,6 +592,43 @@ def get_recent_events(event_type: str = "all", limit: int = 20):
             "events": [],
             "timestamp": datetime.utcnow().isoformat(),
         }
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Settings
+# ────────────────────────────────────────────────────────────────────────────
+
+@app.post("/api/settings/llm")
+def update_llm_settings(llm_enabled: bool = None, llm_provider: str = None):
+    """
+    Update LLM settings. Settings are stored in-memory and persisted via env vars.
+    Frontend can toggle LLM on/off and select provider (ollama, huggingface).
+    """
+    try:
+        global llm_settings
+        if llm_enabled is not None:
+            llm_settings["llm_enabled"] = llm_enabled
+        if llm_provider is not None and llm_provider in ["ollama", "huggingface", "none"]:
+            llm_settings["llm_provider"] = llm_provider
+
+        return {
+            "status": "success",
+            "llm_enabled": llm_settings["llm_enabled"],
+            "llm_provider": llm_settings["llm_provider"],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/settings/llm")
+def get_llm_settings():
+    """Get current LLM settings."""
+    return {
+        "llm_enabled": llm_settings["llm_enabled"],
+        "llm_provider": llm_settings["llm_provider"],
+        "timestamp": datetime.utcnow().isoformat(),
+    }
 
 
 # ────────────────────────────────────────────────────────────────────────────
