@@ -18,6 +18,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+docs/
+screenshots/
+*.md
+
 
 venv/
 env/

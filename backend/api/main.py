@@ -471,6 +471,53 @@ def get_market_sectors():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/market/commodities")
+def get_market_commodities():
+    """
+    Get commodity and forex prices (Oil, Gold, EUR/USD) from market data.
+    Returns current price and daily change percentage.
+    """
+    try:
+        commodity_symbols = {
+            "CL=F": "Oil Futures",
+            "GLD": "Gold",
+            "EURUSD=X": "EUR/USD",
+        }
+        commodities = []
+
+        with db_transaction(MARKET_DB) as conn:
+            for symbol, name in commodity_symbols.items():
+                rows = conn.execute(
+                    "SELECT close, timestamp FROM ohlcv WHERE symbol=? ORDER BY timestamp DESC LIMIT 2",
+                    (symbol,),
+                ).fetchall()
+
+                if rows and len(rows) >= 2:
+                    current = float(rows[0]["close"])
+                    prev = float(rows[1]["close"])
+                    change = ((current - prev) / prev) * 100 if prev > 0 else 0
+                else:
+                    current = 0.0
+                    change = 0.0
+
+                commodities.append({
+                    "name": name,
+                    "symbol": symbol,
+                    "current_price": round(current, 2),
+                    "daily_change_pct": round(change, 2),
+                })
+
+        has_data = any(c["current_price"] > 0 for c in commodities)
+
+        return {
+            "commodities": commodities,
+            "timestamp": datetime.utcnow().isoformat(),
+            "status": "live" if has_data else "awaiting_data",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ────────────────────────────────────────────────────────────────────────────
 # Geopolitical Intelligence Endpoints
 # ────────────────────────────────────────────────────────────────────────────

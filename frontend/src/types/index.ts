@@ -64,6 +64,19 @@ export interface SectorData {
   timestamp: string;
 }
 
+export interface Commodity {
+  name: string;
+  symbol: string;
+  current_price: number;
+  daily_change_pct: number;
+}
+
+export interface CommodityData {
+  commodities: Commodity[];
+  timestamp: string;
+  status: string;
+}
+
 export interface ConflictEntry {
   country: string;
   count: number;

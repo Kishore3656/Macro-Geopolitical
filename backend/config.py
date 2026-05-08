@@ -41,7 +41,7 @@ LGBM_VOL_PATH = "backend/prediction/models/lgbm_volatility.pkl"
 LGBM_DIR_PATH = "backend/prediction/models/lgbm_direction.pkl"
 
 # Market symbols
-SYMBOLS = ["SPY", "VIX", "GLD"]
+SYMBOLS = ["SPY", "VIX", "GLD", "CL=F", "EURUSD=X"]
 
 # RSS feeds
 RSS_FEEDS = [

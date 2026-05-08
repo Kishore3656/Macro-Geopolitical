@@ -2,6 +2,7 @@
 
 import { useGTI, useMarket, useSignals } from '@/hooks';
 import CommandCenterMap from './CommandCenterMap';
+import AssetImpact from './AssetImpact';
 
 export default function NexusCommand() {
   const { current: gti } = useGTI();
@@ -47,6 +48,8 @@ export default function NexusCommand() {
 
   return (
     <div className="space-y-4">
+      <AssetImpact />
+
       <CommandCenterMap accentTitle="The Command Hub" contextLabel="Primary geopolitical map stack" />
 
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">

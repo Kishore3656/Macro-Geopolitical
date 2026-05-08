@@ -6,6 +6,7 @@ import {
   SignalHistoryPoint,
   SPYData,
   SectorData,
+  CommodityData,
   ConflictData,
   BilateralData,
   HeadlineData,
@@ -61,6 +62,10 @@ export const api = {
 
   sectors: async (): Promise<APIResponse<SectorData>> => {
     return fetchAPI<SectorData>('/api/market/sectors');
+  },
+
+  commodities: async (): Promise<APIResponse<CommodityData>> => {
+    return fetchAPI<CommodityData>('/api/market/commodities');
   },
 
   conflicts: async (limit: number = 15): Promise<APIResponse<ConflictData>> => {

@@ -4,12 +4,13 @@ import { useWebSocket } from './useWebSocket';
 import { SPYData } from '@/types';
 
 export function useMarket() {
-  const { spy, sectors, loading, error, fetchSPY, fetchSectors, applyWSUpdate } = useMarketStore();
+  const { spy, sectors, commodities, loading, error, fetchSPY, fetchSectors, fetchCommodities, applyWSUpdate } = useMarketStore();
 
   useEffect(() => {
     fetchSPY(100);
     fetchSectors();
-  }, [fetchSPY, fetchSectors]);
+    fetchCommodities();
+  }, [fetchSPY, fetchSectors, fetchCommodities]);
 
   useWebSocket({
     url: 'ws://localhost:8000/ws/market',
@@ -18,5 +19,5 @@ export function useMarket() {
     },
   });
 
-  return { spy, sectors, loading, error };
+  return { spy, sectors, commodities, loading, error };
 }
