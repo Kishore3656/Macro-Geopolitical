@@ -36,72 +36,35 @@ A production-grade system combining geopolitical data, sentiment analysis, and m
 - Node.js 18+ (for frontend)
 - 4GB RAM, 2GB disk
 
-### 1. Clone & Setup
+### Setup & Run
 ```bash
+# Clone repository
 git clone https://github.com/kishore3656/trading-bot-geo-market-ml.git
 cd trading-bot-geo-market-ml
 
-# Python dependencies
+# Install dependencies
 pip install -r requirements.txt
 python -m spacy download en_core_web_sm
-
-# Frontend dependencies
 cd frontend && npm install && cd ..
-```
 
-### 2. Initialize Databases
-```bash
+# Initialize databases
 python -c "from ingestion.db import init_all; init_all()"
-```
 
-### 3. Start Scheduler
-```bash
-python scheduler.py
-# Runs every 15 min: fetches news, computes GTI, runs ML inference
-```
-
-### 4. Start API Server
-```bash
-python api/main.py
-# Server on http://localhost:8000
-```
-
-### 5. Start Frontend (Optional)
-```bash
-cd frontend && npm run dev
-# Frontend on http://localhost:3000
-```
-
-## Status
-
-**Phase 7 Complete** - Production-ready system with:
-- Phases 1-6 fully implemented
-- **Phase 7: ML accuracy +5-10pp** (27 technical indicators)
-- Live geopolitical data integration from GDELT
-- Error handling + logging
-- Health checks + real-time monitoring
-- Database backups
-- Complete documentation
-- Full training pipeline
-
-## Quick Start
-
-**See [docs/00_MASTER_SETUP.md](docs/00_MASTER_SETUP.md)** ← Start here!
-
-Or run one command:
-```bash
+# Start all services (Scheduler, API, Frontend)
 .\run.bat
 # Then open http://localhost:3000
 ```
 
-## Documentation
+## Features Included
 
-- **[docs/00_MASTER_SETUP.md](docs/00_MASTER_SETUP.md)** ← Start here
-- [docs/LIVE_REGIONS_DATA.md](docs/LIVE_REGIONS_DATA.md) - Real geopolitical data wiring
-- [docs/ML_IMPROVEMENTS.md](docs/ML_IMPROVEMENTS.md) - Phase 7 ML improvements
-- [docs/PHASE_7_SUMMARY.md](docs/PHASE_7_SUMMARY.md) - What's new in Phase 7
-- [docs/NEXUS_IMPLEMENTATION.md](docs/NEXUS_IMPLEMENTATION.md) - Full technical details
-- [DEPLOYMENT.md](DEPLOYMENT.md) - Production deployment
+**Phase 7 Complete** - Production-ready system with:
+- Geopolitical Tension Index (GTI) from real-time conflict data
+- ML predictions (UP/DOWN/volatility) using LightGBM with 27 technical indicators
+- Sentiment analysis via VADER + optional LLM
+- Real-time React dashboard with WebSocket updates
+- Asset Impact component (live commodity prices: Oil, Gold, EUR/USD)
+- Market regime detection and drift monitoring
+- Health checks and production logging
 
 ## Support
 
