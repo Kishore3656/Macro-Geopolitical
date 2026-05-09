@@ -71,7 +71,7 @@ python -c "from ingestion.db import init_all; init_all()"
 For issues, questions, or suggestions:
 1. Check logs: `tail -f logs/trading_bot.log`
 2. Run health check: `curl http://localhost:8000/api/status`
-3. Review troubleshooting in [DEPLOYMENT.md](DEPLOYMENT.md)
+3. Review troubleshooting in [DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ---
 

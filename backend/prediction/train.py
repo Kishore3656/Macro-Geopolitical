@@ -34,12 +34,16 @@ Usage:
 import argparse
 import json
 import os
+import sys
 from datetime import datetime
 
 import joblib
 import lightgbm as lgb
 from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score, f1_score
 from sklearn.model_selection import train_test_split, cross_val_score
+
+# Add backend directory to path for imports when run as subprocess
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import LGBM_VOL_PATH, LGBM_DIR_PATH
 from prediction.features import build_feature_matrix, FEATURE_COLS

@@ -29,16 +29,21 @@ GTI_WINDOW_HOURS       = 6
 GTI_CONFLICT_THRESHOLD = -5.0    # GoldsteinScale below this = conflict
 
 # Database paths
-DATA_DIR       = "data"
-NEWS_DB        = "data/news.db"
-MARKET_DB      = "data/market.db"
-GTI_DB         = "data/gti.db"
-PREDICTIONS_DB = "data/predictions.db"
-NEWSAPI_CALLS  = "data/newsapi_calls.json"
+BACKEND_DIR    = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR    = os.path.dirname(BACKEND_DIR)
+DATA_DIR       = os.path.join(PROJECT_DIR, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
+NEWS_DB        = os.path.join(DATA_DIR, "news.db")
+MARKET_DB      = os.path.join(DATA_DIR, "market.db")
+GTI_DB         = os.path.join(DATA_DIR, "gti.db")
+PREDICTIONS_DB = os.path.join(DATA_DIR, "predictions.db")
+NEWSAPI_CALLS  = os.path.join(DATA_DIR, "newsapi_calls.json")
 
-# Model paths (relative to backend/)
-LGBM_VOL_PATH = "backend/prediction/models/lgbm_volatility.pkl"
-LGBM_DIR_PATH = "backend/prediction/models/lgbm_direction.pkl"
+# Model paths
+MODELS_DIR     = os.path.join(BACKEND_DIR, "prediction", "models")
+os.makedirs(MODELS_DIR, exist_ok=True)
+LGBM_VOL_PATH  = os.path.join(MODELS_DIR, "lgbm_volatility.pkl")
+LGBM_DIR_PATH  = os.path.join(MODELS_DIR, "lgbm_direction.pkl")
 
 # Market symbols
 SYMBOLS = ["SPY", "VIX", "GLD", "CL=F", "EURUSD=X"]

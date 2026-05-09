@@ -30,10 +30,15 @@ import io
 import zipfile
 import argparse
 import sqlite3
+import sys
+import os
 from datetime import datetime, timedelta
 
 import requests
 import pandas as pd
+
+# Add backend directory to path for imports when run as subprocess
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import NEWS_DB, GTI_DB
 from ingestion.db import get_conn, db_transaction

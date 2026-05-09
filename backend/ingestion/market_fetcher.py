@@ -21,10 +21,15 @@ Usage:
 """
 
 import argparse
+import sys
+import os
 from datetime import datetime, timedelta
 
 import pandas as pd
 import yfinance as yf
+
+# Add backend directory to path for imports when run as subprocess
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import MARKET_DB, SYMBOLS
 from ingestion.db import get_conn
