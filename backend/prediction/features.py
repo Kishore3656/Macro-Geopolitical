@@ -187,14 +187,14 @@ def build_feature_matrix(
     if df["vix_close"].isna().all():
         print("WARNING: VIX data entirely missing — filling with neutral value 20.0")
         df["vix_close"] = 20.0
-    df["vix_change_1h"] = df["vix_close"].pct_change(1)
+    df["vix_change_1h"] = df["vix_close"].pct_change(1).fillna(0.0)  # first row NaN → 0
 
     df["gld_close"] = df["gld_close"].ffill().bfill()
     # Fill still-missing GLD (entirely empty column) with neutral default
     if df["gld_close"].isna().all():
         print("WARNING: GLD data entirely missing — filling with neutral value 180.0")
         df["gld_close"] = 180.0
-    df["gld_returns_1h"] = df["gld_close"].pct_change(1)
+    df["gld_returns_1h"] = df["gld_close"].pct_change(1).fillna(0.0)  # first row NaN → 0
 
     # Time-of-day features
     df["hour_of_day"] = df["hour"].dt.hour

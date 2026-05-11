@@ -74,9 +74,10 @@ def fetch_rapidapi_events(days_back: int = 7) -> int:
             for ev in events:
                 try:
                     # Map RapidAPI fields to our schema
-                    # Use md5 hash for deterministic IDs (hash() is randomized per-process)
+                    # Use md5 of sorted JSON for deterministic IDs (dict key order varies)
+                    import json as _json
                     event_id = ev.get("id") or ev.get("event_id") or hashlib.md5(
-                        str(ev).encode("utf-8")
+                        _json.dumps(ev, sort_keys=True).encode("utf-8")
                     ).hexdigest()
                     event_date = ev.get("date") or ev.get("event_date") or datetime.utcnow().isoformat()
                     country = ev.get("country") or ev.get("actor1_country") or ""

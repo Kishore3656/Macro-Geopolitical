@@ -116,6 +116,10 @@ def get_gti_current():
             row = conn.execute(
                 "SELECT * FROM gti_scores ORDER BY timestamp DESC LIMIT 1"
             ).fetchone()
+            # Total events in last 24h — used as the real denominator for conflict_ratio
+            total_events = conn.execute(
+                "SELECT COUNT(*) FROM gdelt_events WHERE event_date >= datetime('now', '-24 hours')"
+            ).fetchone()[0] or 0
 
         if row:
             gti_score = float(row["gti_score"])
@@ -139,6 +143,7 @@ def get_gti_current():
         else:
             risk_level = "HIGH_CONFLICT"
 
+        peaceful_ct = max(0, total_events - conflict_ct)
         return {
             "timestamp": datetime.utcnow().isoformat(),
             "score": round(gti_score, 4),
@@ -147,8 +152,8 @@ def get_gti_current():
             "sentiment": round(vader_avg, 4),
             "volatility": round(avg_tone, 4),
             "conflict_count": conflict_ct,
-            "peaceful_count": max(0, 100 - conflict_ct),
-            "conflict_ratio": round(conflict_ct / max(1, 100), 4),
+            "peaceful_count": peaceful_ct,
+            "conflict_ratio": round(conflict_ct / max(1, total_events), 4),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

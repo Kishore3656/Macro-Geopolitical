@@ -57,22 +57,26 @@ python -c "from ingestion.db import init_all; init_all()"
 
 ## Features Included
 
-**Phase 7 Complete** - Production-ready system with:
 - Geopolitical Tension Index (GTI) from real-time conflict data
 - ML predictions (UP/DOWN/volatility) using LightGBM with 27 technical indicators
 - Sentiment analysis via VADER + optional LLM
 - Real-time React dashboard with WebSocket updates
-- Asset Impact component (live commodity prices: Oil, Gold, EUR/USD)
 - Market regime detection and drift monitoring
 - Health checks and production logging
+
+## Known Fixes Applied
+
+- **GDELT timestamps**: DATEADDED column (full YYYYMMDDHHMMSS) now fetched, so events are no longer all pinned to midnight
+- **Feature NaN rows**: `pct_change` first-row NaN on VIX/GLD columns filled with 0 before dropna, preventing silent row loss
+- **Duplicate events**: RapidAPI event IDs now use `json.dumps(sort_keys=True)` for stable hashing across restarts
+- **Conflict ratio**: API now divides by actual total event count from the last 24h, not a hardcoded 100
 
 ## Support
 
 For issues, questions, or suggestions:
 1. Check logs: `tail -f logs/trading_bot.log`
 2. Run health check: `curl http://localhost:8000/api/status`
-3. Review troubleshooting in [DEPLOYMENT.md](docs/DEPLOYMENT.md)
 
 ---
 
-**Status**: Production-ready (All phases complete)
+**Status**: Production-ready

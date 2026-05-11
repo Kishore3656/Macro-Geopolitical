@@ -59,6 +59,7 @@ COLS = {
     55: "location",
     56: "latitude",
     57: "longitude",
+    59: "DATEADDED",   # YYYYMMDDHHMMSS — full timestamp precision
 }
 
 
