@@ -83,9 +83,17 @@ def _parse_gdelt_csv(raw_bytes: bytes) -> pd.DataFrame:
             )
     df.columns = list(COLS.values())
     df["event_id"] = df["event_id"].astype(str)
-    df["timestamp"] = pd.to_datetime(
-        df["timestamp"].astype(str), format="%Y%m%d", errors="coerce"
-    )
+
+    # Use DATEADDED (YYYYMMDDHHMMSS) for full timestamp precision if available
+    # Otherwise use SQLDATE (YYYYMMDD, defaults to midnight)
+    if "DATEADDED" in df.columns:
+        df["timestamp"] = pd.to_datetime(
+            df["DATEADDED"].astype(str), format="%Y%m%d%H%M%S", errors="coerce"
+        )
+    else:
+        df["timestamp"] = pd.to_datetime(
+            df["timestamp"].astype(str), format="%Y%m%d", errors="coerce"
+        )
     df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%d %H:%M:%S")
     df = df.dropna(subset=["event_id", "timestamp"])
     return df

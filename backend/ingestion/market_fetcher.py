@@ -72,9 +72,9 @@ def _stooq_history(symbol: str, start: datetime, end: datetime) -> pd.DataFrame:
     """
     Source 2: Stooq via pandas_datareader.
     Stooq serves clean daily CSV data — no API key, different network path.
-    Note: Stooq only provides daily bars, not hourly. We resample to daily
-    when this fallback is used and mark the interval in the timestamp as market close.
-    Returns daily OHLCV or empty DataFrame on any failure.
+    Note: Stooq only provides daily bars, not hourly. We resample each daily bar
+    into ~7 hourly approximations (09:00-15:00 EST, market hours).
+    Returns hourly OHLCV or empty DataFrame on any failure.
     """
     try:
         import pandas_datareader.data as web
@@ -85,7 +85,28 @@ def _stooq_history(symbol: str, start: datetime, end: datetime) -> pd.DataFrame:
         df = df.sort_index()
         # Stooq column names are already Open/High/Low/Close/Volume
         df = df[["Open", "High", "Low", "Close", "Volume"]]
-        return df
+
+        # Resample daily bars to hourly approximation (market hours: 09:00-15:00)
+        # This allows the feature builder to compute 20-hour rolling volatility
+        hourly_rows = []
+        for ts, row in df.iterrows():
+            # Create 7 hourly bars (09:00, 10:00, ..., 15:00) from the day's OHLCV
+            for hour_offset in range(7):
+                bar_ts = pd.Timestamp(ts.date()) + pd.Timedelta(hours=9 + hour_offset)
+                hourly_rows.append({
+                    "Open": row["Open"],
+                    "High": row["High"],
+                    "Low": row["Low"],
+                    "Close": row["Close"],
+                    "Volume": row["Volume"] / 7,  # spread daily volume across 7 hours
+                    "timestamp": bar_ts,
+                })
+        hourly_df = pd.DataFrame(hourly_rows)
+        if hourly_df.empty:
+            return pd.DataFrame()
+        hourly_df = hourly_df.set_index("timestamp")
+        return hourly_df[["Open", "High", "Low", "Close", "Volume"]]
+
     except (ValueError, TypeError, KeyError, ImportError, RuntimeError, ConnectionError) as exc:
         print(f"Market [{symbol}] Stooq fallback failed: {exc}")
         return pd.DataFrame()

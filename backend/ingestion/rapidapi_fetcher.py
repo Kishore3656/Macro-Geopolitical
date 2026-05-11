@@ -8,6 +8,8 @@ API: https://rapidapi.com/nmk3/api/geopolitical-events-database1
 Free tier: 100 requests/month
 
 Authentication: Requires RAPIDAPI_KEY environment variable
+"""
+import hashlib
 If not set, the fetcher gracefully skips and logs a note.
 """
 
@@ -72,7 +74,10 @@ def fetch_rapidapi_events(days_back: int = 7) -> int:
             for ev in events:
                 try:
                     # Map RapidAPI fields to our schema
-                    event_id = ev.get("id") or ev.get("event_id") or str(hash(str(ev)))
+                    # Use md5 hash for deterministic IDs (hash() is randomized per-process)
+                    event_id = ev.get("id") or ev.get("event_id") or hashlib.md5(
+                        str(ev).encode("utf-8")
+                    ).hexdigest()
                     event_date = ev.get("date") or ev.get("event_date") or datetime.utcnow().isoformat()
                     country = ev.get("country") or ev.get("actor1_country") or ""
                     event_type = ev.get("event_type") or ev.get("type") or ""

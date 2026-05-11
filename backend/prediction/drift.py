@@ -204,7 +204,11 @@ def resolve_outcomes(lookback_hours: int = 1) -> int:
 
         # For volatility, we need the actual volatility baseline (approximated)
         # For now, we'll use a simple metric: if actual return was high, outcome is 1
-        actual_return = (actual_close_next - pred_close) / pred_close
+        # Guard against zero-division (bad market data)
+        if pred_close and pred_close != 0:
+            actual_return = (actual_close_next - pred_close) / pred_close
+        else:
+            actual_return = 0.0
         actual_vol = 1 if abs(actual_return) > 0.01 else 0  # Threshold: 1% return
         predicted_vol = 1 if vol_pred == "HIGH" else 0
         vol_outcome = 1 if actual_vol == predicted_vol else 0

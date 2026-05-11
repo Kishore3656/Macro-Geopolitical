@@ -104,11 +104,17 @@ def _build_live_features() -> tuple[pd.DataFrame, dict]:
     # Compute VIX and GLD features
     vix_close = float(vix_latest["close"]) if vix_latest is not None else 20.0
     vix_closes = vix_rows["close"].values if len(vix_rows) > 1 else [vix_close]
-    vix_change_1h = (vix_closes[-1] - vix_closes[-2]) / vix_closes[-2] if len(vix_closes) > 1 else 0.0
+    # Guard against zero-division (bad VIX data)
+    vix_change_1h = 0.0
+    if len(vix_closes) > 1 and vix_closes[-2] and vix_closes[-2] != 0:
+        vix_change_1h = (vix_closes[-1] - vix_closes[-2]) / vix_closes[-2]
 
     gld_close = float(gld_latest["close"]) if gld_latest is not None else spy_latest["close"]
     gld_closes = gld_rows["close"].values if len(gld_rows) > 1 else [gld_close]
-    gld_returns_1h = (gld_closes[-1] - gld_closes[-2]) / gld_closes[-2] if len(gld_closes) > 1 else 0.0
+    # Guard against zero-division (bad GLD data)
+    gld_returns_1h = 0.0
+    if len(gld_closes) > 1 and gld_closes[-2] and gld_closes[-2] != 0:
+        gld_returns_1h = (gld_closes[-1] - gld_closes[-2]) / gld_closes[-2]
 
     # Time features
     from datetime import datetime as dt

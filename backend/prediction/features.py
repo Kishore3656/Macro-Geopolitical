@@ -183,9 +183,17 @@ def build_feature_matrix(
 
     # VIX and GLD features (forward-fill gaps if they don't trade all hours)
     df["vix_close"] = df["vix_close"].ffill().bfill()
+    # Fill still-missing VIX (entirely empty column) with neutral default
+    if df["vix_close"].isna().all():
+        print("WARNING: VIX data entirely missing — filling with neutral value 20.0")
+        df["vix_close"] = 20.0
     df["vix_change_1h"] = df["vix_close"].pct_change(1)
 
     df["gld_close"] = df["gld_close"].ffill().bfill()
+    # Fill still-missing GLD (entirely empty column) with neutral default
+    if df["gld_close"].isna().all():
+        print("WARNING: GLD data entirely missing — filling with neutral value 180.0")
+        df["gld_close"] = 180.0
     df["gld_returns_1h"] = df["gld_close"].pct_change(1)
 
     # Time-of-day features
@@ -241,7 +249,10 @@ def build_feature_matrix(
     df["target_vol"] = (next_returns > df["vol_20h"]).astype(int)
 
     # Drop rows with NaN in features or targets
+    pre_drop = len(df)
     df = df.dropna(subset=FEATURE_COLS + ["target_vol", "target_dir"])
+    if len(df) < pre_drop:
+        print(f"WARNING: dropna removed {pre_drop - len(df)} rows ({len(df)} remaining)")
     df = df.reset_index(drop=True)
 
     print(f"Features: built {len(df)} rows for {symbol} ({lookback_days}d lookback)")
